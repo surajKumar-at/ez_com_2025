@@ -1,0 +1,44 @@
+{
+  "auth": {
+    "login": "Iniciar Sesión",
+    "signup": "Registrarse",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar Contraseña",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "userType": "Tipo de Usuario",
+    "admin": "Administrador",
+    "customer": "Cliente",
+    "loginTitle": "Iniciar sesión en tu cuenta",
+    "signupTitle": "Crear tu cuenta",
+    "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+    "dontHaveAccount": "¿No tienes una cuenta?",
+    "loginError": "Email o contraseña inválidos",
+    "signupError": "Error al crear la cuenta",
+    "signupSuccess": "Cuenta creada exitosamente"
+  },
+  "admin": {
+    "dashboard": "Panel de Administración",
+    "config": "Configuración",
+    "authorizations": "Autorizaciones",
+    "userRoles": "Roles de Usuario",
+    "siteDefaults": "Configuración por Defecto",
+    "systems": "Sistemas",
+    "systemAuth": "Autenticación del Sistema",
+    "erpConnection": "Conexión ERP",
+    "salesAreas": "Áreas de Ventas",
+    "catalog": "Catálogo",
+    "synchronize": "Sincronizar",
+    "partners": "Socios",
+    "create": "Crear",
+    "list": "Lista",
+    "users": "Usuarios"
+  },
+  "common": {
+    "logout": "Cerrar Sesión",
+    "loading": "Cargando...",
+    "submit": "Enviar",
+    "cancel": "Cancelar"
+  }
+}

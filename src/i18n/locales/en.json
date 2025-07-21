@@ -1,0 +1,44 @@
+{
+  "auth": {
+    "login": "Login",
+    "signup": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "userType": "User Type",
+    "admin": "Admin",
+    "customer": "Customer",
+    "loginTitle": "Login to your account",
+    "signupTitle": "Create your account",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?",
+    "loginError": "Invalid email or password",
+    "signupError": "Error creating account",
+    "signupSuccess": "Account created successfully"
+  },
+  "admin": {
+    "dashboard": "Admin Dashboard",
+    "config": "Config",
+    "authorizations": "Authorizations",
+    "userRoles": "User Roles",
+    "siteDefaults": "Site Defaults",
+    "systems": "Systems",
+    "systemAuth": "System Auth",
+    "erpConnection": "ERP Connection",
+    "salesAreas": "Sales Areas",
+    "catalog": "Catalog",
+    "synchronize": "Synchronize",
+    "partners": "Partners",
+    "create": "Create",
+    "list": "List",
+    "users": "Users"
+  },
+  "common": {
+    "logout": "Logout",
+    "loading": "Loading...",
+    "submit": "Submit",
+    "cancel": "Cancel"
+  }
+}

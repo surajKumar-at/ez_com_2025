@@ -15,7 +15,8 @@ import {
   CreditCard,
   Wrench,
   Sparkles,
-  Scale
+  Scale,
+  User
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -130,6 +131,14 @@ const Index = () => {
           </p>
           <div className="flex justify-center gap-4">
             <Button 
+              onClick={() => navigate("/auth")} 
+              variant="default"
+              className="flex items-center gap-2"
+            >
+              <User className="w-4 h-4" />
+              Sign In
+            </Button>
+            <Button 
               onClick={() => navigate("/licenses")} 
               variant="outline"
               className="flex items-center gap-2"
@@ -139,6 +148,7 @@ const Index = () => {
             </Button>
             <Button 
               onClick={() => navigate("/getting-started")}
+              variant="outline"
               className="flex items-center gap-2"
             >
               <Code className="w-4 h-4" />
