@@ -57,28 +57,45 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Processing request:', req.method, req.url);
+    
     const databaseUrl = Deno.env.get('SUPABASE_DB_URL');
     if (!databaseUrl) {
+      console.error('SUPABASE_DB_URL environment variable not found');
       throw new Error('Database URL not found');
     }
 
+    console.log('Database URL found, creating connection...');
     const db = createDbClient(databaseUrl);
     const url = new URL(req.url);
     const method = req.method;
 
-    let response: ApiResponse;
+    let response: any;
 
     switch (method) {
       case 'GET': {
-        // Get all user roles
-        const roles = await db.select().from(ezcUserRoles)
-          .where(eq(ezcUserRoles.eurDeletedFlag, ''));
-        
-        response = {
-          success: true,
-          data: roles,
-          message: 'User roles retrieved successfully'
-        };
+        console.log('Fetching user roles...');
+        try {
+          // Get all user roles - simplified query first
+          const roles = await db.select().from(ezcUserRoles);
+          console.log('Raw roles from DB:', roles);
+          
+          // Filter out deleted roles
+          const activeRoles = roles.filter(role => role.eurDeletedFlag !== 'Y');
+          console.log('Active roles:', activeRoles);
+          
+          response = {
+            success: true,
+            data: activeRoles,
+            message: 'User roles retrieved successfully'
+          };
+        } catch (dbError) {
+          console.error('Database error:', dbError);
+          response = {
+            success: false,
+            error: `Database error: ${dbError.message}`
+          };
+        }
         break;
       }
 
@@ -180,11 +197,13 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Edge function error:', error);
+    console.error('Error stack:', error.stack);
     
-    const errorResponse: ApiResponse = {
+    const errorResponse = {
       success: false,
-      error: error instanceof Error ? error.message : 'Internal server error'
+      error: error instanceof Error ? error.message : 'Internal server error',
+      details: error instanceof Error ? error.stack : 'Unknown error'
     };
 
     return new Response(JSON.stringify(errorResponse), {

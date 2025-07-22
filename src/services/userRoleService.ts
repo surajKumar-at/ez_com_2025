@@ -7,13 +7,20 @@ export const userRoleService = {
   // Get all user roles
   getAllUserRoles: async (): Promise<UserRoleDto[]> => {
     try {
+      console.log('Fetching user roles from:', `${API_BASE_URL}/user-roles`);
       const response = await axios.get<ApiResponse>(`${API_BASE_URL}/user-roles`);
+      console.log('API Response:', response.data);
+      
       if (response.data.success) {
-        return response.data.data;
+        return response.data.data || [];
       }
       throw new Error(response.data.error || 'Failed to fetch user roles');
     } catch (error) {
       console.error('Error fetching user roles:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Response data:', error.response?.data);
+        console.error('Response status:', error.response?.status);
+      }
       throw error;
     }
   },
