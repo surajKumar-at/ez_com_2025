@@ -1,48 +1,4 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
-import { drizzle } from 'https://esm.sh/drizzle-orm@0.29.3/postgres-js';
-import postgres from 'https://esm.sh/postgres@3.4.3';
-import { pgTable, varchar } from 'https://esm.sh/drizzle-orm@0.29.3/pg-core';
-import { eq } from 'https://esm.sh/drizzle-orm@0.29.3';
-import { z } from 'https://esm.sh/zod@3.22.4';
-
-// Define schema directly in the edge function
-const ezcUserRoles = pgTable('ezc_user_roles', {
-  eurRoleNr: varchar('eur_role_nr'),
-  eurRoleType: varchar('eur_role_type'),
-  eurLanguage: varchar('eur_language'),
-  eurRoleDescription: varchar('eur_role_description'),
-  eurDeletedFlag: varchar('eur_deleted_flag'),
-  eurComponent: varchar('eur_component'),
-  eurBusDomain: varchar('eur_bus_domain'),
-});
-
-// Define DTOs directly in the edge function
-const CreateUserRoleDto = z.object({
-  eurRoleNr: z.string().min(1, 'Role is required'),
-  eurRoleType: z.enum(['E', 'S', 'C'], {
-    required_error: 'Role type is required'
-  }),
-  eurRoleDescription: z.string().min(1, 'Description is required'),
-  eurBusDomain: z.string().default('Sales'),
-});
-
-const UpdateUserRoleDto = CreateUserRoleDto.partial().extend({
-  eurRoleNr: z.string().min(1, 'Role is required'),
-});
-
-const ApiResponse = z.object({
-  success: z.boolean(),
-  data: z.any().optional(),
-  message: z.string().optional(),
-  error: z.string().optional(),
-});
-
-// Database client function
-function createDbClient(databaseUrl: string) {
-  const client = postgres(databaseUrl);
-  return drizzle(client);
-}
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -59,14 +15,17 @@ serve(async (req) => {
   try {
     console.log('Processing request:', req.method, req.url);
     
-    const databaseUrl = Deno.env.get('SUPABASE_DB_URL');
-    if (!databaseUrl) {
-      console.error('SUPABASE_DB_URL environment variable not found');
-      throw new Error('Database URL not found');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Missing Supabase configuration');
     }
 
-    console.log('Database URL found, creating connection...');
-    const db = createDbClient(databaseUrl);
+    // Import Supabase client
+    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2.39.3');
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
     const url = new URL(req.url);
     const method = req.method;
 
@@ -76,17 +35,22 @@ serve(async (req) => {
       case 'GET': {
         console.log('Fetching user roles...');
         try {
-          // Get all user roles - simplified query first
-          const roles = await db.select().from(ezcUserRoles);
-          console.log('Raw roles from DB:', roles);
+          // Query the EZC_USER_ROLES table directly using Supabase client
+          const { data: roles, error } = await supabase
+            .from('ezc_user_roles')
+            .select('*')
+            .neq('eur_deleted_flag', 'Y');
           
-          // Filter out deleted roles
-          const activeRoles = roles.filter(role => role.eurDeletedFlag !== 'Y');
-          console.log('Active roles:', activeRoles);
+          if (error) {
+            console.error('Supabase query error:', error);
+            throw error;
+          }
+
+          console.log('Roles fetched:', roles);
           
           response = {
             success: true,
-            data: activeRoles,
+            data: roles || [],
             message: 'User roles retrieved successfully'
           };
         } catch (dbError) {
@@ -102,30 +66,45 @@ serve(async (req) => {
       case 'POST': {
         // Create new user role
         const body = await req.json();
-        const validation = CreateUserRoleDto.safeParse(body);
+        console.log('Creating role with data:', body);
         
-        if (!validation.success) {
+        // Basic validation
+        if (!body.eurRoleNr || !body.eurRoleType || !body.eurRoleDescription) {
           response = {
             success: false,
-            error: validation.error.errors.map(e => e.message).join(', ')
+            error: 'Missing required fields: eurRoleNr, eurRoleType, eurRoleDescription'
           };
           break;
         }
 
         const newRole = {
-          ...validation.data,
-          eurLanguage: 'EN',
-          eurDeletedFlag: '',
-          eurComponent: 'ROLE'
+          eur_role_nr: body.eurRoleNr,
+          eur_role_type: body.eurRoleType,
+          eur_role_description: body.eurRoleDescription,
+          eur_bus_domain: body.eurBusDomain || 'Sales',
+          eur_language: 'EN',
+          eur_deleted_flag: '',
+          eur_component: 'ROLE'
         };
 
-        await db.insert(ezcUserRoles).values(newRole);
-        
-        response = {
-          success: true,
-          data: newRole,
-          message: 'User role created successfully'
-        };
+        const { data, error } = await supabase
+          .from('ezc_user_roles')
+          .insert([newRole])
+          .select();
+
+        if (error) {
+          console.error('Insert error:', error);
+          response = {
+            success: false,
+            error: `Failed to create role: ${error.message}`
+          };
+        } else {
+          response = {
+            success: true,
+            data: data[0],
+            message: 'User role created successfully'
+          };
+        }
         break;
       }
 
@@ -141,24 +120,30 @@ serve(async (req) => {
         }
 
         const body = await req.json();
-        const validation = UpdateUserRoleDto.safeParse(body);
-        
-        if (!validation.success) {
+        console.log('Updating role:', roleNr, 'with data:', body);
+
+        const updateData: any = {};
+        if (body.eurRoleType) updateData.eur_role_type = body.eurRoleType;
+        if (body.eurRoleDescription) updateData.eur_role_description = body.eurRoleDescription;
+        if (body.eurBusDomain) updateData.eur_bus_domain = body.eurBusDomain;
+
+        const { error } = await supabase
+          .from('ezc_user_roles')
+          .update(updateData)
+          .eq('eur_role_nr', roleNr);
+
+        if (error) {
+          console.error('Update error:', error);
           response = {
             success: false,
-            error: validation.error.errors.map(e => e.message).join(', ')
+            error: `Failed to update role: ${error.message}`
           };
-          break;
+        } else {
+          response = {
+            success: true,
+            message: 'User role updated successfully'
+          };
         }
-
-        await db.update(ezcUserRoles)
-          .set(validation.data)
-          .where(eq(ezcUserRoles.eurRoleNr, roleNr));
-        
-        response = {
-          success: true,
-          message: 'User role updated successfully'
-        };
         break;
       }
 
@@ -173,14 +158,25 @@ serve(async (req) => {
           break;
         }
 
-        await db.update(ezcUserRoles)
-          .set({ eurDeletedFlag: 'Y' })
-          .where(eq(ezcUserRoles.eurRoleNr, roleNr));
-        
-        response = {
-          success: true,
-          message: 'User role deleted successfully'
-        };
+        console.log('Deleting role:', roleNr);
+
+        const { error } = await supabase
+          .from('ezc_user_roles')
+          .update({ eur_deleted_flag: 'Y' })
+          .eq('eur_role_nr', roleNr);
+
+        if (error) {
+          console.error('Delete error:', error);
+          response = {
+            success: false,
+            error: `Failed to delete role: ${error.message}`
+          };
+        } else {
+          response = {
+            success: true,
+            message: 'User role deleted successfully'
+          };
+        }
         break;
       }
 
