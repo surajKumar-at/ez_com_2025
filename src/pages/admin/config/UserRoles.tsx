@@ -15,7 +15,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { userRoleService } from '@/services/userRoleService';
 import { CreateUserRoleDto, UpdateUserRoleDto, UserRoleDto } from '@/lib/dto/userRole.dto';
-import { userRoleSchema } from '@/lib/db/schema';
+import { CreateUserRoleDto as CreateUserRoleDtoSchema, UpdateUserRoleDto as UpdateUserRoleDtoSchema } from '@/lib/dto/userRole.dto';
 
 const roleTypeOptions = [
   { value: 'E', label: 'Extranet (System Independent Role)' },
@@ -32,8 +32,18 @@ function UserRoles() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingRole, setEditingRole] = useState<UserRoleDto | null>(null);
 
-  const form = useForm<CreateUserRoleDto>({
-    resolver: zodResolver(userRoleSchema),
+  const createForm = useForm<CreateUserRoleDto>({
+    resolver: zodResolver(CreateUserRoleDtoSchema),
+    defaultValues: {
+      eurRoleNr: '',
+      eurRoleType: 'E',
+      eurRoleDescription: '',
+      eurBusDomain: 'Sales',
+    },
+  });
+
+  const updateForm = useForm<UpdateUserRoleDto>({
+    resolver: zodResolver(UpdateUserRoleDtoSchema),
     defaultValues: {
       eurRoleNr: '',
       eurRoleType: 'E',
@@ -63,29 +73,45 @@ function UserRoles() {
     loadUserRoles();
   }, []);
 
-  // Handle form submission
-  const onSubmit = async (data: CreateUserRoleDto) => {
+  // Handle create form submission
+  const onCreateSubmit = async (data: CreateUserRoleDto) => {
     try {
       setActionLoading(true);
-      
+      await userRoleService.createUserRole(data);
+      toast({
+        title: t('common.success'),
+        description: t('userRoles.created'),
+      });
+      setIsDialogOpen(false);
+      setEditingRole(null);
+      createForm.reset();
+      loadUserRoles();
+    } catch (error) {
+      toast({
+        title: t('common.error'),
+        description: error instanceof Error ? error.message : t('userRoles.genericError'),
+        variant: 'destructive',
+      });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Handle update form submission
+  const onUpdateSubmit = async (data: UpdateUserRoleDto) => {
+    try {
+      setActionLoading(true);
       if (editingRole) {
         await userRoleService.updateUserRole(editingRole.eurRoleNr!, data);
         toast({
           title: t('common.success'),
           description: t('userRoles.updated'),
         });
-      } else {
-        await userRoleService.createUserRole(data);
-        toast({
-          title: t('common.success'),
-          description: t('userRoles.created'),
-        });
+        setIsDialogOpen(false);
+        setEditingRole(null);
+        updateForm.reset();
+        loadUserRoles();
       }
-      
-      setIsDialogOpen(false);
-      setEditingRole(null);
-      form.reset();
-      loadUserRoles();
     } catch (error) {
       toast({
         title: t('common.error'),
@@ -100,7 +126,7 @@ function UserRoles() {
   // Handle edit role
   const handleEditRole = (role: UserRoleDto) => {
     setEditingRole(role);
-    form.reset({
+    updateForm.reset({
       eurRoleNr: role.eurRoleNr || '',
       eurRoleType: role.eurRoleType as 'E' | 'S' | 'C',
       eurRoleDescription: role.eurRoleDescription || '',
@@ -133,7 +159,7 @@ function UserRoles() {
   // Handle create new role
   const handleCreateNew = () => {
     setEditingRole(null);
-    form.reset({
+    createForm.reset({
       eurRoleNr: '',
       eurRoleType: 'E',
       eurRoleDescription: '',
@@ -176,97 +202,190 @@ function UserRoles() {
                 }
               </DialogDescription>
             </DialogHeader>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="eurRoleNr"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('userRoles.role')}</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                          disabled={!!editingRole}
-                          placeholder={t('userRoles.enterRole')} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="eurRoleType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('userRoles.roleType')}</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+            {editingRole ? (
+              <Form {...updateForm}>
+                <form onSubmit={updateForm.handleSubmit(onUpdateSubmit)} className="space-y-4">
+                  <FormField
+                    control={updateForm.control}
+                    name="eurRoleNr"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('userRoles.role')}</FormLabel>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder={t('userRoles.selectRoleType')} />
-                          </SelectTrigger>
+                          <Input 
+                            {...field} 
+                            disabled={true}
+                            placeholder={t('userRoles.enterRole')} 
+                          />
                         </FormControl>
-                        <SelectContent>
-                          {roleTypeOptions.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="eurRoleDescription"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('userRoles.description')}</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder={t('userRoles.enterDescription')} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="eurBusDomain"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('userRoles.businessDomain')}</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="Sales" />
-                      </FormControl>
-                      <FormDescription>
-                        {t('userRoles.defaultSales')}
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <DialogFooter>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsDialogOpen(false)}
-                  >
-                    {t('common.cancel')}
-                  </Button>
-                  <Button type="submit" disabled={actionLoading}>
-                    {actionLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {editingRole ? t('userRoles.updateRole') : t('userRoles.createRole')}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </Form>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={updateForm.control}
+                    name="eurRoleType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('userRoles.roleType')}</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={t('userRoles.selectRoleType')} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {roleTypeOptions.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={updateForm.control}
+                    name="eurRoleDescription"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('userRoles.description')}</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder={t('userRoles.enterDescription')} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={updateForm.control}
+                    name="eurBusDomain"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('userRoles.businessDomain')}</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Sales" />
+                        </FormControl>
+                        <FormDescription>
+                          {t('userRoles.defaultSales')}
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <DialogFooter>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsDialogOpen(false)}
+                    >
+                      {t('common.cancel')}
+                    </Button>
+                    <Button type="submit" disabled={actionLoading}>
+                      {actionLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {t('userRoles.updateRole')}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            ) : (
+              <Form {...createForm}>
+                <form onSubmit={createForm.handleSubmit(onCreateSubmit)} className="space-y-4">
+                  <FormField
+                    control={createForm.control}
+                    name="eurRoleNr"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('userRoles.role')}</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field} 
+                            placeholder={t('userRoles.enterRole')} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={createForm.control}
+                    name="eurRoleType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('userRoles.roleType')}</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={t('userRoles.selectRoleType')} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {roleTypeOptions.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={createForm.control}
+                    name="eurRoleDescription"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('userRoles.description')}</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder={t('userRoles.enterDescription')} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={createForm.control}
+                    name="eurBusDomain"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t('userRoles.businessDomain')}</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Sales" />
+                        </FormControl>
+                        <FormDescription>
+                          {t('userRoles.defaultSales')}
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <DialogFooter>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsDialogOpen(false)}
+                    >
+                      {t('common.cancel')}
+                    </Button>
+                    <Button type="submit" disabled={actionLoading}>
+                      {actionLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {t('userRoles.createRole')}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            )}
           </DialogContent>
         </Dialog>
       </div>
