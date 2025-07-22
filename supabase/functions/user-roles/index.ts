@@ -1,8 +1,4 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { drizzle } from 'https://esm.sh/drizzle-orm@0.44.3/postgres-js';
-import postgres from 'https://esm.sh/postgres@3.4.7';
-import { pgTable, varchar } from 'https://esm.sh/drizzle-orm@0.44.3/pg-core';
-import { eq, ne } from 'https://esm.sh/drizzle-orm@0.44.3';
 import { z } from 'https://esm.sh/zod@3.23.8';
 
 const corsHeaders = {
@@ -10,17 +6,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
 };
-
-// Database schema
-const ezcUserRoles = pgTable('ezc_user_roles', {
-  eurRoleNr: varchar('eur_role_nr'),
-  eurRoleType: varchar('eur_role_type'),
-  eurLanguage: varchar('eur_language'),
-  eurRoleDescription: varchar('eur_role_description'),
-  eurDeletedFlag: varchar('eur_deleted_flag'),
-  eurComponent: varchar('eur_component'),
-  eurBusDomain: varchar('eur_bus_domain'),
-});
 
 // DTO Schemas for validation
 const UserRoleDto = z.object({
@@ -53,7 +38,7 @@ const ApiResponse = z.object({
   error: z.string().optional(),
 });
 
-// Transform database row to DTO
+// Transform database row to DTO (hide column names)
 function dbRowToDto(row: any): z.infer<typeof UserRoleDto> {
   return {
     eurRoleNr: row.eur_role_nr,
@@ -66,7 +51,7 @@ function dbRowToDto(row: any): z.infer<typeof UserRoleDto> {
   };
 }
 
-// Transform DTO to database row
+// Transform DTO to database row (expose column names only internally)
 function dtoToDbRow(dto: any) {
   return {
     eur_role_nr: dto.eurRoleNr,
@@ -88,14 +73,16 @@ serve(async (req) => {
   try {
     console.log('Processing request:', req.method, req.url);
     
-    const databaseUrl = Deno.env.get('SUPABASE_DB_URL');
-    if (!databaseUrl) {
-      throw new Error('Missing database configuration');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Missing Supabase configuration');
     }
 
-    // Create database connection
-    const client = postgres(databaseUrl);
-    const db = drizzle(client);
+    // Import Supabase client
+    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2.39.3');
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
     const url = new URL(req.url);
     const method = req.method;
@@ -106,15 +93,20 @@ serve(async (req) => {
       case 'GET': {
         console.log('Fetching user roles...');
         try {
-          const roles = await db
-            .select()
-            .from(ezcUserRoles)
-            .where(ne(ezcUserRoles.eurDeletedFlag, 'Y'));
+          const { data: roles, error } = await supabase
+            .from('ezc_user_roles')
+            .select('*')
+            .neq('eur_deleted_flag', 'Y');
           
+          if (error) {
+            console.error('Supabase query error:', error);
+            throw error;
+          }
+
           console.log('Roles fetched from DB:', roles);
           
-          // Transform to DTOs
-          const dtoRoles = roles.map(dbRowToDto);
+          // Transform to DTOs (hide database column names)
+          const dtoRoles = roles?.map(dbRowToDto) || [];
           
           response = {
             success: true,
@@ -147,13 +139,18 @@ serve(async (req) => {
             eurComponent: 'ROLE'
           });
 
-          const [newRole] = await db
-            .insert(ezcUserRoles)
-            .values(dbData)
-            .returning();
+          const { data, error } = await supabase
+            .from('ezc_user_roles')
+            .insert([dbData])
+            .select();
+
+          if (error) {
+            console.error('Insert error:', error);
+            throw error;
+          }
 
           // Transform back to DTO
-          const dtoRole = dbRowToDto(newRole);
+          const dtoRole = dbRowToDto(data[0]);
 
           response = {
             success: true,
@@ -201,10 +198,15 @@ serve(async (req) => {
           if (validatedData.eurRoleDescription) updateData.eur_role_description = validatedData.eurRoleDescription;
           if (validatedData.eurBusDomain) updateData.eur_bus_domain = validatedData.eurBusDomain;
 
-          await db
-            .update(ezcUserRoles)
-            .set(updateData)
-            .where(eq(ezcUserRoles.eurRoleNr, roleNr));
+          const { error } = await supabase
+            .from('ezc_user_roles')
+            .update(updateData)
+            .eq('eur_role_nr', roleNr);
+
+          if (error) {
+            console.error('Update error:', error);
+            throw error;
+          }
 
           response = {
             success: true,
@@ -241,10 +243,15 @@ serve(async (req) => {
 
           console.log('Deleting role:', roleNr);
 
-          await db
-            .update(ezcUserRoles)
-            .set({ eur_deleted_flag: 'Y' })
-            .where(eq(ezcUserRoles.eurRoleNr, roleNr));
+          const { error } = await supabase
+            .from('ezc_user_roles')
+            .update({ eur_deleted_flag: 'Y' })
+            .eq('eur_role_nr', roleNr);
+
+          if (error) {
+            console.error('Delete error:', error);
+            throw error;
+          }
 
           response = {
             success: true,
