@@ -1,8 +1,48 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createDbClient } from '../../../src/lib/db/client.ts';
-import { ezcUserRoles } from '../../../src/lib/db/schema.ts';
-import { CreateUserRoleDto, UpdateUserRoleDto, ApiResponse } from '../../../src/lib/dto/userRole.dto.ts';
-import { eq } from 'https://esm.sh/drizzle-orm@0.44.3';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { drizzle } from 'https://esm.sh/drizzle-orm@0.29.3/postgres-js';
+import postgres from 'https://esm.sh/postgres@3.4.3';
+import { pgTable, varchar } from 'https://esm.sh/drizzle-orm@0.29.3/pg-core';
+import { eq } from 'https://esm.sh/drizzle-orm@0.29.3';
+import { z } from 'https://esm.sh/zod@3.22.4';
+
+// Define schema directly in the edge function
+const ezcUserRoles = pgTable('ezc_user_roles', {
+  eurRoleNr: varchar('eur_role_nr'),
+  eurRoleType: varchar('eur_role_type'),
+  eurLanguage: varchar('eur_language'),
+  eurRoleDescription: varchar('eur_role_description'),
+  eurDeletedFlag: varchar('eur_deleted_flag'),
+  eurComponent: varchar('eur_component'),
+  eurBusDomain: varchar('eur_bus_domain'),
+});
+
+// Define DTOs directly in the edge function
+const CreateUserRoleDto = z.object({
+  eurRoleNr: z.string().min(1, 'Role is required'),
+  eurRoleType: z.enum(['E', 'S', 'C'], {
+    required_error: 'Role type is required'
+  }),
+  eurRoleDescription: z.string().min(1, 'Description is required'),
+  eurBusDomain: z.string().default('Sales'),
+});
+
+const UpdateUserRoleDto = CreateUserRoleDto.partial().extend({
+  eurRoleNr: z.string().min(1, 'Role is required'),
+});
+
+const ApiResponse = z.object({
+  success: z.boolean(),
+  data: z.any().optional(),
+  message: z.string().optional(),
+  error: z.string().optional(),
+});
+
+// Database client function
+function createDbClient(databaseUrl: string) {
+  const client = postgres(databaseUrl);
+  return drizzle(client);
+}
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

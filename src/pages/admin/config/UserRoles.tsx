@@ -23,7 +23,7 @@ const roleTypeOptions = [
   { value: 'C', label: 'Internet (System Dependent Role)' },
 ];
 
-export default function UserRoles() {
+function UserRoles() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [userRoles, setUserRoles] = useState<UserRoleDto[]>([]);
@@ -50,8 +50,8 @@ export default function UserRoles() {
       setUserRoles(roles);
     } catch (error) {
       toast({
-        title: t('error'),
-        description: t('Failed to load user roles'),
+        title: t('common.error'),
+        description: t('userRoles.loadError'),
         variant: 'destructive',
       });
     } finally {
@@ -71,14 +71,14 @@ export default function UserRoles() {
       if (editingRole) {
         await userRoleService.updateUserRole(editingRole.eurRoleNr!, data);
         toast({
-          title: t('success'),
-          description: t('User role updated successfully'),
+          title: t('common.success'),
+          description: t('userRoles.updated'),
         });
       } else {
         await userRoleService.createUserRole(data);
         toast({
-          title: t('success'),
-          description: t('User role created successfully'),
+          title: t('common.success'),
+          description: t('userRoles.created'),
         });
       }
       
@@ -88,8 +88,8 @@ export default function UserRoles() {
       loadUserRoles();
     } catch (error) {
       toast({
-        title: t('error'),
-        description: error instanceof Error ? error.message : t('An error occurred'),
+        title: t('common.error'),
+        description: error instanceof Error ? error.message : t('userRoles.genericError'),
         variant: 'destructive',
       });
     } finally {
@@ -115,14 +115,14 @@ export default function UserRoles() {
       setActionLoading(true);
       await userRoleService.deleteUserRole(roleNr);
       toast({
-        title: t('success'),
-        description: t('User role deleted successfully'),
+        title: t('common.success'),
+        description: t('userRoles.deleted'),
       });
       loadUserRoles();
     } catch (error) {
       toast({
-        title: t('error'),
-        description: error instanceof Error ? error.message : t('An error occurred'),
+        title: t('common.error'),
+        description: error instanceof Error ? error.message : t('userRoles.genericError'),
         variant: 'destructive',
       });
     } finally {
@@ -154,7 +154,7 @@ export default function UserRoles() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-        <h1 className="text-3xl font-bold tracking-tight">{t('userRoles.title')}</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('userRoles.title')}</h1>
           <p className="text-muted-foreground">{t('userRoles.description')}</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -167,12 +167,12 @@ export default function UserRoles() {
           <DialogContent className="sm:max-w-[525px]">
             <DialogHeader>
               <DialogTitle>
-                {editingRole ? t('Update Role') : t('Create New Role')}
+                {editingRole ? t('userRoles.updateRole') : t('userRoles.createRole')}
               </DialogTitle>
               <DialogDescription>
                 {editingRole 
-                  ? t('Update the role details below') 
-                  : t('Fill in the details to create a new user role')
+                  ? t('userRoles.updateDescription') 
+                  : t('userRoles.createDescription')
                 }
               </DialogDescription>
             </DialogHeader>
@@ -183,12 +183,12 @@ export default function UserRoles() {
                   name="eurRoleNr"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('Role')}</FormLabel>
+                      <FormLabel>{t('userRoles.role')}</FormLabel>
                       <FormControl>
                         <Input 
                           {...field} 
                           disabled={!!editingRole}
-                          placeholder={t('Enter role name')} 
+                          placeholder={t('userRoles.enterRole')} 
                         />
                       </FormControl>
                       <FormMessage />
@@ -201,11 +201,11 @@ export default function UserRoles() {
                   name="eurRoleType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('Role Type')}</FormLabel>
+                      <FormLabel>{t('userRoles.roleType')}</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder={t('Select role type')} />
+                            <SelectValue placeholder={t('userRoles.selectRoleType')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -226,9 +226,9 @@ export default function UserRoles() {
                   name="eurRoleDescription"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('Description')}</FormLabel>
+                      <FormLabel>{t('userRoles.description')}</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder={t('Enter role description')} />
+                        <Input {...field} placeholder={t('userRoles.enterDescription')} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -240,12 +240,12 @@ export default function UserRoles() {
                   name="eurBusDomain"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('Business Domain')}</FormLabel>
+                      <FormLabel>{t('userRoles.businessDomain')}</FormLabel>
                       <FormControl>
                         <Input {...field} placeholder="Sales" />
                       </FormControl>
                       <FormDescription>
-                        {t('Default value is "Sales"')}
+                        {t('userRoles.defaultSales')}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -258,11 +258,11 @@ export default function UserRoles() {
                     variant="outline"
                     onClick={() => setIsDialogOpen(false)}
                   >
-                    {t('Cancel')}
+                    {t('common.cancel')}
                   </Button>
                   <Button type="submit" disabled={actionLoading}>
                     {actionLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {editingRole ? t('Update Role') : t('Create Role')}
+                    {editingRole ? t('userRoles.updateRole') : t('userRoles.createRole')}
                   </Button>
                 </DialogFooter>
               </form>
@@ -273,25 +273,25 @@ export default function UserRoles() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t('Existing User Roles')}</CardTitle>
+          <CardTitle>{t('userRoles.existingRoles')}</CardTitle>
           <CardDescription>
-            {t('List of all user roles in the system')}
+            {t('userRoles.listDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {userRoles.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-muted-foreground">{t('No user roles found')}</p>
+              <p className="text-muted-foreground">{t('userRoles.noRoles')}</p>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t('Role')}</TableHead>
-                  <TableHead>{t('Type')}</TableHead>
-                  <TableHead>{t('Description')}</TableHead>
-                  <TableHead>{t('Business Domain')}</TableHead>
-                  <TableHead className="text-right">{t('Actions')}</TableHead>
+                  <TableHead>{t('userRoles.role')}</TableHead>
+                  <TableHead>{t('userRoles.type')}</TableHead>
+                  <TableHead>{t('userRoles.description')}</TableHead>
+                  <TableHead>{t('userRoles.businessDomain')}</TableHead>
+                  <TableHead className="text-right">{t('userRoles.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -320,19 +320,19 @@ export default function UserRoles() {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>{t('Are you sure?')}</AlertDialogTitle>
+                              <AlertDialogTitle>{t('userRoles.confirmDelete')}</AlertDialogTitle>
                               <AlertDialogDescription>
-                                {t('This will delete the user role')} "{role.eurRoleNr}". {t('This action cannot be undone')}.
+                                {t('userRoles.deleteMessage')} "{role.eurRoleNr}". {t('userRoles.undoWarning')}.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
+                              <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() => handleDeleteRole(role.eurRoleNr!)}
                                 disabled={actionLoading}
                               >
                                 {actionLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                {t('Delete')}
+                                {t('userRoles.delete')}
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
@@ -349,3 +349,5 @@ export default function UserRoles() {
     </div>
   );
 }
+
+export default UserRoles;
