@@ -20,6 +20,11 @@
   },
   "admin": {
     "dashboard": "Admin Dashboard",
+    "adminPanel": "Administrative Panel",
+    "welcomeTitle": "Welcome to Admin Dashboard",
+    "welcomeDescription": "Manage your system configuration, users, and business processes from this central control panel.",
+    "profile": "Profile",
+    "settings": "Settings",
     "config": "Config",
     "authorizations": "Authorizations",
     "userRoles": "User Roles",
@@ -41,7 +46,8 @@
     "submit": "Submit",
     "cancel": "Cancel",
     "success": "Success",
-    "error": "Error"
+    "error": "Error",
+    "home": "Home"
   },
   "userRoles": {
     "title": "User Roles",

@@ -20,6 +20,11 @@
   },
   "admin": {
     "dashboard": "Panel de Administración",
+    "adminPanel": "Panel Administrativo",
+    "welcomeTitle": "Bienvenido al Panel de Administración",
+    "welcomeDescription": "Gestione la configuración del sistema, usuarios y procesos de negocio desde este panel de control central.",
+    "profile": "Perfil",
+    "settings": "Configuraciones",
     "config": "Configuración",
     "authorizations": "Autorizaciones",
     "userRoles": "Roles de Usuario",
@@ -41,7 +46,8 @@
     "submit": "Enviar",
     "cancel": "Cancelar",
     "success": "Éxito",
-    "error": "Error"
+    "error": "Error",
+    "home": "Inicio"
   },
   "userRoles": {
     "title": "Roles de Usuario",
