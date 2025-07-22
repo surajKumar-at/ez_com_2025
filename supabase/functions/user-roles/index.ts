@@ -1,7 +1,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { z } from 'https://esm.sh/zod@3.23.8';
-import { drizzle } from 'https://esm.sh/drizzle-orm@0.44.3/postgres-js';
-import postgres from 'https://esm.sh/postgres@3.4.7';
+import { drizzle } from 'https://esm.sh/drizzle-orm@0.44.3/supabase';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { pgTable, varchar } from 'https://esm.sh/drizzle-orm@0.44.3/pg-core';
 import { eq, ne } from 'https://esm.sh/drizzle-orm@0.44.3';
 
@@ -95,14 +95,9 @@ serve(async (req) => {
       throw new Error('Missing Supabase configuration');
     }
 
-    // Setup Drizzle with Postgres
-    const databaseUrl = Deno.env.get('SUPABASE_DB_URL');
-    if (!databaseUrl) {
-      throw new Error('Missing database URL');
-    }
-
-    const client = postgres(databaseUrl);
-    const db = drizzle(client);
+    // Setup Drizzle with Supabase client
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    const db = drizzle(supabase);
 
     const url = new URL(req.url);
     const method = req.method;
