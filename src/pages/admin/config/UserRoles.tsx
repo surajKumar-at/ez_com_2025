@@ -10,7 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Plus, Edit, Trash2, Loader2 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Plus, Edit, Trash2, Loader2, Search } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { userRoleService } from '@/services/userRoleService';
@@ -31,6 +32,8 @@ function UserRoles() {
   const [actionLoading, setActionLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingRole, setEditingRole] = useState<UserRoleDto | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
 
   const createForm = useForm<CreateUserRoleDto>({
     resolver: zodResolver(CreateUserRoleDtoSchema),
@@ -155,6 +158,53 @@ function UserRoles() {
       setActionLoading(false);
     }
   };
+
+  // Handle bulk delete
+  const handleBulkDelete = async () => {
+    try {
+      setActionLoading(true);
+      await Promise.all(selectedRoles.map(roleNr => userRoleService.deleteUserRole(roleNr)));
+      toast({
+        title: t('common.success'),
+        description: t('userRoles.bulkDeleted'),
+      });
+      setSelectedRoles([]);
+      loadUserRoles();
+    } catch (error) {
+      toast({
+        title: t('common.error'),
+        description: error instanceof Error ? error.message : t('userRoles.genericError'),
+        variant: 'destructive',
+      });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Handle select all
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedRoles(filteredRoles.map(role => role.eurRoleNr!));
+    } else {
+      setSelectedRoles([]);
+    }
+  };
+
+  // Handle individual select
+  const handleSelectRole = (roleNr: string, checked: boolean) => {
+    if (checked) {
+      setSelectedRoles(prev => [...prev, roleNr]);
+    } else {
+      setSelectedRoles(prev => prev.filter(id => id !== roleNr));
+    }
+  };
+
+  // Filter roles based on search term
+  const filteredRoles = userRoles.filter(role => 
+    role.eurRoleNr?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    role.eurRoleDescription?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    role.eurBusDomain?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   // Handle create new role
   const handleCreateNew = () => {
@@ -398,14 +448,63 @@ function UserRoles() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {userRoles.length === 0 ? (
+          {/* Search and Actions Bar */}
+          <div className="flex items-center gap-4 mb-6">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                placeholder={t('userRoles.searchPlaceholder')}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            {selectedRoles.length > 0 && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm">
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    {t('userRoles.deleteSelected')} ({selectedRoles.length})
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{t('userRoles.confirmBulkDelete')}</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t('userRoles.bulkDeleteMessage')} {selectedRoles.length} {t('userRoles.roles')}. {t('userRoles.undoWarning')}.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleBulkDelete}
+                      disabled={actionLoading}
+                    >
+                      {actionLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {t('userRoles.delete')}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
+          {filteredRoles.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-muted-foreground">{t('userRoles.noRoles')}</p>
+              <p className="text-muted-foreground">
+                {searchTerm ? t('userRoles.noRolesFound') : t('userRoles.noRoles')}
+              </p>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-12">
+                    <Checkbox
+                      checked={selectedRoles.length === filteredRoles.length}
+                      onCheckedChange={handleSelectAll}
+                      aria-label={t('userRoles.selectAll')}
+                    />
+                  </TableHead>
                   <TableHead>{t('userRoles.role')}</TableHead>
                   <TableHead>{t('userRoles.type')}</TableHead>
                   <TableHead>{t('userRoles.description')}</TableHead>
@@ -414,8 +513,15 @@ function UserRoles() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {userRoles.map((role) => (
+                {filteredRoles.map((role) => (
                   <TableRow key={role.eurRoleNr}>
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedRoles.includes(role.eurRoleNr!)}
+                        onCheckedChange={(checked) => handleSelectRole(role.eurRoleNr!, checked as boolean)}
+                        aria-label={`${t('userRoles.select')} ${role.eurRoleNr}`}
+                      />
+                    </TableCell>
                     <TableCell className="font-medium">{role.eurRoleNr}</TableCell>
                     <TableCell>
                       {roleTypeOptions.find(opt => opt.value === role.eurRoleType)?.label || role.eurRoleType}

@@ -72,6 +72,15 @@
     "updated": "Rol de usuario actualizado exitosamente",
     "deleted": "Rol de usuario eliminado exitosamente",
     "loadError": "Error al cargar los roles de usuario",
-    "genericError": "Ocurrió un error"
+    "genericError": "Ocurrió un error",
+    "searchPlaceholder": "Buscar roles por nombre, descripción o dominio...",
+    "deleteSelected": "Eliminar Seleccionados",
+    "confirmBulkDelete": "Confirmar Eliminación Masiva",
+    "bulkDeleteMessage": "¿Estás seguro de que quieres eliminar",
+    "roles": "roles",
+    "bulkDeleted": "Roles seleccionados eliminados exitosamente",
+    "selectAll": "Seleccionar todo",
+    "select": "Seleccionar",
+    "noRolesFound": "No se encontraron roles que coincidan con tu búsqueda"
   }
 }

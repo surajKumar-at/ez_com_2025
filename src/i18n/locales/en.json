@@ -72,6 +72,15 @@
     "updated": "User role updated successfully",
     "deleted": "User role deleted successfully",
     "loadError": "Failed to load user roles",
-    "genericError": "An error occurred"
+    "genericError": "An error occurred",
+    "searchPlaceholder": "Search roles by name, description or domain...",
+    "deleteSelected": "Delete Selected",
+    "confirmBulkDelete": "Confirm Bulk Delete",
+    "bulkDeleteMessage": "Are you sure you want to delete",
+    "roles": "roles",
+    "bulkDeleted": "Selected roles deleted successfully",
+    "selectAll": "Select all",
+    "select": "Select",
+    "noRolesFound": "No roles found matching your search"
   }
 }
