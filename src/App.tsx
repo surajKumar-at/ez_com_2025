@@ -15,6 +15,7 @@ import Frontend from "./pages/Frontend";
 import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import CustomerDashboard from "./pages/customer/CustomerDashboard";
+import UserRoles from "./pages/admin/config/UserRoles";
 
 const queryClient = new QueryClient();
 
@@ -28,7 +29,14 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/admin/*" element={<AdminDashboard />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/config/user-roles" element={
+            <div className="min-h-screen bg-background">
+              <div className="container mx-auto py-8">
+                <UserRoles />
+              </div>
+            </div>
+          } />
             <Route path="/customer" element={<CustomerDashboard />} />
             <Route path="/licenses" element={<Licenses />} />
             <Route path="/getting-started" element={<GettingStarted />} />

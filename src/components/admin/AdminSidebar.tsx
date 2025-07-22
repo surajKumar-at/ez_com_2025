@@ -55,7 +55,7 @@ export function AdminSidebar() {
       icon: Settings,
       items: [
         { title: t('admin.authorizations'), url: '/admin/authorizations', icon: Shield },
-        { title: t('admin.userRoles'), url: '/admin/user-roles', icon: Users },
+        { title: t('admin.userRoles'), url: '/admin/config/user-roles', icon: Users },
         { title: t('admin.siteDefaults'), url: '/admin/site-defaults', icon: Globe },
         { title: t('admin.systems'), url: '/admin/systems', icon: Database },
         { title: t('admin.systemAuth'), url: '/admin/system-auth', icon: Link },
