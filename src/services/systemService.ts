@@ -1,7 +1,8 @@
+
 import axios from 'axios';
 import { CreateSystemDto, System, SystemResponse } from '@/lib/dto/system.dto';
 
-const API_BASE_URL = 'https://ifonmbbhyreuewdcvfyt.supabase.co/functions/v1';
+const API_BASE_URL = '/api';
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('auth_token');

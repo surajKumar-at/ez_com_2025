@@ -2,14 +2,14 @@
 import axios from 'axios';
 import { CreateAdverseEventDto, UpdateAdverseEventDto, AdverseEventDto, ApiResponse } from '@/lib/dto/adverseEvent.dto';
 
-const API_BASE_URL = 'https://ifonmbbhyreuewdcvfyt.supabase.co/functions/v1';
+// Use local API endpoints that proxy to Supabase
+const API_BASE_URL = '/api';
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('auth_token');
   return {
     'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json',
-    'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlmb25tYmJoeXJldWV3ZGN2Znl0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI1ODYwMzksImV4cCI6MjA2ODE2MjAzOX0.BFHVOVIU7Fb89Wys1Mwtc2mzwiRmpGKZyyrF1o55DX0'
+    'Content-Type': 'application/json'
   };
 };
 

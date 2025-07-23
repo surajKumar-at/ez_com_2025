@@ -1,7 +1,8 @@
+
 import axios from 'axios';
 import { CreateUserRoleDto, UpdateUserRoleDto, UserRoleDto, ApiResponse } from '@/lib/dto/userRole.dto';
 
-const API_BASE_URL = 'https://ifonmbbhyreuewdcvfyt.supabase.co/functions/v1';
+const API_BASE_URL = '/api';
 
 export const userRoleService = {
   // Get all user roles

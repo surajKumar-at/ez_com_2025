@@ -1,7 +1,8 @@
+
 import axios from 'axios';
 import { LoginRequestDto, UserSessionDto } from '@/lib/dto/user.dto';
 
-const API_BASE_URL = 'https://ifonmbbhyreuewdcvfyt.supabase.co/functions/v1';
+const API_BASE_URL = '/api';
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('auth_token');
