@@ -53,84 +53,68 @@ export const AdverseEventForm = ({
   const form = useForm<AdverseEvent>({
     resolver: zodResolver(adverseEventSchema),
     defaultValues: {
-      eaei_patient_fname: '',
-      eaei_patient_lname: '',
-      eaei_patient_mname: '',
+      eaei_patient_first_name: '',
+      eaei_patient_last_name: '',
+      eaei_patient_middle_initial: '',
       eaei_patient_dob: '',
-      eaei_patient_age: undefined,
-      eaei_patient_gender: '',
-      eaei_patient_weight: undefined,
-      eaei_patient_height: undefined,
-      eaei_patient_medical_record_no: '',
-      eaei_event_description: '',
-      eaei_event_date: '',
-      eaei_event_time: '',
-      eaei_event_location: '',
-      eaei_event_severity: undefined,
-      eaei_event_outcome: '',
-      eaei_reporter_name: '',
-      eaei_reporter_title: '',
-      eaei_reporter_contact: '',
-      eaei_device_name: '',
-      eaei_device_model: '',
-      eaei_device_serial: '',
-      eaei_device_lot: '',
-      eaei_medication_name: '',
-      eaei_medication_dose: '',
-      eaei_medication_route: '',
-      eaei_medication_frequency: '',
-      eaei_concomitant_meds: '',
-      eaei_medical_history: '',
-      eaei_lab_values: '',
-      eaei_actions_taken: '',
-      eaei_followup_required: undefined,
-      eaei_report_to_fda: undefined,
-      eaei_report_to_manufacturer: undefined,
-      eaei_status: 'Draft',
+      eaei_age_at_vaccination_in_months: undefined,
+      eaei_sex: '',
+      eaei_weight_at_birth: undefined,
+      eaei_adverse_events_description: '',
+      eaei_adverse_event_onset: '',
+      eaei_form_filled_by_name: '',
+      eaei_form_filled_by_occupation: '',
+      eaei_relation_to_patient: '',
+      eaei_patient_recovered: undefined,
+      eaei_is_emergency_room_or_dr_visit_reqd: undefined,
+      eaei_is_life_threat_illness: undefined,
+      eaei_result_permanent_disability: undefined,
+      eaei_result_prolong_hospitalization: undefined,
+      eaei_hospitalization_days: undefined,
+      eaei_illness_at_vaccination_time: '',
+      eaei_other_medications: '',
+      eaei_vaccine_purchased_with: '',
+      eaei_diag_tests_lab_data: '',
+      eaei_pre_conditions: '',
+      eaei_reported_previously_to: '',
+      eaei_is_15_day_report: undefined,
+      eaei_report_type: '',
       eaei_assigned_to: '',
-      eaei_priority: 'Medium',
+      eaei_status: 'Draft',
     },
   });
 
   useEffect(() => {
     if (initialData) {
       form.reset({
-        eaei_patient_fname: initialData.eaei_patient_fname || '',
-        eaei_patient_lname: initialData.eaei_patient_lname || '',
-        eaei_patient_mname: initialData.eaei_patient_mname || '',
+        eaei_patient_first_name: initialData.eaei_patient_first_name || '',
+        eaei_patient_last_name: initialData.eaei_patient_last_name || '',
+        eaei_patient_middle_initial: initialData.eaei_patient_middle_initial || '',
         eaei_patient_dob: initialData.eaei_patient_dob || '',
-        eaei_patient_age: initialData.eaei_patient_age || undefined,
-        eaei_patient_gender: initialData.eaei_patient_gender || '',
-        eaei_patient_weight: initialData.eaei_patient_weight || undefined,
-        eaei_patient_height: initialData.eaei_patient_height || undefined,
-        eaei_patient_medical_record_no: initialData.eaei_patient_medical_record_no || '',
-        eaei_event_description: initialData.eaei_event_description || '',
-        eaei_event_date: initialData.eaei_event_date || '',
-        eaei_event_time: initialData.eaei_event_time || '',
-        eaei_event_location: initialData.eaei_event_location || '',
-        eaei_event_severity: initialData.eaei_event_severity as any,
-        eaei_event_outcome: initialData.eaei_event_outcome || '',
-        eaei_reporter_name: initialData.eaei_reporter_name || '',
-        eaei_reporter_title: initialData.eaei_reporter_title || '',
-        eaei_reporter_contact: initialData.eaei_reporter_contact || '',
-        eaei_device_name: initialData.eaei_device_name || '',
-        eaei_device_model: initialData.eaei_device_model || '',
-        eaei_device_serial: initialData.eaei_device_serial || '',
-        eaei_device_lot: initialData.eaei_device_lot || '',
-        eaei_medication_name: initialData.eaei_medication_name || '',
-        eaei_medication_dose: initialData.eaei_medication_dose || '',
-        eaei_medication_route: initialData.eaei_medication_route || '',
-        eaei_medication_frequency: initialData.eaei_medication_frequency || '',
-        eaei_concomitant_meds: initialData.eaei_concomitant_meds || '',
-        eaei_medical_history: initialData.eaei_medical_history || '',
-        eaei_lab_values: initialData.eaei_lab_values || '',
-        eaei_actions_taken: initialData.eaei_actions_taken || '',
-        eaei_followup_required: initialData.eaei_followup_required as any,
-        eaei_report_to_fda: initialData.eaei_report_to_fda as any,
-        eaei_report_to_manufacturer: initialData.eaei_report_to_manufacturer as any,
-        eaei_status: (initialData.eaei_status as any) || 'Draft',
+        eaei_age_at_vaccination_in_months: initialData.eaei_age_at_vaccination_in_months || undefined,
+        eaei_sex: initialData.eaei_sex || '',
+        eaei_weight_at_birth: initialData.eaei_weight_at_birth || undefined,
+        eaei_adverse_events_description: initialData.eaei_adverse_events_description || '',
+        eaei_adverse_event_onset: initialData.eaei_adverse_event_onset || '',
+        eaei_form_filled_by_name: initialData.eaei_form_filled_by_name || '',
+        eaei_form_filled_by_occupation: initialData.eaei_form_filled_by_occupation || '',
+        eaei_relation_to_patient: initialData.eaei_relation_to_patient || '',
+        eaei_patient_recovered: initialData.eaei_patient_recovered as any,
+        eaei_is_emergency_room_or_dr_visit_reqd: initialData.eaei_is_emergency_room_or_dr_visit_reqd as any,
+        eaei_is_life_threat_illness: initialData.eaei_is_life_threat_illness as any,
+        eaei_result_permanent_disability: initialData.eaei_result_permanent_disability as any,
+        eaei_result_prolong_hospitalization: initialData.eaei_result_prolong_hospitalization as any,
+        eaei_hospitalization_days: initialData.eaei_hospitalization_days || undefined,
+        eaei_illness_at_vaccination_time: initialData.eaei_illness_at_vaccination_time || '',
+        eaei_other_medications: initialData.eaei_other_medications || '',
+        eaei_vaccine_purchased_with: initialData.eaei_vaccine_purchased_with || '',
+        eaei_diag_tests_lab_data: initialData.eaei_diag_tests_lab_data || '',
+        eaei_pre_conditions: initialData.eaei_pre_conditions || '',
+        eaei_reported_previously_to: initialData.eaei_reported_previously_to || '',
+        eaei_is_15_day_report: initialData.eaei_is_15_day_report as any,
+        eaei_report_type: initialData.eaei_report_type || '',
         eaei_assigned_to: initialData.eaei_assigned_to || '',
-        eaei_priority: (initialData.eaei_priority as any) || 'Medium',
+        eaei_status: (initialData.eaei_status as any) || 'Draft',
       });
     } else {
       form.reset();
@@ -172,7 +156,7 @@ export const AdverseEventForm = ({
                   <CardContent className="grid grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
-                      name="eaei_patient_fname"
+                      name="eaei_patient_first_name"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>{t('adverseEvents.firstName')} *</FormLabel>
@@ -185,7 +169,7 @@ export const AdverseEventForm = ({
                     />
                     <FormField
                       control={form.control}
-                      name="eaei_patient_lname"
+                      name="eaei_patient_last_name"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>{t('adverseEvents.lastName')} *</FormLabel>
@@ -198,7 +182,7 @@ export const AdverseEventForm = ({
                     />
                     <FormField
                       control={form.control}
-                      name="eaei_patient_mname"
+                      name="eaei_patient_middle_initial"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>{t('adverseEvents.middleName')}</FormLabel>
@@ -224,7 +208,7 @@ export const AdverseEventForm = ({
                     />
                     <FormField
                       control={form.control}
-                      name="eaei_patient_age"
+                      name="eaei_age_at_vaccination_in_months"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>{t('adverseEvents.age')}</FormLabel>
@@ -241,7 +225,7 @@ export const AdverseEventForm = ({
                     />
                     <FormField
                       control={form.control}
-                      name="eaei_patient_gender"
+                      name="eaei_sex"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>{t('adverseEvents.gender')}</FormLabel>
@@ -261,19 +245,6 @@ export const AdverseEventForm = ({
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="eaei_patient_medical_record_no"
-                      render={({ field }) => (
-                        <FormItem className="col-span-2">
-                          <FormLabel>{t('adverseEvents.medicalRecordNo')}</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -287,7 +258,7 @@ export const AdverseEventForm = ({
                   <CardContent className="space-y-4">
                     <FormField
                       control={form.control}
-                      name="eaei_event_description"
+                      name="eaei_adverse_events_description"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>{t('adverseEvents.eventDescription')} *</FormLabel>
@@ -298,85 +269,19 @@ export const AdverseEventForm = ({
                         </FormItem>
                       )}
                     />
-                    <div className="grid grid-cols-3 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="eaei_event_date"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t('adverseEvents.eventDate')}</FormLabel>
-                            <FormControl>
-                              <Input type="date" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="eaei_event_time"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t('adverseEvents.eventTime')}</FormLabel>
-                            <FormControl>
-                              <Input type="time" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="eaei_event_location"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t('adverseEvents.eventLocation')}</FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="eaei_event_severity"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t('adverseEvents.severity')}</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder={t('adverseEvents.selectSeverity')} />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="Mild">Mild</SelectItem>
-                                <SelectItem value="Moderate">Moderate</SelectItem>
-                                <SelectItem value="Severe">Severe</SelectItem>
-                                <SelectItem value="Life-threatening">Life-threatening</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="eaei_event_outcome"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t('adverseEvents.outcome')}</FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+                    <FormField
+                      control={form.control}
+                      name="eaei_adverse_event_onset"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('adverseEvents.eventDate')}</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -388,37 +293,22 @@ export const AdverseEventForm = ({
                     <CardDescription>{t('adverseEvents.medicalInfoDesc')}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="eaei_medication_name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t('adverseEvents.medicationName')}</FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="eaei_medication_dose"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t('adverseEvents.dose')}</FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
                     <FormField
                       control={form.control}
-                      name="eaei_medical_history"
+                      name="eaei_other_medications"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('adverseEvents.medicationName')}</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="eaei_pre_conditions"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>{t('adverseEvents.medicalHistory')}</FormLabel>
@@ -431,7 +321,7 @@ export const AdverseEventForm = ({
                     />
                     <FormField
                       control={form.control}
-                      name="eaei_actions_taken"
+                      name="eaei_diag_tests_lab_data"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>{t('adverseEvents.actionsTaken')}</FormLabel>
@@ -456,7 +346,7 @@ export const AdverseEventForm = ({
                     <div className="grid grid-cols-2 gap-4">
                       <FormField
                         control={form.control}
-                        name="eaei_reporter_name"
+                        name="eaei_form_filled_by_name"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>{t('adverseEvents.reporterName')} *</FormLabel>
@@ -469,7 +359,7 @@ export const AdverseEventForm = ({
                       />
                       <FormField
                         control={form.control}
-                        name="eaei_reporter_title"
+                        name="eaei_form_filled_by_occupation"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>{t('adverseEvents.reporterTitle')}</FormLabel>
@@ -507,23 +397,13 @@ export const AdverseEventForm = ({
                       />
                       <FormField
                         control={form.control}
-                        name="eaei_priority"
+                        name="eaei_assigned_to"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>{t('adverseEvents.priority')}</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="Low">Low</SelectItem>
-                                <SelectItem value="Medium">Medium</SelectItem>
-                                <SelectItem value="High">High</SelectItem>
-                                <SelectItem value="Critical">Critical</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <FormLabel>{t('adverseEvents.assignedTo')}</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
