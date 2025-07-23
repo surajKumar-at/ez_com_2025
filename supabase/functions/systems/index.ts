@@ -1,19 +1,10 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { drizzle } from 'https://esm.sh/drizzle-orm/postgres-js@0.44.3'
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts'
 
-// DTO schemas
-const systemSchema = z.object({
-  esd_sys_no: z.number(),
-  esd_sys_type: z.string(),
-  esd_lang: z.string(),
-  esd_description: z.string(),
-  est_sys_type: z.string(),
-  est_lang: z.string(),
-  est_description: z.string()
-})
+console.log('Systems edge function starting...')
 
+// DTO schemas
 const createSystemSchema = z.object({
   systemType: z.string().min(1, 'System type is required'),
   language: z.string().min(1, 'Language is required'),
@@ -28,6 +19,9 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  const url = new URL(req.url)
+  console.log(`Processing request: ${req.method} ${url.pathname}`)
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -36,14 +30,30 @@ serve(async (req) => {
   try {
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     )
 
-    const authHeader = req.headers.get('Authorization')!
-    const token = authHeader.replace('Bearer ', '')
-    const { data: user } = await supabaseClient.auth.getUser(token)
+    // Authentication check
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Authorization header missing',
+          data: null 
+        }),
+        { 
+          status: 401, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
 
-    if (!user) {
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token)
+
+    if (authError || !user) {
+      console.log('Authentication failed:', authError?.message)
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -57,67 +67,40 @@ serve(async (req) => {
       )
     }
 
-    const db = drizzle(supabaseClient)
-
     if (req.method === 'GET') {
-      // Get systems with system types
-      const { data, error } = await supabaseClient
-        .rpc('execute_query', {
-          query: `
-            select A.esd_sys_no, A.esd_sys_type, A.esd_lang, A.esd_description,
-                   B.est_sys_type, B.est_lang, B.est_description as est_description
-            from EZC_SYSTEM_DESC A, EZC_SYSTEM_TYPES B 
-            where A.ESD_SYS_TYPE = B.EST_SYS_TYPE 
-            and A.ESD_LANG = B.EST_LANG 
-            and A.ESD_LANG = 'EN' 
-            order by esd_sys_no
-          `
-        })
+      console.log('Fetching systems...')
 
-      if (error) {
-        // Fallback to direct query if RPC doesn't exist
-        const { data: systemsData, error: systemsError } = await supabaseClient
-          .from('ezc_system_desc')
-          .select(`
-            esd_sys_no,
-            esd_sys_type,
-            esd_lang,
-            esd_description
-          `)
-          .eq('esd_lang', 'EN')
-          .order('esd_sys_no')
+      // First try to get systems from ezc_system_desc table
+      const { data: systemsData, error: systemsError } = await supabaseClient
+        .from('ezc_system_desc')
+        .select('*')
+        .eq('esd_lang', 'EN')
+        .order('esd_sys_no')
 
-        if (systemsError) {
-          return new Response(
-            JSON.stringify({ 
-              success: false, 
-              error: 'Failed to fetch systems',
-              data: null 
-            }),
-            { 
-              status: 500, 
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-            }
-          )
-        }
+      console.log('Systems query result:', { systemsData, systemsError })
 
+      if (systemsError) {
+        console.error('Database error:', systemsError)
         return new Response(
           JSON.stringify({ 
-            success: true, 
-            error: null,
-            data: systemsData || []
+            success: false, 
+            error: `Database error: ${systemsError.message}`,
+            data: null 
           }),
           { 
+            status: 500, 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
           }
         )
       }
 
+      console.log('Systems fetched from DB:', systemsData)
+
       return new Response(
         JSON.stringify({ 
           success: true, 
           error: null,
-          data: data || []
+          data: systemsData || []
         }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -126,8 +109,26 @@ serve(async (req) => {
     }
 
     if (req.method === 'POST') {
+      console.log('Creating new system...')
       const body = await req.json()
-      const validatedData = createSystemSchema.parse(body)
+      console.log('Request body:', body)
+
+      const validationResult = createSystemSchema.safeParse(body)
+      if (!validationResult.success) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: `Validation error: ${validationResult.error.issues.map(i => i.message).join(', ')}`,
+            data: null 
+          }),
+          { 
+            status: 400, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        )
+      }
+
+      const validatedData = validationResult.data
 
       // Insert new system
       const { data, error } = await supabaseClient
@@ -141,10 +142,11 @@ serve(async (req) => {
         .select()
 
       if (error) {
+        console.error('Insert error:', error)
         return new Response(
           JSON.stringify({ 
             success: false, 
-            error: 'Failed to create system',
+            error: `Failed to create system: ${error.message}`,
             data: null 
           }),
           { 
@@ -154,11 +156,13 @@ serve(async (req) => {
         )
       }
 
+      console.log('System created:', data)
+
       return new Response(
         JSON.stringify({ 
           success: true, 
           error: null,
-          data: data[0]
+          data: data?.[0] || null
         }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -167,8 +171,9 @@ serve(async (req) => {
     }
 
     if (req.method === 'DELETE') {
-      const url = new URL(req.url)
+      console.log('Deleting systems...')
       const ids = url.searchParams.get('ids')?.split(',').map(Number) || []
+      console.log('IDs to delete:', ids)
 
       if (ids.length === 0) {
         return new Response(
@@ -190,10 +195,11 @@ serve(async (req) => {
         .in('esd_sys_no', ids)
 
       if (error) {
+        console.error('Delete error:', error)
         return new Response(
           JSON.stringify({ 
             success: false, 
-            error: 'Failed to delete systems',
+            error: `Failed to delete systems: ${error.message}`,
             data: null 
           }),
           { 
@@ -202,6 +208,8 @@ serve(async (req) => {
           }
         )
       }
+
+      console.log(`Deleted ${ids.length} systems`)
 
       return new Response(
         JSON.stringify({ 
@@ -227,11 +235,11 @@ serve(async (req) => {
       }
     )
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Error in systems function:', error)
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: error.message || 'Internal server error',
+        error: `Server error: ${error.message}`,
         data: null 
       }),
       { 
