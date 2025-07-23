@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { RootState } from '@/store/store';
 import { clearUser } from '@/store/slices/authSlice';
+import { authService } from '@/services/authService';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { 
@@ -32,9 +33,17 @@ export function AdminMenuBar() {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const handleLogout = () => {
-    dispatch(clearUser());
-    navigate('/auth');
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      dispatch(clearUser());
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Clear state anyway
+      dispatch(clearUser());
+      navigate('/');
+    }
   };
 
   const getUserInitials = () => {

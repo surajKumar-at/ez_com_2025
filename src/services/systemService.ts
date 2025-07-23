@@ -4,7 +4,7 @@ import { CreateSystemDto, System, SystemResponse } from '@/lib/dto/system.dto';
 const API_BASE_URL = 'https://ifonmbbhyreuewdcvfyt.supabase.co/functions/v1';
 
 const getAuthHeaders = () => {
-  const token = localStorage.getItem('supabase.auth.token');
+  const token = localStorage.getItem('auth_token');
   return {
     'Authorization': `Bearer ${token}`,
     'Content-Type': 'application/json'

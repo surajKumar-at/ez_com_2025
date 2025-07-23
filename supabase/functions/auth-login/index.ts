@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { email, password } = await req.json()
+    const { email, password, loginType } = await req.json()
 
     // Create Supabase client
     const supabase = createClient(
@@ -44,6 +44,14 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ success: false, message: 'User not found in EZC system' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
+      )
+    }
+
+    // Check login type restrictions
+    if (loginType === 'admin' && ezcUser.eu_type !== 1) {
+      return new Response(
+        JSON.stringify({ success: false, message: 'Admin access required' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403 }
       )
     }
 

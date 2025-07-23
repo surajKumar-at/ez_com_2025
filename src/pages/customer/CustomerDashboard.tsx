@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { RootState } from '@/store/store';
 import { clearUser } from '@/store/slices/authSlice';
+import { authService } from '@/services/authService';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LogOut, User, ShoppingCart, Package, FileText } from 'lucide-react';
@@ -13,9 +14,17 @@ const CustomerDashboard = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const handleLogout = () => {
-    dispatch(clearUser());
-    navigate('/auth');
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      dispatch(clearUser());
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Clear state anyway
+      dispatch(clearUser());
+      navigate('/');
+    }
   };
 
   if (!user || (user.eu_type !== 2 && user.eu_type !== 3)) {

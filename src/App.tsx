@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Provider } from 'react-redux';
 import { store } from './store/store';
+import { useAuth } from './hooks/useAuth';
 import './i18n';
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -22,14 +23,12 @@ import { AdminLayout } from "./components/admin/AdminLayout";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <Provider store={store}>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
+const AppContent = () => {
+  useAuth(); // Initialize auth state
+  
+  return (
+    <BrowserRouter>
+      <Routes>
           <Route path="/" element={<Auth />} />
           <Route path="/index" element={<Index />} />
           <Route path="/admin" element={<AdminDashboard />} />
@@ -69,6 +68,16 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
+  );
+};
+
+const App = () => (
+  <Provider store={store}>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <AppContent />
       </TooltipProvider>
     </QueryClientProvider>
   </Provider>
