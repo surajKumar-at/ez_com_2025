@@ -31,7 +31,7 @@ serve(async (req) => {
         const { data, error } = await supabaseClient
           .from('ezc_adverse_event_info')
           .select('*')
-          .order('eaei_created_by', { ascending: false });
+          .order('eaei_id', { ascending: false });
 
         if (error) {
           console.error('Database error:', error);
