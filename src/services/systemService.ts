@@ -3,20 +3,11 @@ import { CreateSystemDto, System, SystemResponse } from '@/lib/dto/system.dto';
 
 const API_BASE_URL = 'https://ifonmbbhyreuewdcvfyt.supabase.co/functions/v1';
 
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('auth_token');
-  return {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
-  };
-};
 
 export const systemService = {
   getSystems: async (): Promise<System[]> => {
     try {
-      const response = await axios.get<SystemResponse>(`${API_BASE_URL}/systems`, {
-        headers: getAuthHeaders()
-      });
+      const response = await axios.get<SystemResponse>(`${API_BASE_URL}/systems`);
       
       if (response.data.success && Array.isArray(response.data.data)) {
         return response.data.data;
@@ -30,9 +21,7 @@ export const systemService = {
 
   createSystem: async (systemData: CreateSystemDto): Promise<System> => {
     try {
-      const response = await axios.post<SystemResponse>(`${API_BASE_URL}/systems`, systemData, {
-        headers: getAuthHeaders()
-      });
+      const response = await axios.post<SystemResponse>(`${API_BASE_URL}/systems`, systemData);
       
       if (response.data.success && response.data.data) {
         return response.data.data as System;
@@ -46,9 +35,7 @@ export const systemService = {
 
   deleteSystems: async (systemIds: number[]): Promise<void> => {
     try {
-      const response = await axios.delete<SystemResponse>(`${API_BASE_URL}/systems?ids=${systemIds.join(',')}`, {
-        headers: getAuthHeaders()
-      });
+      const response = await axios.delete<SystemResponse>(`${API_BASE_URL}/systems?ids=${systemIds.join(',')}`);
       
       if (!response.data.success) {
         throw new Error(response.data.error || 'Failed to delete systems');
