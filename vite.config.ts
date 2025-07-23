@@ -11,11 +11,15 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
+  preview: {
+    host: "::",
+    port: 8080,
+  },
   plugins: [
     react(),
+    // Always include the API proxy plugin
     apiProxyPlugin(),
-    mode === 'development' &&
-    componentTagger(),
+    mode === 'development' && componentTagger(),
   ].filter(Boolean),
   resolve: {
     alias: {

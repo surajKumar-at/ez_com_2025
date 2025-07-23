@@ -9,13 +9,8 @@ export function apiProxyPlugin(): Plugin {
   return {
     name: 'api-proxy',
     configureServer(server) {
-      server.middlewares.use((req, res, next) => {
-        // Only handle requests that start with /api/
-        if (!req.url?.startsWith('/api/')) {
-          return next();
-        }
-
-        console.log(`🔄 Intercepted request: ${req.method} ${req.url}`);
+      server.middlewares.use('/api', async (req, res, next) => {
+        console.log(`🔄 API Proxy intercepted: ${req.method} ${req.url}`);
 
         // Handle CORS preflight requests
         if (req.method === 'OPTIONS') {
@@ -27,95 +22,166 @@ export function apiProxyPlugin(): Plugin {
           return;
         }
 
-        // Extract the endpoint path from /api/endpoint-name
-        const endpoint = req.url.replace('/api', '');
-        console.log(`➡️ Extracted endpoint: ${endpoint}`);
+        try {
+          // Extract the endpoint path from /api/endpoint-name
+          const endpoint = req.url || '';
+          console.log(`➡️ Extracted endpoint: ${endpoint}`);
 
-        const headers: any = {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_ANON_KEY,
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-        };
+          const headers: any = {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY,
+          };
 
-        // Forward authorization header if present
-        if (req.headers.authorization) {
-          headers['Authorization'] = req.headers.authorization;
-          console.log('🔐 Forwarding auth header');
+          // Forward authorization header if present
+          if (req.headers.authorization) {
+            headers['Authorization'] = req.headers.authorization;
+            console.log('🔐 Forwarding auth header');
+          }
+
+          const supabaseUrl = `${SUPABASE_URL}/functions/v1${endpoint}`;
+          console.log(`📡 Forwarding to: ${supabaseUrl}`);
+
+          let response;
+          let requestBody = '';
+
+          // Collect request body for POST/PUT requests
+          if (req.method === 'POST' || req.method === 'PUT') {
+            await new Promise<void>((resolve) => {
+              req.on('data', chunk => {
+                requestBody += chunk.toString();
+              });
+              req.on('end', () => {
+                resolve();
+              });
+            });
+
+            console.log(`📦 Request body: ${requestBody}`);
+            
+            const parsedBody = requestBody ? JSON.parse(requestBody) : {};
+            
+            if (req.method === 'POST') {
+              response = await axios.post(supabaseUrl, parsedBody, { headers });
+            } else if (req.method === 'PUT') {
+              response = await axios.put(supabaseUrl, parsedBody, { headers });
+            }
+          } else {
+            // Handle GET/DELETE requests
+            if (req.method === 'GET') {
+              response = await axios.get(supabaseUrl, { headers });
+            } else if (req.method === 'DELETE') {
+              response = await axios.delete(supabaseUrl, { headers });
+            }
+          }
+
+          console.log(`✅ Supabase response status: ${response?.status}`);
+          console.log(`📋 Response data:`, response?.data);
+
+          res.statusCode = response?.status || 200;
+          res.setHeader('Content-Type', 'application/json');
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          res.setHeader('Access-Control-Allow-Headers', 'authorization, x-client-info, apikey, content-type');
+          res.end(JSON.stringify(response?.data));
+
+        } catch (error: any) {
+          console.error('❌ Proxy error:', error.message);
+          console.error('❌ Error response:', error.response?.data);
+
+          res.statusCode = error.response?.status || 500;
+          res.setHeader('Content-Type', 'application/json');
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          res.end(JSON.stringify({
+            success: false,
+            error: error.response?.data?.message || error.message || 'Internal server error'
+          }));
+        }
+      });
+    },
+    configurePreviewServer(server) {
+      // Also configure for preview server
+      server.middlewares.use('/api', async (req, res, next) => {
+        console.log(`🔄 Preview API Proxy intercepted: ${req.method} ${req.url}`);
+
+        // Handle CORS preflight requests
+        if (req.method === 'OPTIONS') {
+          res.statusCode = 200;
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+          res.setHeader('Access-Control-Allow-Headers', 'authorization, x-client-info, apikey, content-type');
+          res.end();
+          return;
         }
 
-        const supabaseUrl = `${SUPABASE_URL}/functions/v1${endpoint}`;
-        console.log(`📡 Forwarding to: ${supabaseUrl}`);
+        try {
+          // Extract the endpoint path from /api/endpoint-name
+          const endpoint = req.url || '';
+          console.log(`➡️ Extracted endpoint: ${endpoint}`);
 
-        // Handle POST/PUT requests with body
-        if (req.method === 'POST' || req.method === 'PUT') {
-          let body = '';
-          
-          req.on('data', chunk => {
-            body += chunk.toString();
-          });
+          const headers: any = {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY,
+          };
 
-          req.on('end', async () => {
-            try {
-              console.log(`📦 Request body: ${body}`);
-              
-              const config = { headers };
-              let response;
+          // Forward authorization header if present
+          if (req.headers.authorization) {
+            headers['Authorization'] = req.headers.authorization;
+            console.log('🔐 Forwarding auth header');
+          }
 
-              if (req.method === 'POST') {
-                response = await axios.post(supabaseUrl, body ? JSON.parse(body) : {}, config);
-              } else if (req.method === 'PUT') {
-                response = await axios.put(supabaseUrl, body ? JSON.parse(body) : {}, config);
-              }
+          const supabaseUrl = `${SUPABASE_URL}/functions/v1${endpoint}`;
+          console.log(`📡 Forwarding to: ${supabaseUrl}`);
 
-              console.log(`✅ Supabase response status: ${response?.status}`);
-              console.log(`📋 Response data:`, response?.data);
+          let response;
+          let requestBody = '';
 
-              res.statusCode = response?.status || 200;
-              res.setHeader('Content-Type', 'application/json');
-              res.setHeader('Access-Control-Allow-Origin', '*');
-              res.setHeader('Access-Control-Allow-Headers', 'authorization, x-client-info, apikey, content-type');
-              res.end(JSON.stringify(response?.data));
-            } catch (error: any) {
-              console.error('❌ Proxy error:', error.message);
-              console.error('❌ Error response:', error.response?.data);
+          // Collect request body for POST/PUT requests
+          if (req.method === 'POST' || req.method === 'PUT') {
+            await new Promise<void>((resolve) => {
+              req.on('data', chunk => {
+                requestBody += chunk.toString();
+              });
+              req.on('end', () => {
+                resolve();
+              });
+            });
 
-              res.statusCode = error.response?.status || 500;
-              res.setHeader('Content-Type', 'application/json');
-              res.setHeader('Access-Control-Allow-Origin', '*');
-              res.end(JSON.stringify(error.response?.data || { success: false, error: 'Internal server error' }));
+            console.log(`📦 Request body: ${requestBody}`);
+            
+            const parsedBody = requestBody ? JSON.parse(requestBody) : {};
+            
+            if (req.method === 'POST') {
+              response = await axios.post(supabaseUrl, parsedBody, { headers });
+            } else if (req.method === 'PUT') {
+              response = await axios.put(supabaseUrl, parsedBody, { headers });
             }
-          });
-        } else {
-          // Handle GET/DELETE requests
-          (async () => {
-            try {
-              const config = { headers };
-              let response;
-
-              if (req.method === 'GET') {
-                response = await axios.get(supabaseUrl, config);
-              } else if (req.method === 'DELETE') {
-                response = await axios.delete(supabaseUrl, config);
-              }
-
-              console.log(`✅ Supabase response status: ${response?.status}`);
-
-              res.statusCode = response?.status || 200;
-              res.setHeader('Content-Type', 'application/json');
-              res.setHeader('Access-Control-Allow-Origin', '*');
-              res.setHeader('Access-Control-Allow-Headers', 'authorization, x-client-info, apikey, content-type');
-              res.end(JSON.stringify(response?.data));
-            } catch (error: any) {
-              console.error('❌ Proxy error:', error.message);
-              console.error('❌ Error details:', error.response?.data);
-
-              res.statusCode = error.response?.status || 500;
-              res.setHeader('Content-Type', 'application/json');
-              res.setHeader('Access-Control-Allow-Origin', '*');
-              res.end(JSON.stringify(error.response?.data || { success: false, error: 'Internal server error' }));
+          } else {
+            // Handle GET/DELETE requests
+            if (req.method === 'GET') {
+              response = await axios.get(supabaseUrl, { headers });
+            } else if (req.method === 'DELETE') {
+              response = await axios.delete(supabaseUrl, { headers });
             }
-          })();
+          }
+
+          console.log(`✅ Supabase response status: ${response?.status}`);
+          console.log(`📋 Response data:`, response?.data);
+
+          res.statusCode = response?.status || 200;
+          res.setHeader('Content-Type', 'application/json');
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          res.setHeader('Access-Control-Allow-Headers', 'authorization, x-client-info, apikey, content-type');
+          res.end(JSON.stringify(response?.data));
+
+        } catch (error: any) {
+          console.error('❌ Preview Proxy error:', error.message);
+          console.error('❌ Error response:', error.response?.data);
+
+          res.statusCode = error.response?.status || 500;
+          res.setHeader('Content-Type', 'application/json');
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          res.end(JSON.stringify({
+            success: false,
+            error: error.response?.data?.message || error.message || 'Internal server error'
+          }));
         }
       });
     }

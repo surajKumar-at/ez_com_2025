@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 import { LoginRequestDto, UserSessionDto } from '@/lib/dto/user.dto';
 
@@ -90,12 +89,21 @@ export const authService = {
   async login(data: LoginRequest): Promise<AuthResponse> {
     try {
       console.log('🔐 Attempting login for:', data.email);
+      console.log('🌐 Current location:', window.location.href);
+      console.log('📡 API Base URL:', API_BASE_URL);
       
-      const response = await axios.post(`${API_BASE_URL}/auth-login`, {
+      const loginUrl = `${API_BASE_URL}/auth-login`;
+      console.log('🎯 Login URL:', loginUrl);
+      
+      const requestData = {
         email: data.email,
         password: data.password,
         loginType: data.loginType || 'user'
-      });
+      };
+      
+      console.log('📦 Request data:', requestData);
+      
+      const response = await axios.post(loginUrl, requestData);
 
       console.log('✅ Login response:', response.data);
 
@@ -110,10 +118,16 @@ export const authService = {
       return response.data;
     } catch (error: any) {
       console.error('❌ Login error:', error);
+      console.error('❌ Error details:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+        config: error.config
+      });
       
       return {
         success: false,
-        message: error.response?.data?.message || 'Login failed'
+        message: error.response?.data?.message || error.message || 'Login failed'
       };
     }
   },
