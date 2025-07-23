@@ -85,7 +85,7 @@ serve(async (req) => {
       const { action } = requestData;
 
       if (action === 'migrate-existing-users') {
-        console.log('Starting migration of existing EZC users to Supabase Auth...');
+        console.log('🚀 Starting migration of existing EZC users to Supabase Auth with password "portal"...');
 
         // Get all users from ezc_users that don't have supabase_user_id
         const { data: ezcUsers, error: fetchError } = await supabase
@@ -95,24 +95,35 @@ serve(async (req) => {
           .is('supabase_user_id', null);
 
         if (fetchError) {
-          console.error('Error fetching EZC users:', fetchError);
+          console.error('❌ Error fetching EZC users:', fetchError);
           return new Response(
-            JSON.stringify({ success: false, error: fetchError.message }),
+            JSON.stringify({ 
+              success: false, 
+              error: 'Failed to fetch EZC users',
+              details: fetchError.message 
+            }),
             { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           );
         }
 
-        console.log(`Found ${ezcUsers.length} users to migrate`);
+        console.log(`📊 Found ${ezcUsers.length} users to migrate from ezc_users to auth.users`);
+        console.log('📋 Users to migrate:', ezcUsers.map(u => ({ eu_id: u.eu_id, email: u.eu_email, name: `${u.eu_first_name} ${u.eu_last_name}` })));
 
         const migrationResults = [];
+        let processedCount = 0;
         
         for (const ezcUser of ezcUsers) {
+          processedCount++;
           try {
+            console.log(`\n🔄 [${processedCount}/${ezcUsers.length}] Processing user: ${ezcUser.eu_email}`);
+            console.log(`   EU_ID: ${ezcUser.eu_id}, Name: ${ezcUser.eu_first_name} ${ezcUser.eu_last_name}, Type: ${ezcUser.eu_type}`);
+            
             // Create user in Supabase Auth with default password "portal"
+            console.log(`   🔐 Creating auth user with password "portal"...`);
             const { data: authUser, error: createError } = await supabase.auth.admin.createUser({
               email: ezcUser.eu_email,
               password: 'portal',
-              email_confirm: true,
+              email_confirm: true,  // Auto-confirm to allow immediate login
               user_metadata: {
                 first_name: ezcUser.eu_first_name,
                 last_name: ezcUser.eu_last_name,
@@ -122,61 +133,108 @@ serve(async (req) => {
             });
 
             if (createError) {
-              console.error(`Error creating auth user for ${ezcUser.eu_email}:`, createError);
+              console.error(`   ❌ Failed to create auth user for ${ezcUser.eu_email}:`, createError);
               migrationResults.push({
                 eu_id: ezcUser.eu_id,
                 email: ezcUser.eu_email,
+                name: `${ezcUser.eu_first_name} ${ezcUser.eu_last_name}`,
                 success: false,
-                error: createError.message
+                error: `Auth creation failed: ${createError.message}`,
+                step_failed: 'auth_creation'
               });
               continue;
             }
 
-            // Update ezc_users with supabase_user_id
+            console.log(`   ✅ Created auth user - Supabase ID: ${authUser.user.id}`);
+
+            // Update ezc_users with supabase_user_id to link the accounts
+            console.log(`   🔗 Linking ezc_user ${ezcUser.eu_id} with supabase user ${authUser.user.id}...`);
             const { error: updateError } = await supabase
               .from('ezc_users')
               .update({ supabase_user_id: authUser.user.id })
               .eq('eu_id', ezcUser.eu_id);
 
             if (updateError) {
-              console.error(`Error updating ezc_users for ${ezcUser.eu_email}:`, updateError);
+              console.error(`   ❌ Failed to link accounts for ${ezcUser.eu_email}:`, updateError);
+              
+              // Cleanup: delete the auth user since linking failed
+              console.log(`   🧹 Cleaning up auth user ${authUser.user.id}...`);
+              await supabase.auth.admin.deleteUser(authUser.user.id);
+              
               migrationResults.push({
                 eu_id: ezcUser.eu_id,
                 email: ezcUser.eu_email,
+                name: `${ezcUser.eu_first_name} ${ezcUser.eu_last_name}`,
                 success: false,
-                error: updateError.message
+                error: `Account linking failed: ${updateError.message}`,
+                step_failed: 'account_linking',
+                supabase_user_id: authUser.user.id
               });
               continue;
             }
 
+            console.log(`   ✅ Successfully linked accounts!`);
             migrationResults.push({
               eu_id: ezcUser.eu_id,
               email: ezcUser.eu_email,
+              name: `${ezcUser.eu_first_name} ${ezcUser.eu_last_name}`,
               success: true,
-              supabase_user_id: authUser.user.id
+              supabase_user_id: authUser.user.id,
+              message: 'User migrated successfully - can login with password "portal"'
             });
 
-            console.log(`Successfully migrated user: ${ezcUser.eu_email}`);
+            console.log(`   🎉 Migration completed for: ${ezcUser.eu_email}`);
           } catch (error) {
-            console.error(`Unexpected error migrating ${ezcUser.eu_email}:`, error);
+            console.error(`   💥 Unexpected error migrating ${ezcUser.eu_email}:`, error);
             migrationResults.push({
               eu_id: ezcUser.eu_id,
               email: ezcUser.eu_email,
+              name: `${ezcUser.eu_first_name} ${ezcUser.eu_last_name}`,
               success: false,
-              error: error.message
+              error: `Unexpected error: ${error.message}`,
+              step_failed: 'unexpected_error'
             });
           }
         }
 
         const successCount = migrationResults.filter(r => r.success).length;
         const failureCount = migrationResults.filter(r => !r.success).length;
+        const successUsers = migrationResults.filter(r => r.success);
+        const failureUsers = migrationResults.filter(r => !r.success);
 
-        console.log(`Migration completed: ${successCount} successful, ${failureCount} failed`);
+        console.log(`\n🏁 MIGRATION SUMMARY:`);
+        console.log(`   ✅ Successfully migrated: ${successCount} users`);
+        console.log(`   ❌ Failed migrations: ${failureCount} users`);
+        console.log(`   📊 Total processed: ${migrationResults.length} users`);
+        
+        if (successCount > 0) {
+          console.log(`\n✅ SUCCESSFUL MIGRATIONS:`);
+          successUsers.forEach(user => {
+            console.log(`   - ${user.email} (${user.eu_id}) → Supabase ID: ${user.supabase_user_id}`);
+          });
+        }
+        
+        if (failureCount > 0) {
+          console.log(`\n❌ FAILED MIGRATIONS:`);
+          failureUsers.forEach(user => {
+            console.log(`   - ${user.email} (${user.eu_id}): ${user.error}`);
+          });
+        }
+
+        console.log(`\n🔐 LOGIN INFO: All migrated users can now login with their email and password "portal"`);
 
         return new Response(
           JSON.stringify({ 
             success: true, 
-            message: `Migration completed: ${successCount} successful, ${failureCount} failed`,
+            message: `Migration completed: ${successCount}/${migrationResults.length} users migrated successfully`,
+            summary: {
+              total: migrationResults.length,
+              successful: successCount,
+              failed: failureCount,
+              password: 'portal'
+            },
+            successful_users: successUsers,
+            failed_users: failureUsers,
             results: migrationResults
           }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
