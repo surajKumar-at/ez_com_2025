@@ -4,12 +4,23 @@ import { CreateAdverseEventDto, UpdateAdverseEventDto, AdverseEventDto, ApiRespo
 
 const API_BASE_URL = 'https://ifonmbbhyreuewdcvfyt.supabase.co/functions/v1';
 
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('auth_token');
+  return {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json',
+    'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlmb25tYmJoeXJldWV3ZGN2Znl0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI1ODYwMzksImV4cCI6MjA2ODE2MjAzOX0.BFHVOVIU7Fb89Wys1Mwtc2mzwiRmpGKZyyrF1o55DX0'
+  };
+};
+
 export const adverseEventService = {
   // Get all adverse events
   getAllAdverseEvents: async (): Promise<AdverseEventDto[]> => {
     try {
       console.log('Fetching adverse events from:', `${API_BASE_URL}/adverse-events`);
-      const response = await axios.get<ApiResponse>(`${API_BASE_URL}/adverse-events`);
+      const response = await axios.get<ApiResponse>(`${API_BASE_URL}/adverse-events`, {
+        headers: getAuthHeaders()
+      });
       console.log('API Response:', response.data);
       
       if (response.data.success) {
@@ -29,7 +40,9 @@ export const adverseEventService = {
   // Create new adverse event
   createAdverseEvent: async (eventData: CreateAdverseEventDto): Promise<AdverseEventDto> => {
     try {
-      const response = await axios.post<ApiResponse>(`${API_BASE_URL}/adverse-events`, eventData);
+      const response = await axios.post<ApiResponse>(`${API_BASE_URL}/adverse-events`, eventData, {
+        headers: getAuthHeaders()
+      });
       if (response.data.success) {
         return response.data.data;
       }
@@ -45,7 +58,10 @@ export const adverseEventService = {
     try {
       const response = await axios.put<ApiResponse>(
         `${API_BASE_URL}/adverse-events?id=${eventId}`,
-        eventData
+        eventData,
+        {
+          headers: getAuthHeaders()
+        }
       );
       if (!response.data.success) {
         throw new Error(response.data.error || 'Failed to update adverse event');
@@ -60,7 +76,10 @@ export const adverseEventService = {
   deleteAdverseEvent: async (eventId: number): Promise<void> => {
     try {
       const response = await axios.delete<ApiResponse>(
-        `${API_BASE_URL}/adverse-events?id=${eventId}`
+        `${API_BASE_URL}/adverse-events?id=${eventId}`,
+        {
+          headers: getAuthHeaders()
+        }
       );
       if (!response.data.success) {
         throw new Error(response.data.error || 'Failed to delete adverse event');
@@ -75,7 +94,10 @@ export const adverseEventService = {
   deleteMultipleAdverseEvents: async (eventIds: number[]): Promise<void> => {
     try {
       const response = await axios.delete<ApiResponse>(
-        `${API_BASE_URL}/adverse-events?ids=${eventIds.join(',')}`
+        `${API_BASE_URL}/adverse-events?ids=${eventIds.join(',')}`,
+        {
+          headers: getAuthHeaders()
+        }
       );
       if (!response.data.success) {
         throw new Error(response.data.error || 'Failed to delete adverse events');

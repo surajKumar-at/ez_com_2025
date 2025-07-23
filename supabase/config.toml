@@ -1,3 +1,4 @@
+
 project_id = "ifonmbbhyreuewdcvfyt"
 
 [functions.auth-login]
@@ -7,4 +8,7 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.user-roles]
+verify_jwt = false
+
+[functions.adverse-events]
 verify_jwt = false
