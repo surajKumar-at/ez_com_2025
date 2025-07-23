@@ -2,7 +2,7 @@ export interface System {
   esd_sys_no: number;
   esd_sys_type: string;
   esd_lang: string;
-  esd_description: string;
+  esd_sys_desc: string;
   est_sys_type?: string;
   est_lang?: string;
   est_description?: string;
