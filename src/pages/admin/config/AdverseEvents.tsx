@@ -118,17 +118,17 @@ const AdverseEvents = () => {
   const filteredEvents = adverseEvents.filter((event) => {
     const searchLower = searchTerm.toLowerCase();
     return (
-      event.eaei_patient_fname?.toLowerCase().includes(searchLower) ||
-      event.eaei_patient_lname?.toLowerCase().includes(searchLower) ||
-      event.eaei_event_description?.toLowerCase().includes(searchLower) ||
+      event.eaei_patient_first_name?.toLowerCase().includes(searchLower) ||
+      event.eaei_patient_last_name?.toLowerCase().includes(searchLower) ||
+      event.eaei_adverse_events_description?.toLowerCase().includes(searchLower) ||
       event.eaei_status?.toLowerCase().includes(searchLower) ||
-      event.eaei_reporter_name?.toLowerCase().includes(searchLower)
+      event.eaei_form_filled_by_name?.toLowerCase().includes(searchLower)
     );
   });
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedEvents(filteredEvents.map(event => event.eaei_id!));
+      setSelectedEvents(filteredEvents.map(event => event.eaei_adverse_event_id!));
     } else {
       setSelectedEvents([]);
     }
@@ -158,16 +158,6 @@ const AdverseEvents = () => {
       case 'Submitted': return 'default';
       case 'Under Review': return 'outline';
       case 'Closed': return 'destructive';
-      default: return 'secondary';
-    }
-  };
-
-  const getPriorityBadgeVariant = (priority?: string) => {
-    switch (priority) {
-      case 'Low': return 'secondary';
-      case 'Medium': return 'default';
-      case 'High': return 'outline';
-      case 'Critical': return 'destructive';
       default: return 'secondary';
     }
   };
@@ -277,7 +267,6 @@ const AdverseEvents = () => {
                   <TableHead>{t('adverseEvents.patientName')}</TableHead>
                   <TableHead>{t('adverseEvents.eventDescription')}</TableHead>
                   <TableHead>{t('adverseEvents.status')}</TableHead>
-                  <TableHead>{t('adverseEvents.priority')}</TableHead>
                   <TableHead>{t('adverseEvents.reporter')}</TableHead>
                   <TableHead>{t('adverseEvents.eventDate')}</TableHead>
                   <TableHead className="text-right">{t('adverseEvents.actions')}</TableHead>
@@ -285,32 +274,27 @@ const AdverseEvents = () => {
               </TableHeader>
               <TableBody>
                 {filteredEvents.map((event) => (
-                  <TableRow key={event.eaei_id}>
+                  <TableRow key={event.eaei_adverse_event_id}>
                     <TableCell>
                       <Checkbox
-                        checked={selectedEvents.includes(event.eaei_id!)}
-                        onCheckedChange={(checked) => handleSelectEvent(event.eaei_id!, checked as boolean)}
+                        checked={selectedEvents.includes(event.eaei_adverse_event_id!)}
+                        onCheckedChange={(checked) => handleSelectEvent(event.eaei_adverse_event_id!, checked as boolean)}
                         aria-label={t('adverseEvents.select')}
                       />
                     </TableCell>
                     <TableCell className="font-medium">
-                      {event.eaei_patient_fname} {event.eaei_patient_lname}
+                      {event.eaei_patient_first_name} {event.eaei_patient_last_name}
                     </TableCell>
                     <TableCell className="max-w-xs truncate">
-                      {event.eaei_event_description}
+                      {event.eaei_adverse_events_description}
                     </TableCell>
                     <TableCell>
                       <Badge variant={getStatusBadgeVariant(event.eaei_status)}>
-                        {event.eaei_status}
+                        {event.eaei_status || 'Draft'}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      <Badge variant={getPriorityBadgeVariant(event.eaei_priority)}>
-                        {event.eaei_priority}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{event.eaei_reporter_name}</TableCell>
-                    <TableCell>{event.eaei_event_date}</TableCell>
+                    <TableCell>{event.eaei_form_filled_by_name}</TableCell>
+                    <TableCell>{event.eaei_adverse_event_onset}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end space-x-2">
                         <Button
@@ -336,7 +320,7 @@ const AdverseEvents = () => {
                             <AlertDialogFooter>
                               <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                               <AlertDialogAction
-                                onClick={() => deleteMutation.mutate(event.eaei_id!)}
+                                onClick={() => deleteMutation.mutate(event.eaei_adverse_event_id!)}
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                               >
                                 {t('adverseEvents.delete')}
@@ -362,7 +346,7 @@ const AdverseEvents = () => {
         }}
         onSubmit={(data) => {
           if (editingEvent) {
-            updateMutation.mutate({ id: editingEvent.eaei_id!, data });
+            updateMutation.mutate({ id: editingEvent.eaei_adverse_event_id!, data });
           } else {
             createMutation.mutate(data);
           }
