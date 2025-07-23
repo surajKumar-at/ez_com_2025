@@ -31,7 +31,7 @@ serve(async (req) => {
         const { data, error } = await supabaseClient
           .from('ezc_adverse_event_info')
           .select('*')
-          .order('eaei_created_on', { ascending: false });
+          .order('eaei_created_by', { ascending: false });
 
         if (error) {
           console.error('Database error:', error);
@@ -55,11 +55,9 @@ serve(async (req) => {
         const requestData = await req.json();
         console.log('Creating adverse event:', requestData);
 
-        // Add timestamps
+        // Add current timestamp if needed
         const adverseEventData = {
           ...requestData,
-          eaei_created_on: new Date().toISOString(),
-          eaei_modified_on: new Date().toISOString(),
         };
 
         const { data, error } = await supabaseClient
@@ -101,15 +99,9 @@ serve(async (req) => {
         const requestData = await req.json();
         console.log(`Updating adverse event ${id}:`, requestData);
 
-        // Add modified timestamp
-        const updateData = {
-          ...requestData,
-          eaei_modified_on: new Date().toISOString(),
-        };
-
         const { data, error } = await supabaseClient
           .from('ezc_adverse_event_info')
-          .update(updateData)
+          .update(requestData)
           .eq('eaei_id', parseInt(id))
           .select()
           .single();
