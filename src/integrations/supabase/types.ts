@@ -11486,6 +11486,41 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          created_at: string | null
+          eu_business_partner: string | null
+          eu_id: string | null
+          eu_type: number | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          eu_business_partner?: string | null
+          eu_id?: string | null
+          eu_type?: number | null
+          id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          eu_business_partner?: string | null
+          eu_id?: string | null
+          eu_type?: number | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_eu_id_fkey"
+            columns: ["eu_id"]
+            isOneToOne: false
+            referencedRelation: "ezc_users"
+            referencedColumns: ["eu_id"]
+          },
+        ]
+      }
       qrtz_blob_triggers: {
         Row: {
           blob_data: string | null
@@ -11966,6 +12001,29 @@ export type Database = {
       generate_next_user_id: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_ship_to_options: {
+        Args: { sold_to: string }
+        Returns: {
+          customer_no: string
+          customer_name: string
+          reference_no: number
+        }[]
+      }
+      get_user_permissions: {
+        Args: { user_id: string }
+        Returns: {
+          auth_key: string
+          auth_value: string
+        }[]
+      }
+      get_user_sold_to_options: {
+        Args: { user_id: string }
+        Returns: {
+          customer_no: string
+          customer_name: string
+          sys_key: string
+        }[]
       }
     }
     Enums: {
