@@ -19,6 +19,7 @@ import CustomerDashboard from "./pages/customer/CustomerDashboard";
 import UserRoles from "./pages/admin/config/UserRoles";
 import Systems from "./pages/admin/config/Systems";
 import MigrateUsers from "./pages/admin/config/MigrateUsers";
+import AdverseEvents from "./pages/admin/config/AdverseEvents";
 import { AdminLayout } from "./components/admin/AdminLayout";
 
 const queryClient = new QueryClient();
@@ -45,6 +46,11 @@ const AppContent = () => {
           <Route path="/admin/config/migrate-users" element={
             <AdminLayout>
               <MigrateUsers />
+            </AdminLayout>
+          } />
+          <Route path="/admin/config/adverse-events" element={
+            <AdminLayout>
+              <AdverseEvents />
             </AdminLayout>
           } />
             <Route path="/customer" element={<CustomerDashboard />} />

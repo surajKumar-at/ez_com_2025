@@ -29,6 +29,7 @@ import {
   ChevronDown,
   ChevronRight,
   ArrowRightLeft,
+  AlertTriangle,
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
@@ -59,6 +60,7 @@ export function AdminSidebar() {
         { title: t('admin.userRoles'), url: '/admin/config/user-roles', icon: Users },
         { title: t('admin.systems'), url: '/admin/config/systems', icon: Database },
         { title: t('admin.migrateUsers'), url: '/admin/config/migrate-users', icon: ArrowRightLeft },
+        { title: t('admin.adverseEvents'), url: '/admin/config/adverse-events', icon: AlertTriangle },
         { title: t('admin.siteDefaults'), url: '/admin/site-defaults', icon: Globe },
         { title: t('admin.systemAuth'), url: '/admin/system-auth', icon: Link },
         { title: t('admin.erpConnection'), url: '/admin/erp-connection', icon: Database },
