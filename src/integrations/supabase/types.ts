@@ -10369,7 +10369,7 @@ export type Database = {
           eu_email: string | null
           eu_fax: string | null
           eu_first_name: string | null
-          eu_id: string | null
+          eu_id: string
           eu_is_built_in_user: string | null
           eu_last_login_date: string | null
           eu_last_login_time: string | null
@@ -10384,6 +10384,7 @@ export type Database = {
           eu_type: number | null
           eu_valid_to_date: string | null
           eug_id: number | null
+          supabase_user_id: string | null
         }
         Insert: {
           eu_business_partner?: string | null
@@ -10395,7 +10396,7 @@ export type Database = {
           eu_email?: string | null
           eu_fax?: string | null
           eu_first_name?: string | null
-          eu_id?: string | null
+          eu_id: string
           eu_is_built_in_user?: string | null
           eu_last_login_date?: string | null
           eu_last_login_time?: string | null
@@ -10410,6 +10411,7 @@ export type Database = {
           eu_type?: number | null
           eu_valid_to_date?: string | null
           eug_id?: number | null
+          supabase_user_id?: string | null
         }
         Update: {
           eu_business_partner?: string | null
@@ -10421,7 +10423,7 @@ export type Database = {
           eu_email?: string | null
           eu_fax?: string | null
           eu_first_name?: string | null
-          eu_id?: string | null
+          eu_id?: string
           eu_is_built_in_user?: string | null
           eu_last_login_date?: string | null
           eu_last_login_time?: string | null
@@ -10436,6 +10438,7 @@ export type Database = {
           eu_type?: number | null
           eu_valid_to_date?: string | null
           eug_id?: number | null
+          supabase_user_id?: string | null
         }
         Relationships: []
       }
@@ -11956,7 +11959,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_next_business_partner_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_next_user_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
