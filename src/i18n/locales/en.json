@@ -38,7 +38,8 @@
     "partners": "Partners",
     "create": "Create",
     "list": "List",
-    "users": "Users"
+      "users": "Users",
+      "migrateUsers": "Migrate Users"
   },
   "common": {
     "logout": "Logout",

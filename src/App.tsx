@@ -17,6 +17,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import CustomerDashboard from "./pages/customer/CustomerDashboard";
 import UserRoles from "./pages/admin/config/UserRoles";
 import Systems from "./pages/admin/config/Systems";
+import MigrateUsers from "./pages/admin/config/MigrateUsers";
 import { AdminLayout } from "./components/admin/AdminLayout";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,11 @@ const App = () => (
           <Route path="/admin/config/systems" element={
             <AdminLayout>
               <Systems />
+            </AdminLayout>
+          } />
+          <Route path="/admin/config/migrate-users" element={
+            <AdminLayout>
+              <MigrateUsers />
             </AdminLayout>
           } />
             <Route path="/customer" element={<CustomerDashboard />} />
