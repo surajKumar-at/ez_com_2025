@@ -13,6 +13,8 @@ export function apiProxyPlugin(): Plugin {
         if (req.url?.startsWith('/api/')) {
           try {
             const endpoint = req.url.replace('/api', '');
+            console.log(`🔄 Proxying request: ${req.method} ${endpoint}`);
+            
             const headers: any = {
               'Content-Type': 'application/json',
               'apikey': SUPABASE_ANON_KEY,
@@ -23,9 +25,11 @@ export function apiProxyPlugin(): Plugin {
             // Forward authorization header if present
             if (req.headers.authorization) {
               headers['Authorization'] = req.headers.authorization;
+              console.log('🔐 Forwarding auth header');
             }
 
             const supabaseUrl = `${SUPABASE_URL}/functions/v1${endpoint}`;
+            console.log(`➡️ Forwarding to: ${supabaseUrl}`);
             
             let body = '';
             if (req.method === 'POST' || req.method === 'PUT') {
@@ -51,21 +55,34 @@ export function apiProxyPlugin(): Plugin {
               case 'DELETE':
                 response = await axios.delete(supabaseUrl, config);
                 break;
+              case 'OPTIONS':
+                res.statusCode = 200;
+                res.setHeader('Access-Control-Allow-Origin', '*');
+                res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+                res.setHeader('Access-Control-Allow-Headers', 'authorization, x-client-info, apikey, content-type');
+                res.end();
+                return;
               default:
+                console.log(`❌ Method not allowed: ${req.method}`);
                 res.statusCode = 405;
                 res.end(JSON.stringify({ success: false, error: 'Method not allowed' }));
                 return;
             }
 
+            console.log(`✅ Supabase response status: ${response.status}`);
+            
             res.statusCode = response.status;
             res.setHeader('Content-Type', 'application/json');
             res.setHeader('Access-Control-Allow-Origin', '*');
             res.setHeader('Access-Control-Allow-Headers', 'authorization, x-client-info, apikey, content-type');
             res.end(JSON.stringify(response.data));
           } catch (error: any) {
-            console.error('Proxy error:', error.message);
+            console.error('❌ Proxy error:', error.message);
+            console.error('❌ Error details:', error.response?.data);
+            
             res.statusCode = error.response?.status || 500;
             res.setHeader('Content-Type', 'application/json');
+            res.setHeader('Access-Control-Allow-Origin', '*');
             res.end(JSON.stringify(error.response?.data || { success: false, error: 'Internal server error' }));
           }
         } else {

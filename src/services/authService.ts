@@ -89,20 +89,28 @@ const upstash = new UpstashClient();
 export const authService = {
   async login(data: LoginRequest): Promise<AuthResponse> {
     try {
+      console.log('🔐 Attempting login for:', data.email);
+      
       const response = await axios.post(`${API_BASE_URL}/auth-login`, {
         email: data.email,
         password: data.password,
-        loginType: data.loginType
+        loginType: data.loginType || 'user'
       });
+
+      console.log('✅ Login response:', response.data);
 
       if (response.data.success && response.data.user) {
         // Store the auth token for future requests
         localStorage.setItem('auth_token', response.data.user.supabase_user_id);
         localStorage.setItem('user_data', JSON.stringify(response.data.user));
+        
+        console.log('✅ Auth data stored successfully');
       }
 
       return response.data;
     } catch (error: any) {
+      console.error('❌ Login error:', error);
+      
       return {
         success: false,
         message: error.response?.data?.message || 'Login failed'
@@ -112,9 +120,16 @@ export const authService = {
 
   async signup(data: SignupRequest): Promise<AuthResponse> {
     try {
+      console.log('📝 Attempting signup for:', data.email);
+      
       const response = await axios.post(`${API_BASE_URL}/auth-signup`, data);
+      
+      console.log('✅ Signup response:', response.data);
+      
       return response.data;
     } catch (error: any) {
+      console.error('❌ Signup error:', error);
+      
       return {
         success: false,
         message: error.response?.data?.message || 'Signup failed'
@@ -124,6 +139,8 @@ export const authService = {
 
   async logout(): Promise<void> {
     try {
+      console.log('🔓 Attempting logout');
+      
       const response = await axios.post(`${API_BASE_URL}/auth-logout`, {}, {
         headers: getAuthHeaders()
       });
@@ -132,9 +149,9 @@ export const authService = {
       localStorage.removeItem('auth_token');
       localStorage.removeItem('user_data');
       
-      console.log('Logout response:', response.data);
+      console.log('✅ Logout successful:', response.data);
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('❌ Logout error:', error);
       // Clear local storage even if API call fails
       localStorage.removeItem('auth_token');
       localStorage.removeItem('user_data');
@@ -143,12 +160,18 @@ export const authService = {
 
   async getCurrentSession(): Promise<AuthResponse> {
     try {
+      console.log('🔍 Checking current session');
+      
       const response = await axios.get(`${API_BASE_URL}/auth-session`, {
         headers: getAuthHeaders()
       });
       
+      console.log('✅ Session check response:', response.data);
+      
       return response.data;
     } catch (error: any) {
+      console.error('❌ Session check error:', error);
+      
       return {
         success: false,
         message: error.response?.data?.message || 'Session check failed'
