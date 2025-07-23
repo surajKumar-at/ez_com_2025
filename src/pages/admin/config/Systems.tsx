@@ -52,7 +52,7 @@ export default function Systems() {
 
   useEffect(() => {
     const filtered = systems.filter(system =>
-      system.esd_sys_desc.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      system.esd_description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       system.esd_sys_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
       system.esd_sys_no.toString().includes(searchTerm)
     );
@@ -336,7 +336,7 @@ export default function Systems() {
                       <TableCell>
                         <Badge variant="secondary">{system.esd_lang}</Badge>
                       </TableCell>
-                      <TableCell>{system.esd_sys_desc}</TableCell>
+                      <TableCell>{system.esd_description}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
