@@ -56,8 +56,8 @@ export function AdminSidebar() {
       items: [
         { title: t('admin.authorizations'), url: '/admin/authorizations', icon: Shield },
         { title: t('admin.userRoles'), url: '/admin/config/user-roles', icon: Users },
+        { title: t('admin.systems'), url: '/admin/config/systems', icon: Database },
         { title: t('admin.siteDefaults'), url: '/admin/site-defaults', icon: Globe },
-        { title: t('admin.systems'), url: '/admin/systems', icon: Database },
         { title: t('admin.systemAuth'), url: '/admin/system-auth', icon: Link },
         { title: t('admin.erpConnection'), url: '/admin/erp-connection', icon: Database },
         { title: t('admin.salesAreas'), url: '/admin/sales-areas', icon: MapPin },

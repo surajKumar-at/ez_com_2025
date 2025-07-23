@@ -88,5 +88,43 @@
     "selectAll": "Select all",
     "select": "Select",
     "noRolesFound": "No roles found matching your search"
+  },
+  "systems": {
+    "title": "Systems",
+    "description": "Manage system configurations and types",
+    "searchTitle": "Search Systems",
+    "searchDescription": "Search for systems by ID, type, or description",
+    "searchPlaceholder": "Enter system ID, type, or description",
+    "systemsList": "Systems List",
+    "totalSystems": "Total: {{count}} systems",
+    "selected": "selected",
+    "deleteSelected": "Delete {{count}} system(s)",
+    "createNew": "Create New System",
+    "createSystem": "Create System",
+    "createSystemDesc": "Add a new system to the configuration",
+    "systemId": "System ID",
+    "systemType": "System Type",
+    "language": "Language",
+    "description": "Description",
+    "systemIdPlaceholder": "Enter system ID",
+    "descriptionPlaceholder": "Enter system description",
+    "selectSystemType": "Select system type",
+    "selectLanguage": "Select language",
+    "fetchError": "Failed to fetch systems",
+    "createSuccess": "System created successfully",
+    "createError": "Failed to create system",
+    "deleteSuccess": "{{count}} system(s) deleted successfully",
+    "deleteError": "Failed to delete systems"
+  },
+  "common": {
+    "logout": "Logout",
+    "loading": "Loading...",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "success": "Success",
+    "error": "Error",
+    "home": "Home",
+    "create": "Create",
+    "creating": "Creating..."
   }
 }

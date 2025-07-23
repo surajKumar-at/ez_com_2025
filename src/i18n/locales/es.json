@@ -88,5 +88,43 @@
     "selectAll": "Seleccionar todo",
     "select": "Seleccionar",
     "noRolesFound": "No se encontraron roles que coincidan con tu búsqueda"
+  },
+  "systems": {
+    "title": "Sistemas",
+    "description": "Gestionar configuraciones y tipos de sistemas",
+    "searchTitle": "Buscar Sistemas",
+    "searchDescription": "Buscar sistemas por ID, tipo o descripción",
+    "searchPlaceholder": "Ingrese ID, tipo o descripción del sistema",
+    "systemsList": "Lista de Sistemas",
+    "totalSystems": "Total: {{count}} sistemas",
+    "selected": "seleccionados",
+    "deleteSelected": "Eliminar {{count}} sistema(s)",
+    "createNew": "Crear Nuevo Sistema",
+    "createSystem": "Crear Sistema",
+    "createSystemDesc": "Agregar un nuevo sistema a la configuración",
+    "systemId": "ID del Sistema",
+    "systemType": "Tipo de Sistema",
+    "language": "Idioma",
+    "description": "Descripción",
+    "systemIdPlaceholder": "Ingrese ID del sistema",
+    "descriptionPlaceholder": "Ingrese descripción del sistema",
+    "selectSystemType": "Seleccionar tipo de sistema",
+    "selectLanguage": "Seleccionar idioma",
+    "fetchError": "Error al obtener sistemas",
+    "createSuccess": "Sistema creado exitosamente",
+    "createError": "Error al crear sistema",
+    "deleteSuccess": "{{count}} sistema(s) eliminado(s) exitosamente",
+    "deleteError": "Error al eliminar sistemas"
+  },
+  "common": {
+    "logout": "Cerrar Sesión",
+    "loading": "Cargando...",
+    "submit": "Enviar",
+    "cancel": "Cancelar",
+    "success": "Éxito",
+    "error": "Error",
+    "home": "Inicio",
+    "create": "Crear",
+    "creating": "Creando..."
   }
 }

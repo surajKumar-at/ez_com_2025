@@ -16,6 +16,7 @@ import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import CustomerDashboard from "./pages/customer/CustomerDashboard";
 import UserRoles from "./pages/admin/config/UserRoles";
+import Systems from "./pages/admin/config/Systems";
 import { AdminLayout } from "./components/admin/AdminLayout";
 
 const queryClient = new QueryClient();
@@ -28,12 +29,17 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
+          <Route path="/" element={<Auth />} />
+          <Route path="/index" element={<Index />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/config/user-roles" element={
             <AdminLayout>
               <UserRoles />
+            </AdminLayout>
+          } />
+          <Route path="/admin/config/systems" element={
+            <AdminLayout>
+              <Systems />
             </AdminLayout>
           } />
             <Route path="/customer" element={<CustomerDashboard />} />
