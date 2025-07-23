@@ -1,7 +1,23 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { drizzle } from 'https://esm.sh/drizzle-orm/postgres-js@0.44.3'
+import { drizzle } from 'https://esm.sh/drizzle-orm/postgres-js'
+import postgres from 'https://esm.sh/postgres'
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts'
+import { eq } from 'https://esm.sh/drizzle-orm'
+
+// Table schemas
+const ezcSystemDesc = {
+  esdSysNo: 'esd_sys_no',
+  esdSysType: 'esd_sys_type', 
+  esdLang: 'esd_lang',
+  esdDescription: 'esd_description',
+};
+
+const ezcSystemTypes = {
+  estSysType: 'est_sys_type',
+  estLang: 'est_lang', 
+  estDescription: 'est_description',
+};
 
 // DTO schemas
 const systemSchema = z.object({
@@ -57,7 +73,8 @@ serve(async (req) => {
       )
     }
 
-    const db = drizzle(supabaseClient)
+    const client = postgres(Deno.env.get('SUPABASE_DB_URL')!)
+    const db = drizzle(client)
 
     if (req.method === 'GET') {
       // Get systems with system types
