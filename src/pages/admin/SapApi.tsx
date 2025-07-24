@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useToast } from '@/hooks/use-toast';
 import axios from 'axios';
 import { Loader2, Search } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const SapApi: React.FC = () => {
   const { toast } = useToast();
@@ -19,6 +20,7 @@ const SapApi: React.FC = () => {
   });
   const [businessPartnerData, setBusinessPartnerData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [customerExists, setCustomerExists] = useState<boolean>(false);
 
   // Convert SAP date format /Date(timestamp+timezone)/ to readable date
   const convertSapDate = (sapDate: string): string => {
@@ -89,8 +91,32 @@ const SapApi: React.FC = () => {
     setIsLoading(true);
     setError(null);
     setBusinessPartnerData(null);
+    setCustomerExists(false);
 
     try {
+      // First check if customer already exists in ezc_customer table
+      const { data: existingCustomer, error: dbError } = await supabase
+        .from('ezc_customer')
+        .select('ec_no')
+        .eq('ec_erp_cust_no', formData.soldTo)
+        .eq('ec_partner_function', 'AG')
+        .maybeSingle();
+
+      if (dbError) {
+        throw new Error('Failed to check existing customer');
+      }
+
+      if (existingCustomer) {
+        setCustomerExists(true);
+        toast({
+          title: 'Customer Already Added',
+          description: 'This customer is already present in the system.',
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // If customer doesn't exist, fetch from SAP
       const response = await axios.post('/api/sap-business-partner', formData);
       const result = response.data;
       
@@ -260,6 +286,17 @@ const SapApi: React.FC = () => {
           </form>
         </CardContent>
       </Card>
+
+      {/* Customer Already Added Display */}
+      {customerExists && (
+        <Card className="border-blue-300">
+          <CardContent className="pt-6">
+            <div className="text-blue-600">
+              <strong>Customer Already Added:</strong> This customer is already present in the system.
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Error Display */}
       {error && (

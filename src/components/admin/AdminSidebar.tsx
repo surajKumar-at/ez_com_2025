@@ -66,7 +66,6 @@ export function AdminSidebar() {
         { title: t('admin.systemAuth'), url: '/admin/system-auth', icon: Link },
         { title: t('admin.erpConnection'), url: '/admin/erp-connection', icon: Database },
         { title: t('admin.salesAreas'), url: '/admin/config/sales-areas', icon: MapPin },
-        { title: 'Add Customer', url: '/admin/sap-business-partner', icon: Database },
       ],
     },
     {
@@ -88,6 +87,8 @@ export function AdminSidebar() {
       title: t('admin.users'),
       icon: Users,
       items: [
+        { title: t('admin.users'), url: '/admin/config/users', icon: Users },
+        { title: 'Add Customer', url: '/admin/sap-business-partner', icon: Database },
         { title: t('admin.create'), url: '/admin/users/create', icon: Plus },
         { title: t('admin.list'), url: '/admin/users/list', icon: List },
       ],
