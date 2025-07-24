@@ -66,7 +66,7 @@ const AppContent = () => {
               <SystemAuth />
             </AdminLayout>
           } />
-          <Route path="/admin/sap-api" element={
+          <Route path="/admin/sap-business-partner" element={
             <AdminLayout>
               <SapApi />
             </AdminLayout>
