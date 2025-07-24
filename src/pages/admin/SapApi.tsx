@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useToast } from '@/hooks/use-toast';
 import axios from 'axios';
 import { Loader2, Search } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+
 
 const SapApi: React.FC = () => {
   const { toast } = useToast();
@@ -94,19 +94,18 @@ const SapApi: React.FC = () => {
     setCustomerExists(false);
 
     try {
-      // First check if customer already exists in ezc_customer table
-      const { data: existingCustomer, error: dbError } = await supabase
-        .from('ezc_customer')
-        .select('ec_no')
-        .eq('ec_erp_cust_no', formData.soldTo)
-        .eq('ec_partner_function', 'AG')
-        .maybeSingle();
-
-      if (dbError) {
-        throw new Error('Failed to check existing customer');
+      // First check if customer already exists using edge function
+      const checkResponse = await axios.post('/api/check-customer-exists', {
+        soldTo: formData.soldTo
+      });
+      
+      const checkResult = checkResponse.data;
+      
+      if (!checkResult.success) {
+        throw new Error(checkResult.error || 'Failed to check existing customer');
       }
 
-      if (existingCustomer) {
+      if (checkResult.exists) {
         setCustomerExists(true);
         toast({
           title: 'Customer Already Added',
