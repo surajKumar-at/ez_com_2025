@@ -1,21 +1,11 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { drizzle } from 'https://esm.sh/drizzle-orm@0.44.3/postgres-js';
-import postgres from 'https://esm.sh/postgres@3.4.7';
-import { pgTable, varchar } from 'https://esm.sh/drizzle-orm@0.44.3/pg-core';
-import { eq, and } from 'https://esm.sh/drizzle-orm@0.44.3';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { z } from 'https://esm.sh/zod@3.23.8';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
-
-// Schema definition
-const ezcCustomer = pgTable('ezc_customer', {
-  ecNo: varchar('ec_no'),
-  ecErpCustNo: varchar('ec_erp_cust_no'),
-  ecPartnerFunction: varchar('ec_partner_function'),
-});
 
 // Request validation schema
 const requestSchema = z.object({
@@ -48,28 +38,26 @@ serve(async (req) => {
     const body = await req.json();
     const { soldTo } = requestSchema.parse(body);
 
-    // Create database connection
-    const databaseUrl = Deno.env.get('DATABASE_URL');
-    if (!databaseUrl) {
-      throw new Error('DATABASE_URL is not configured');
-    }
-
-    const client = postgres(databaseUrl);
-    const db = drizzle(client);
+    // Create Supabase client
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+    );
 
     // Check if customer exists
-    const existingCustomer = await db
-      .select({ ecNo: ezcCustomer.ecNo })
-      .from(ezcCustomer)
-      .where(
-        and(
-          eq(ezcCustomer.ecErpCustNo, soldTo),
-          eq(ezcCustomer.ecPartnerFunction, 'AG')
-        )
-      )
-      .limit(1);
+    const { data: existingCustomer, error: dbError } = await supabase
+      .from('ezc_customer')
+      .select('ec_no')
+      .eq('ec_erp_cust_no', soldTo)
+      .eq('ec_partner_function', 'AG')
+      .maybeSingle();
 
-    const customerExists = existingCustomer.length > 0;
+    if (dbError) {
+      console.error('Database error:', dbError);
+      throw new Error('Failed to check existing customer');
+    }
+
+    const customerExists = !!existingCustomer;
 
     console.log(`Customer ${soldTo} exists: ${customerExists}`);
 
