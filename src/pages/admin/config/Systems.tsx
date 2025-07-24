@@ -12,13 +12,14 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Search, Plus, Trash2, Settings } from 'lucide-react';
 import { systemService } from '@/services/systemService';
-import { System, CreateSystemDto } from '@/lib/dto/system.dto';
+import { System, CreateSystemDto, SystemType } from '@/lib/dto/system.dto';
 
 export default function Systems() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [systems, setSystems] = useState<System[]>([]);
   const [filteredSystems, setFilteredSystems] = useState<System[]>([]);
+  const [systemTypes, setSystemTypes] = useState<SystemType[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSystems, setSelectedSystems] = useState<number[]>([]);
@@ -32,13 +33,6 @@ export default function Systems() {
     description: ''
   });
 
-  const systemTypes = [
-    { value: 'WEB', label: 'Web System' },
-    { value: 'MOBILE', label: 'Mobile System' },
-    { value: 'API', label: 'API System' },
-    { value: 'BACKEND', label: 'Backend System' }
-  ];
-
   const languages = [
     { value: 'EN', label: 'English' },
     { value: 'ES', label: 'Spanish' },
@@ -48,6 +42,7 @@ export default function Systems() {
 
   useEffect(() => {
     fetchSystems();
+    fetchSystemTypes();
   }, []);
 
   useEffect(() => {
@@ -72,6 +67,19 @@ export default function Systems() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSystemTypes = async () => {
+    try {
+      const data = await systemService.getSystemTypes();
+      setSystemTypes(data);
+    } catch (error) {
+      toast({
+        title: t('common.error'),
+        description: t('systems.fetchSystemTypesError'),
+        variant: 'destructive'
+      });
     }
   };
 
@@ -196,8 +204,8 @@ export default function Systems() {
                         </SelectTrigger>
                         <SelectContent>
                           {systemTypes.map((type) => (
-                            <SelectItem key={type.value} value={type.value}>
-                              {type.label}
+                            <SelectItem key={type.est_sys_type} value={type.est_sys_type}>
+                              {type.est_description}
                             </SelectItem>
                           ))}
                         </SelectContent>

@@ -1,6 +1,5 @@
-
 import axios from 'axios';
-import { CreateSystemDto, System, SystemResponse } from '@/lib/dto/system.dto';
+import { CreateSystemDto, System, SystemResponse, SystemType, SystemTypeResponse } from '@/lib/dto/system.dto';
 
 const API_BASE_URL = '/api';
 
@@ -57,6 +56,22 @@ export const systemService = {
       }
     } catch (error) {
       console.error('Error deleting systems:', error);
+      throw error;
+    }
+  },
+
+  getSystemTypes: async (): Promise<SystemType[]> => {
+    try {
+      const response = await axios.get<SystemTypeResponse>(`${API_BASE_URL}/system-types`, {
+        headers: getAuthHeaders()
+      });
+      
+      if (response.data.success && Array.isArray(response.data.data)) {
+        return response.data.data;
+      }
+      throw new Error(response.data.error || 'Failed to fetch system types');
+    } catch (error) {
+      console.error('Error fetching system types:', error);
       throw error;
     }
   }
