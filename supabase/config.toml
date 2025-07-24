@@ -12,3 +12,6 @@ verify_jwt = false
 
 [functions.adverse-events]
 verify_jwt = false
+
+[functions.sap-api]
+verify_jwt = false
