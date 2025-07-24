@@ -38,13 +38,7 @@ export function apiProxyPlugin(): Plugin {
             console.log('🔐 Forwarding auth header');
           }
 
-          // Handle system-types as a sub-path of systems
-          let supabaseUrl;
-          if (endpoint === '/system-types') {
-            supabaseUrl = `${SUPABASE_URL}/functions/v1/systems/system-types`;
-          } else {
-            supabaseUrl = `${SUPABASE_URL}/functions/v1${endpoint}`;
-          }
+          const supabaseUrl = `${SUPABASE_URL}/functions/v1${endpoint}`;
           console.log(`📡 Forwarding to: ${supabaseUrl}`);
 
           let response;
@@ -133,13 +127,7 @@ export function apiProxyPlugin(): Plugin {
             console.log('🔐 Forwarding auth header');
           }
 
-          // Handle system-types as a sub-path of systems  
-          let supabaseUrl;
-          if (endpoint === '/system-types') {
-            supabaseUrl = `${SUPABASE_URL}/functions/v1/systems/system-types`;
-          } else {
-            supabaseUrl = `${SUPABASE_URL}/functions/v1${endpoint}`;
-          }
+          const supabaseUrl = `${SUPABASE_URL}/functions/v1${endpoint}`;
           console.log(`📡 Forwarding to: ${supabaseUrl}`);
 
           let response;

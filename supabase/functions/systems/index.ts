@@ -76,62 +76,6 @@ serve(async (req) => {
     const client = postgres(Deno.env.get('SUPABASE_DB_URL')!)
     const db = drizzle(client)
 
-    const url = new URL(req.url)
-    const pathname = url.pathname
-
-    // Handle system types endpoint
-    if (pathname.endsWith('/system-types')) {
-      if (req.method === 'GET') {
-        console.log('Fetching system types...')
-        
-        const { data, error } = await supabaseClient
-          .from('ezc_system_types')
-          .select('est_sys_type, est_lang, est_description')
-          .eq('est_lang', 'EN')
-          .order('est_description')
-
-        if (error) {
-          console.error('Error fetching system types:', error)
-          return new Response(
-            JSON.stringify({ 
-              success: false, 
-              error: 'Failed to fetch system types',
-              data: null 
-            }),
-            { 
-              status: 500, 
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-            }
-          )
-        }
-
-        console.log('System types fetched successfully:', data?.length || 0, 'records')
-
-        return new Response(
-          JSON.stringify({ 
-            success: true, 
-            error: null,
-            data: data || []
-          }),
-          { 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
-        )
-      }
-
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Method not allowed',
-          data: null 
-        }),
-        { 
-          status: 405, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
-    }
-
     if (req.method === 'GET') {
       // Get systems with system types
       const { data, error } = await supabaseClient
