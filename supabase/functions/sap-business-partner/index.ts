@@ -1,5 +1,5 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createDbClient } from '../../../src/lib/db/client.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,7 +15,11 @@ serve(async (req) => {
   }
 
   try {
-    const db = createDbClient(Deno.env.get('DATABASE_URL')!);
+    // Create Supabase client
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+    );
 
     if (req.method === 'POST') {
       const { soldTo, salesOrg, division, distributionChannel } = await req.json();
@@ -34,15 +38,16 @@ serve(async (req) => {
       }
 
       // Get SAP credentials
-      const credentialResult = await db.query(`
-        SELECT username, password 
-        FROM ezc_sap_credincials 
-        WHERE environment = 'DEMO' 
-        ORDER BY created_at DESC 
-        LIMIT 1
-      `);
+      const { data: credentials, error: credError } = await supabase
+        .from('ezc_sap_credincials')
+        .select('username, password')
+        .eq('environment', 'DEMO')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
 
-      if (credentialResult.rows.length === 0) {
+      if (credError || !credentials) {
+        console.error('Error fetching SAP credentials:', credError);
         return new Response(
           JSON.stringify({ 
             success: false, 
@@ -55,22 +60,21 @@ serve(async (req) => {
         );
       }
 
-      const { username, password } = credentialResult.rows[0];
-
       // Get SAP URLs
-      const baseUrlResult = await db.query(`
-        SELECT value 
-        FROM ezc_sap_urls 
-        WHERE key = 'BASE_URL'
-      `);
+      const { data: baseUrlData, error: baseUrlError } = await supabase
+        .from('ezc_sap_urls')
+        .select('value')
+        .eq('key', 'BASE_URL')
+        .single();
 
-      const endpointResult = await db.query(`
-        SELECT value 
-        FROM ezc_sap_urls 
-        WHERE key = 'GET_SELECTED_SOLDTO'
-      `);
+      const { data: endpointData, error: endpointError } = await supabase
+        .from('ezc_sap_urls')
+        .select('value')
+        .eq('key', 'GET_SELECTED_SOLDTO')
+        .single();
 
-      if (baseUrlResult.rows.length === 0 || endpointResult.rows.length === 0) {
+      if (baseUrlError || endpointError || !baseUrlData || !endpointData) {
+        console.error('Error fetching SAP URLs:', baseUrlError, endpointError);
         return new Response(
           JSON.stringify({ 
             success: false, 
@@ -83,15 +87,15 @@ serve(async (req) => {
         );
       }
 
-      const baseUrl = baseUrlResult.rows[0].value;
-      const endpoint = endpointResult.rows[0].value.replace('{PARTNER}', soldTo);
+      const baseUrl = baseUrlData.value;
+      const endpoint = endpointData.value.replace('{PARTNER}', soldTo);
       
       const fullUrl = `${baseUrl}${endpoint}`;
 
       console.log(`Calling SAP API: ${fullUrl}`);
 
       // Create basic auth header
-      const authHeader = btoa(`${username}:${password}`);
+      const authHeader = btoa(`${credentials.username}:${credentials.password}`);
 
       // Call SAP API
       const sapResponse = await fetch(fullUrl, {
