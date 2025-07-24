@@ -189,5 +189,21 @@
     "reportingInfoDesc": "Detalles del reportero y reporte regulatorio",
     "reporterName": "Nombre del Reportero",
     "reporterTitle": "Título del Reportero"
+  },
+  "systemAuth": {
+    "title": "Autorización del Sistema",
+    "description": "Gestionar autorizaciones y permisos del sistema",
+    "selectSystem": "Seleccionar Sistema",
+    "selectSystemDesc": "Elija un sistema para gestionar sus autorizaciones",
+    "selectSystemPlaceholder": "Seleccionar un sistema...",
+    "system": "Sistema",
+    "authorizations": "Autorizaciones",
+    "authorizationsDesc": "Gestionar asignaciones de autorización para el sistema seleccionado",
+    "authorizationsFor": "Autorizaciones para {{system}}",
+    "authorizationDescription": "Descripción de Autorización",
+    "fetchError": "Error al obtener datos",
+    "fetchSystemAuthError": "Error al obtener autorizaciones del sistema",
+    "saveSuccess": "Autorizaciones del sistema actualizadas exitosamente",
+    "saveError": "Error al actualizar autorizaciones del sistema"
   }
 }

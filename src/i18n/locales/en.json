@@ -190,5 +190,21 @@
     "reportingInfoDesc": "Reporter details and regulatory reporting",
     "reporterName": "Reporter Name",
     "reporterTitle": "Reporter Title"
+  },
+  "systemAuth": {
+    "title": "System Authorization",
+    "description": "Manage system authorizations and permissions",
+    "selectSystem": "Select System",
+    "selectSystemDesc": "Choose a system to manage its authorizations",
+    "selectSystemPlaceholder": "Select a system...",
+    "system": "System",
+    "authorizations": "Authorizations",
+    "authorizationsDesc": "Manage authorization assignments for the selected system",
+    "authorizationsFor": "Authorizations for {{system}}",
+    "authorizationDescription": "Authorization Description",
+    "fetchError": "Error fetching data",
+    "fetchSystemAuthError": "Error fetching system authorizations",
+    "saveSuccess": "System authorizations updated successfully",
+    "saveError": "Error updating system authorizations"
   }
 }
