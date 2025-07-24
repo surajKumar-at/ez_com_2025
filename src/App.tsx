@@ -60,7 +60,7 @@ const AppContent = () => {
               <SalesAreas />
             </AdminLayout>
           } />
-          <Route path="/admin/system-auth" element={
+          <Route path="/admin/config/system-auth" element={
             <AdminLayout>
               <SystemAuth />
             </AdminLayout>
