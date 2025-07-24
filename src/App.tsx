@@ -21,7 +21,6 @@ import Systems from "./pages/admin/config/Systems";
 import MigrateUsers from "./pages/admin/config/MigrateUsers";
 import AdverseEvents from "./pages/admin/config/AdverseEvents";
 import SalesAreas from "./pages/admin/config/SalesAreas";
-import SapBusinessPartner from "./pages/admin/config/SapBusinessPartner";
 import SapApi from "./pages/admin/SapApi";
 import SystemAuth from "./pages/admin/config/SystemAuth";
 import { AdminLayout } from "./components/admin/AdminLayout";
@@ -60,11 +59,6 @@ const AppContent = () => {
           <Route path="/admin/config/sales-areas" element={
             <AdminLayout>
               <SalesAreas />
-            </AdminLayout>
-          } />
-          <Route path="/admin/config/sap-business-partner" element={
-            <AdminLayout>
-              <SapBusinessPartner />
             </AdminLayout>
           } />
           <Route path="/admin/system-auth" element={
