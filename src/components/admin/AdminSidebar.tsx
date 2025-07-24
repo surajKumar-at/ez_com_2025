@@ -64,7 +64,7 @@ export function AdminSidebar() {
         { title: t('admin.siteDefaults'), url: '/admin/site-defaults', icon: Globe },
         { title: t('admin.systemAuth'), url: '/admin/system-auth', icon: Link },
         { title: t('admin.erpConnection'), url: '/admin/erp-connection', icon: Database },
-        { title: t('admin.salesAreas'), url: '/admin/sales-areas', icon: MapPin },
+        { title: t('admin.salesAreas'), url: '/admin/config/sales-areas', icon: MapPin },
       ],
     },
     {
