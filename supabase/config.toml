@@ -13,5 +13,6 @@ verify_jwt = false
 [functions.adverse-events]
 verify_jwt = false
 
-[functions.sap-api]
+[functions.sap-business-partner]
 verify_jwt = false
+

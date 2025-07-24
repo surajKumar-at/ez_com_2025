@@ -91,7 +91,7 @@ const SapApi: React.FC = () => {
     setBusinessPartnerData(null);
 
     try {
-      const response = await axios.post('/api/sap-api', formData);
+      const response = await axios.post('/api/sap-business-partner', formData);
       const result = response.data;
       
       if (result.success && result.data) {
