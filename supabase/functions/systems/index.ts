@@ -1,6 +1,9 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { drizzle } from 'https://esm.sh/drizzle-orm/postgres-js'
+import postgres from 'https://esm.sh/postgres'
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts'
+import { eq } from 'https://esm.sh/drizzle-orm'
 
 // Table schemas
 const ezcSystemDesc = {
@@ -70,7 +73,8 @@ serve(async (req) => {
       )
     }
 
-    // Use Supabase client directly
+    const client = postgres(Deno.env.get('SUPABASE_DB_URL')!)
+    const db = drizzle(client)
 
     if (req.method === 'GET') {
       // Get systems with system types
