@@ -8552,6 +8552,60 @@ export type Database = {
         }
         Relationships: []
       }
+      ezc_sap_credincials: {
+        Row: {
+          created_at: string | null
+          environment: string | null
+          id: number
+          password: string
+          updated_at: string | null
+          username: string
+        }
+        Insert: {
+          created_at?: string | null
+          environment?: string | null
+          id?: number
+          password: string
+          updated_at?: string | null
+          username: string
+        }
+        Update: {
+          created_at?: string | null
+          environment?: string | null
+          id?: number
+          password?: string
+          updated_at?: string | null
+          username?: string
+        }
+        Relationships: []
+      }
+      ezc_sap_urls: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: number
+          key: string
+          updated_at: string | null
+          value: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          key: string
+          updated_at?: string | null
+          value: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          key?: string
+          updated_at?: string | null
+          value?: string
+        }
+        Relationships: []
+      }
       ezc_shipping_claims_comments: {
         Row: {
           escc_comments: string | null

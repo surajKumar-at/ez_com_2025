@@ -30,6 +30,7 @@ import {
   ChevronRight,
   ArrowRightLeft,
   AlertTriangle,
+  Building2,
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
@@ -65,6 +66,7 @@ export function AdminSidebar() {
         { title: t('admin.systemAuth'), url: '/admin/system-auth', icon: Link },
         { title: t('admin.erpConnection'), url: '/admin/erp-connection', icon: Database },
         { title: t('admin.salesAreas'), url: '/admin/config/sales-areas', icon: MapPin },
+        { title: 'SAP Business Partner', url: '/admin/config/sap-business-partner', icon: Building2 },
       ],
     },
     {
