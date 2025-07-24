@@ -1,45 +1,62 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.51.0';
-import { createDbClient } from '../../../src/lib/db/client.ts';
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const supabase = createClient(
-  Deno.env.get('SUPABASE_URL') ?? '',
-  Deno.env.get('SUPABASE_ANON_KEY') ?? ''
-);
-
-Deno.serve(async (req) => {
+serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    });
+
     const url = new URL(req.url);
     const pathSegments = url.pathname.split('/').filter(Boolean);
     const endpoint = pathSegments[pathSegments.length - 1] || pathSegments[pathSegments.length - 2];
 
     console.log('System Auth endpoint:', endpoint, 'Method:', req.method);
 
-    const db = createDbClient(Deno.env.get('DATABASE_URL')!);
-
     switch (endpoint) {
       case 'systems':
         if (req.method === 'GET') {
           // Get systems from ezc_system_desc
-          const systems = await db.execute(`
-            SELECT esd_sys_no, esd_sys_desc, esd_sys_type, esd_lang 
-            FROM ezc_system_desc 
-            ORDER BY esd_sys_desc
-          `);
+          const { data: systems, error } = await supabase
+            .from('ezc_system_desc')
+            .select('esd_sys_no, esd_sys_desc, esd_sys_type, esd_lang')
+            .order('esd_sys_desc');
+
+          if (error) {
+            console.error('Error fetching systems:', error);
+            return new Response(
+              JSON.stringify({
+                success: false,
+                data: null,
+                error: error.message
+              }),
+              {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 500
+              }
+            );
+          }
 
           return new Response(
             JSON.stringify({
               success: true,
-              data: systems.rows,
+              data: systems || [],
               error: null
             }),
             {
@@ -53,19 +70,33 @@ Deno.serve(async (req) => {
       case 'auth-descriptions':
         if (req.method === 'GET') {
           // Get authorization descriptions
-          const authDescriptions = await db.execute(`
-            SELECT euad_auth_key, euad_auth_desc, euad_lang, euad_is_sys_auth, euad_deletion_flag
-            FROM ezc_auth_desc 
-            WHERE euad_lang = 'EN' 
-              AND euad_is_sys_auth = 'Y' 
-              AND euad_deletion_flag = 'N'
-            ORDER BY euad_auth_desc
-          `);
+          const { data: authDescriptions, error } = await supabase
+            .from('ezc_auth_desc')
+            .select('euad_auth_key, euad_auth_desc, euad_lang, euad_is_sys_auth, euad_deletion_flag')
+            .eq('euad_lang', 'EN')
+            .eq('euad_is_sys_auth', 'Y')
+            .eq('euad_deletion_flag', 'N')
+            .order('euad_auth_desc');
+
+          if (error) {
+            console.error('Error fetching auth descriptions:', error);
+            return new Response(
+              JSON.stringify({
+                success: false,
+                data: null,
+                error: error.message
+              }),
+              {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 500
+              }
+            );
+          }
 
           return new Response(
             JSON.stringify({
               success: true,
-              data: authDescriptions.rows,
+              data: authDescriptions || [],
               error: null
             }),
             {
@@ -94,26 +125,100 @@ Deno.serve(async (req) => {
             );
           }
 
-          // Get system's current authorizations
-          const systemAuths = await db.execute(`
-            SELECT A.esa_sys_no, A.esa_auth_key, B.euad_auth_desc
-            FROM ezc_system_auth A, ezc_auth_desc B 
-            WHERE A.esa_sys_no = $1 
-              AND A.esa_auth_key = B.euad_auth_key 
-              AND B.euad_lang = 'EN'
-          `, [parseInt(systemId)]);
+          // Get system's current authorizations using raw SQL via RPC
+          try {
+            const { data: systemAuths, error } = await supabase
+              .rpc('execute_query', {
+                query: `
+                  SELECT A.esa_sys_no, A.esa_auth_key, B.euad_auth_desc
+                  FROM ezc_system_auth A, ezc_auth_desc B 
+                  WHERE A.esa_sys_no = ${parseInt(systemId)}
+                    AND A.esa_auth_key = B.euad_auth_key 
+                    AND B.euad_lang = 'EN'
+                `
+              });
 
-          return new Response(
-            JSON.stringify({
-              success: true,
-              data: systemAuths.rows,
-              error: null
-            }),
-            {
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-              status: 200
+            if (error) {
+              // Fallback query if RPC doesn't exist - simplified approach
+              const { data: systemAuthData, error: fallbackError } = await supabase
+                .from('ezc_system_auth')
+                .select('esa_sys_no, esa_auth_key')
+                .eq('esa_sys_no', parseInt(systemId));
+
+              if (fallbackError) {
+                console.error('Error fetching system authorizations:', fallbackError);
+                return new Response(
+                  JSON.stringify({
+                    success: false,
+                    error: fallbackError.message,
+                    data: null
+                  }),
+                  {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                    status: 500
+                  }
+                );
+              }
+
+              // Get auth descriptions for the found auth keys
+              const authKeys = systemAuthData?.map(sa => sa.esa_auth_key) || [];
+              let authDescriptions = [];
+              
+              if (authKeys.length > 0) {
+                const { data: authDescData } = await supabase
+                  .from('ezc_auth_desc')
+                  .select('euad_auth_key, euad_auth_desc')
+                  .in('euad_auth_key', authKeys)
+                  .eq('euad_lang', 'EN');
+                
+                authDescriptions = authDescData || [];
+              }
+
+              // Combine the data
+              const result = systemAuthData?.map(sa => ({
+                esa_sys_no: sa.esa_sys_no,
+                esa_auth_key: sa.esa_auth_key,
+                euad_auth_desc: authDescriptions.find(ad => ad.euad_auth_key === sa.esa_auth_key)?.euad_auth_desc || ''
+              })) || [];
+
+              return new Response(
+                JSON.stringify({
+                  success: true,
+                  data: result,
+                  error: null
+                }),
+                {
+                  headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                  status: 200
+                }
+              );
             }
-          );
+
+            return new Response(
+              JSON.stringify({
+                success: true,
+                data: systemAuths || [],
+                error: null
+              }),
+              {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 200
+              }
+            );
+          } catch (queryError) {
+            console.error('Error executing system auth query:', queryError);
+            return new Response(
+              JSON.stringify({
+                success: false,
+                error: 'Failed to fetch system authorizations',
+                data: null
+              }),
+              {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 500
+              }
+            );
+          }
         }
         break;
 
@@ -135,32 +240,80 @@ Deno.serve(async (req) => {
             );
           }
 
-          // Delete existing authorizations for the system
-          await db.execute(`
-            DELETE FROM ezc_system_auth WHERE esa_sys_no = $1
-          `, [systemId]);
+          try {
+            // Delete existing authorizations for the system
+            const { error: deleteError } = await supabase
+              .from('ezc_system_auth')
+              .delete()
+              .eq('esa_sys_no', systemId);
 
-          // Insert new authorizations
-          if (authKeys && authKeys.length > 0) {
-            for (const authKey of authKeys) {
-              await db.execute(`
-                INSERT INTO ezc_system_auth (esa_sys_no, esa_auth_key) 
-                VALUES ($1, $2)
-              `, [systemId, authKey]);
+            if (deleteError) {
+              console.error('Error deleting existing authorizations:', deleteError);
+              return new Response(
+                JSON.stringify({
+                  success: false,
+                  error: 'Failed to update authorizations',
+                  data: null
+                }),
+                {
+                  headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                  status: 500
+                }
+              );
             }
+
+            // Insert new authorizations
+            if (authKeys && authKeys.length > 0) {
+              const authInserts = authKeys.map(authKey => ({
+                esa_sys_no: systemId,
+                esa_auth_key: authKey
+              }));
+
+              const { error: insertError } = await supabase
+                .from('ezc_system_auth')
+                .insert(authInserts);
+
+              if (insertError) {
+                console.error('Error inserting new authorizations:', insertError);
+                return new Response(
+                  JSON.stringify({
+                    success: false,
+                    error: 'Failed to insert new authorizations',
+                    data: null
+                  }),
+                  {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                    status: 500
+                  }
+                );
+              }
+            }
+
+            return new Response(
+              JSON.stringify({
+                success: true,
+                data: null,
+                error: null
+              }),
+              {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 200
+              }
+            );
+          } catch (updateError) {
+            console.error('Error updating system authorizations:', updateError);
+            return new Response(
+              JSON.stringify({
+                success: false,
+                error: 'Failed to update system authorizations',
+                data: null
+              }),
+              {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 500
+              }
+            );
           }
-
-          return new Response(
-            JSON.stringify({
-              success: true,
-              data: null,
-              error: null
-            }),
-            {
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-              status: 200
-            }
-          );
         }
         break;
 
