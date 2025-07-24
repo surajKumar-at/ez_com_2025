@@ -11,7 +11,7 @@ export interface System {
 export interface SystemType {
   est_sys_type: string;
   est_lang: string;
-  est_description: string;
+  est_desc: string;
 }
 
 export interface CreateSystemDto {

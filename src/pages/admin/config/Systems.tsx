@@ -205,7 +205,7 @@ export default function Systems() {
                         <SelectContent>
                           {systemTypes.map((type) => (
                             <SelectItem key={type.est_sys_type} value={type.est_sys_type}>
-                              {type.est_description}
+                              {type.est_desc}
                             </SelectItem>
                           ))}
                         </SelectContent>
