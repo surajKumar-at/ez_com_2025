@@ -16,3 +16,6 @@ verify_jwt = false
 [functions.sap-business-partner]
 verify_jwt = false
 
+[functions.check-customer-exists]
+verify_jwt = false
+
