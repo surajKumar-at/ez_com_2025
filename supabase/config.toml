@@ -19,3 +19,6 @@ verify_jwt = false
 [functions.check-customer-exists]
 verify_jwt = false
 
+[functions.site-defaults]
+verify_jwt = false
+

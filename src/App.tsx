@@ -23,6 +23,7 @@ import AdverseEvents from "./pages/admin/config/AdverseEvents";
 import SalesAreas from "./pages/admin/config/SalesAreas";
 import SapApi from "./pages/admin/SapApi";
 import SystemAuth from "./pages/admin/config/SystemAuth";
+import SiteDefaults from "./pages/admin/config/SiteDefaults";
 import { AdminLayout } from "./components/admin/AdminLayout";
 
 const queryClient = new QueryClient();
@@ -71,6 +72,7 @@ const AppContent = () => {
               <SapApi />
             </AdminLayout>
           } />
+          <Route path="/admin/site-defaults" element={<SiteDefaults />} />
             <Route path="/customer" element={<CustomerDashboard />} />
             <Route path="/licenses" element={<Licenses />} />
             <Route path="/getting-started" element={<GettingStarted />} />

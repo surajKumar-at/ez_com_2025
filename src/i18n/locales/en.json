@@ -41,7 +41,8 @@
     "list": "List",
     "users": "Users",
     "migrateUsers": "Migrate Users",
-    "adverseEvents": "Adverse Events"
+    "adverseEvents": "Adverse Events",
+    "siteDefaults": "Site Defaults"
   },
   "common": {
     "logout": "Logout",

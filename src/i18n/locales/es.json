@@ -40,7 +40,8 @@
     "create": "Crear",
     "list": "Lista",
     "users": "Usuarios",
-    "adverseEvents": "Eventos Adversos"
+    "adverseEvents": "Eventos Adversos",
+    "siteDefaults": "Valores Predeterminados del Sitio"
   },
   "common": {
     "logout": "Cerrar Sesión",
