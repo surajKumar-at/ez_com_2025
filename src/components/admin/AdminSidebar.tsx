@@ -64,7 +64,7 @@ export function AdminSidebar() {
         { title: t('admin.adverseEvents'), url: '/admin/config/adverse-events', icon: AlertTriangle },
         { title: t('admin.siteDefaults'), url: '/admin/site-defaults', icon: Globe },
         { title: t('admin.systemAuth'), url: '/admin/system-auth', icon: Link },
-        { title: t('admin.erpConnection'), url: '/admin/erp-connection', icon: Database },
+        { title: 'Master Defaults', url: '/admin/config/master-defaults', icon: Database },
         { title: t('admin.salesAreas'), url: '/admin/config/sales-areas', icon: MapPin },
       ],
     },

@@ -22,3 +22,6 @@ verify_jwt = false
 [functions.site-defaults]
 verify_jwt = false
 
+[functions.master-defaults]
+verify_jwt = false
+

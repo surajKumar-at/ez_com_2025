@@ -21,6 +21,7 @@ import Systems from "./pages/admin/config/Systems";
 import MigrateUsers from "./pages/admin/config/MigrateUsers";
 import AdverseEvents from "./pages/admin/config/AdverseEvents";
 import SalesAreas from "./pages/admin/config/SalesAreas";
+import MasterDefaults from "./pages/admin/config/MasterDefaults";
 import SapApi from "./pages/admin/SapApi";
 import SystemAuth from "./pages/admin/config/SystemAuth";
 import SiteDefaults from "./pages/admin/config/SiteDefaults";
@@ -60,6 +61,11 @@ const AppContent = () => {
           <Route path="/admin/config/sales-areas" element={
             <AdminLayout>
               <SalesAreas />
+            </AdminLayout>
+          } />
+          <Route path="/admin/config/master-defaults" element={
+            <AdminLayout>
+              <MasterDefaults />
             </AdminLayout>
           } />
           <Route path="/admin/system-auth" element={
