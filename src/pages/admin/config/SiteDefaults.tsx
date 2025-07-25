@@ -10,7 +10,8 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { siteDefaultsService } from '@/services/siteDefaultsService';
-import { SiteDefault, SiteDefaultCreate, SiteDefaultUpdate } from '@/lib/dto/siteDefaults.dto';
+import { SiteDefault, SiteDefaultCreate, SiteDefaultUpdate, defaultLevelOptions, languageOptions } from '@/lib/dto/siteDefaults.dto';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function SiteDefaults() {
   const { t } = useTranslation();
@@ -25,6 +26,7 @@ export default function SiteDefaults() {
     eudd_defaults_desc: '',
     eudd_sys_key: 'NOT',
     eudd_lang: 'EN',
+    eudd_default_type: '1',
   });
 
   useEffect(() => {
@@ -63,6 +65,7 @@ export default function SiteDefaults() {
           eudd_defaults_desc: '',
           eudd_sys_key: 'NOT',
           eudd_lang: 'EN',
+          eudd_default_type: '1',
         });
         fetchSiteDefaults();
       }
@@ -190,6 +193,46 @@ export default function SiteDefaults() {
                     className="col-span-3"
                   />
                 </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="defaultLevel" className="text-right">
+                    Default Level
+                  </Label>
+                  <Select
+                    value={formData.eudd_default_type}
+                    onValueChange={(value) => setFormData({ ...formData, eudd_default_type: value })}
+                  >
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select default level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {defaultLevelOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="language" className="text-right">
+                    Language
+                  </Label>
+                  <Select
+                    value={formData.eudd_lang}
+                    onValueChange={(value) => setFormData({ ...formData, eudd_lang: value })}
+                  >
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select language" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {languageOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
@@ -278,6 +321,46 @@ export default function SiteDefaults() {
                   onChange={(e) => setFormData({ ...formData, eudd_defaults_desc: e.target.value })}
                   className="col-span-3"
                 />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-defaultLevel" className="text-right">
+                  Default Level
+                </Label>
+                <Select
+                  value={formData.eudd_default_type}
+                  onValueChange={(value) => setFormData({ ...formData, eudd_default_type: value })}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select default level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {defaultLevelOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-language" className="text-right">
+                  Language
+                </Label>
+                <Select
+                  value={formData.eudd_lang}
+                  onValueChange={(value) => setFormData({ ...formData, eudd_lang: value })}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {languageOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <DialogFooter>

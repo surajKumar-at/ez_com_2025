@@ -5,9 +5,22 @@ export const siteDefaultSchema = z.object({
   eudd_defaults_desc: z.string().min(1, 'Description is required'),
   eudd_sys_key: z.string().default('NOT'),
   eudd_lang: z.string().default('EN'),
-  eudd_default_type: z.string().optional(),
+  eudd_default_type: z.string().min(1, 'Default type is required'),
   eudd_is_master: z.string().optional(),
 });
+
+export const defaultLevelOptions = [
+  { value: '1', label: 'User Level' },
+  { value: '2', label: 'Customer Level' },
+  { value: '4', label: 'User and Customer Level' },
+];
+
+export const languageOptions = [
+  { value: 'EN', label: 'English' },
+  { value: 'ES', label: 'Spanish' },
+  { value: 'FR', label: 'French' },
+  { value: 'DE', label: 'German' },
+];
 
 export const siteDefaultCreateSchema = siteDefaultSchema.omit({});
 
