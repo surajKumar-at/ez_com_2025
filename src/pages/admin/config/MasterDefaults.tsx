@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { AdminLayout } from '@/components/admin/AdminLayout';
+
 import { masterDefaultsService } from '@/services/masterDefaultsService';
 import { salesAreaService } from '@/services/salesAreaService';
 import { MasterDefault, MasterDefaultCreate, MasterDefaultUpdate, defaultLevelOptions, languageOptions } from '@/lib/dto/masterDefaults.dto';
@@ -47,9 +47,7 @@ export default function MasterDefaults() {
     try {
       const areas = await salesAreaService.getSalesAreas();
       setSalesAreas(areas);
-      if (areas.length > 0) {
-        setSelectedSalesArea(areas[0].eskd_sys_key);
-      }
+      // Don't auto-select first area - let user choose
     } catch (error) {
       toast({
         title: t('common.error'),
@@ -167,224 +165,92 @@ export default function MasterDefaults() {
     }
   };
 
-  if (loading && !selectedSalesArea) {
+  if (loading && salesAreas.length === 0) {
     return (
-      <AdminLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-lg">{t('common.loading')}</div>
-        </div>
-      </AdminLayout>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg">{t('common.loading')}</div>
+      </div>
     );
   }
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Master Defaults</h1>
-        </div>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Master Defaults</h1>
+      </div>
 
-        {/* Business Area Selector */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Business Area Selection</CardTitle>
-            <CardDescription>
-              Select a business area to view and manage its master defaults
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="businessArea" className="text-right">
-                Business Area
-              </Label>
-              <Select value={selectedSalesArea} onValueChange={setSelectedSalesArea}>
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select business area" />
-                </SelectTrigger>
-                <SelectContent>
-                  {salesAreas.map((area) => (
-                    <SelectItem key={area.eskd_sys_key} value={area.eskd_sys_key}>
-                      {area.eskd_sys_key} - {area.eskd_sys_key_desc}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Business Area Selector */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Business Area Selection</CardTitle>
+          <CardDescription>
+            Select a business area to view and manage its master defaults
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="businessArea" className="text-right">
+              Business Area
+            </Label>
+            <Select value={selectedSalesArea} onValueChange={setSelectedSalesArea}>
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder="Select business area" />
+              </SelectTrigger>
+              <SelectContent>
+                {salesAreas.map((area) => (
+                  <SelectItem key={area.eskd_sys_key} value={area.eskd_sys_key}>
+                    {area.eskd_sys_key} - {area.eskd_sys_key_desc}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
 
-        {selectedSalesArea && (
-          <>
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">List of Master Defaults</h2>
-              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Master Default
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Create New Master Default</DialogTitle>
-                    <DialogDescription>
-                      Add a new master default configuration.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="key" className="text-right">
-                        Default Key
-                      </Label>
-                      <Input
-                        id="key"
-                        value={formData.eudd_key}
-                        onChange={(e) => setFormData({ ...formData, eudd_key: e.target.value })}
-                        className="col-span-3"
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="description" className="text-right">
-                        Description
-                      </Label>
-                      <Input
-                        id="description"
-                        value={formData.eudd_defaults_desc}
-                        onChange={(e) => setFormData({ ...formData, eudd_defaults_desc: e.target.value })}
-                        className="col-span-3"
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="defaultLevel" className="text-right">
-                        Default Level
-                      </Label>
-                      <Select
-                        value={formData.eudd_default_type}
-                        onValueChange={(value) => setFormData({ ...formData, eudd_default_type: value })}
-                      >
-                        <SelectTrigger className="col-span-3">
-                          <SelectValue placeholder="Select default level" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {defaultLevelOptions.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="language" className="text-right">
-                        Language
-                      </Label>
-                      <Select
-                        value={formData.eudd_lang}
-                        onValueChange={(value) => setFormData({ ...formData, eudd_lang: value })}
-                      >
-                        <SelectTrigger className="col-span-3">
-                          <SelectValue placeholder="Select language" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {languageOptions.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                      {t('common.cancel')}
-                    </Button>
-                    <Button onClick={handleCreate}>Create</Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </div>
-
-            <Card>
-              <CardContent>
-                {loading ? (
-                  <div className="flex items-center justify-center h-32">
-                    <div className="text-lg">{t('common.loading')}</div>
-                  </div>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Default</TableHead>
-                        <TableHead>Description</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {masterDefaults.map((masterDefault) => (
-                        <TableRow key={masterDefault.eudd_key}>
-                          <TableCell className="font-medium">{masterDefault.eudd_key}</TableCell>
-                          <TableCell>{masterDefault.eudd_defaults_desc}</TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleEdit(masterDefault)}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleDelete(masterDefault.eudd_key)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Edit Dialog */}
-            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+      {selectedSalesArea && (
+        <>
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-semibold">List of Master Defaults</h2>
+            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Master Default
+                </Button>
+              </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Edit Master Default</DialogTitle>
+                  <DialogTitle>Create New Master Default</DialogTitle>
                   <DialogDescription>
-                    Update the master default configuration.
+                    Add a new master default configuration.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="edit-key" className="text-right">
+                    <Label htmlFor="key" className="text-right">
                       Default Key
                     </Label>
                     <Input
-                      id="edit-key"
+                      id="key"
                       value={formData.eudd_key}
-                      disabled
+                      onChange={(e) => setFormData({ ...formData, eudd_key: e.target.value })}
                       className="col-span-3"
                     />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="edit-description" className="text-right">
+                    <Label htmlFor="description" className="text-right">
                       Description
                     </Label>
                     <Input
-                      id="edit-description"
+                      id="description"
                       value={formData.eudd_defaults_desc}
                       onChange={(e) => setFormData({ ...formData, eudd_defaults_desc: e.target.value })}
                       className="col-span-3"
                     />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="edit-defaultLevel" className="text-right">
+                    <Label htmlFor="defaultLevel" className="text-right">
                       Default Level
                     </Label>
                     <Select
@@ -404,7 +270,7 @@ export default function MasterDefaults() {
                     </Select>
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="edit-language" className="text-right">
+                    <Label htmlFor="language" className="text-right">
                       Language
                     </Label>
                     <Select
@@ -425,16 +291,144 @@ export default function MasterDefaults() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                  <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
                     {t('common.cancel')}
                   </Button>
-                  <Button onClick={handleUpdate}>Update</Button>
+                  <Button onClick={handleCreate}>Create</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
-          </>
-        )}
-      </div>
-    </AdminLayout>
+          </div>
+
+          <Card>
+            <CardContent>
+              {loading ? (
+                <div className="flex items-center justify-center h-32">
+                  <div className="text-lg">{t('common.loading')}</div>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Default</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {masterDefaults.map((masterDefault) => (
+                      <TableRow key={masterDefault.eudd_key}>
+                        <TableCell className="font-medium">{masterDefault.eudd_key}</TableCell>
+                        <TableCell>{masterDefault.eudd_defaults_desc}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEdit(masterDefault)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDelete(masterDefault.eudd_key)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Edit Dialog */}
+          <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Edit Master Default</DialogTitle>
+                <DialogDescription>
+                  Update the master default configuration.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit-key" className="text-right">
+                    Default Key
+                  </Label>
+                  <Input
+                    id="edit-key"
+                    value={formData.eudd_key}
+                    disabled
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit-description" className="text-right">
+                    Description
+                  </Label>
+                  <Input
+                    id="edit-description"
+                    value={formData.eudd_defaults_desc}
+                    onChange={(e) => setFormData({ ...formData, eudd_defaults_desc: e.target.value })}
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit-defaultLevel" className="text-right">
+                    Default Level
+                  </Label>
+                  <Select
+                    value={formData.eudd_default_type}
+                    onValueChange={(value) => setFormData({ ...formData, eudd_default_type: value })}
+                  >
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select default level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {defaultLevelOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit-language" className="text-right">
+                    Language
+                  </Label>
+                  <Select
+                    value={formData.eudd_lang}
+                    onValueChange={(value) => setFormData({ ...formData, eudd_lang: value })}
+                  >
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select language" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {languageOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                  {t('common.cancel')}
+                </Button>
+                <Button onClick={handleUpdate}>Update</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
+    </div>
   );
 }
