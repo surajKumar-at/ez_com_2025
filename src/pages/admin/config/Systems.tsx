@@ -88,23 +88,26 @@ export default function Systems() {
   };
 
   // Form validation
-  const validateForm = (): boolean => {
-    const errors: Partial<Record<keyof CreateSystemDto, string>> = {};
-    if (!formData.systemType.trim()) {
-      errors.systemType = t('systems.validation.systemTypeRequired');
-    }
-    if (!formData.language.trim()) {
-      errors.language = t('systems.validation.languageRequired');
-    }
-    if (!formData.systemId.trim()) {
-      errors.systemId = t('systems.validation.systemIdRequired');
-    }
-    if (!formData.description.trim()) {
-      errors.description = t('systems.validation.descriptionRequired');
-    }
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
+ const validateForm = (): boolean => {
+  const errors: Partial<Record<keyof CreateSystemDto, string>> = {};
+
+  if (typeof formData.systemType !== 'string' || formData.systemType.trim() === '') {
+    errors.systemType = t('systems.validation.systemTypeRequired');
+  }
+  if (typeof formData.language !== 'string' || formData.language.trim() === '') {
+    errors.language = t('systems.validation.languageRequired');
+  }
+  if (typeof formData.systemId !== 'string' || formData.systemId.trim() === '') {
+    errors.systemId = t('systems.validation.systemIdRequired');
+  }
+  if (typeof formData.description !== 'string' || formData.description.trim() === '') {
+    errors.description = t('systems.validation.descriptionRequired');
+  }
+
+  setFormErrors(errors);
+  return Object.keys(errors).length === 0;
+};
+
 
   const handleCreateSystem = async () => {
     if (!validateForm()) {
