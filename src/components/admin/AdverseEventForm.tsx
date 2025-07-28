@@ -72,6 +72,23 @@ interface AdverseEventFormProps {
   isLoading?: boolean;
 }
 
+// Helper function to format date for HTML input (yyyy-MM-dd)
+const formatDateForInput = (dateString?: string): string => {
+  if (!dateString) return '';
+  
+  try {
+    const date = new Date(dateString);
+    // Check if the date is valid
+    if (isNaN(date.getTime())) return '';
+    
+    // Format as yyyy-MM-dd for HTML date input
+    return date.toISOString().split('T')[0];
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return '';
+  }
+};
+
 export const AdverseEventForm = ({
   isOpen,
   onClose,
@@ -120,7 +137,7 @@ export const AdverseEventForm = ({
         eaei_patient_first_name: initialData.eaei_patient_first_name || '',
         eaei_patient_last_name: initialData.eaei_patient_last_name || '',
         eaei_patient_middle_initial: initialData.eaei_patient_middle_initial || '',
-        eaei_patient_dob: initialData.eaei_patient_dob || '',
+        eaei_patient_dob: formatDateForInput(initialData.eaei_patient_dob),
         eaei_age_at_vaccination_in_months: initialData.eaei_age_at_vaccination_in_months || undefined,
         eaei_sex: initialData.eaei_sex || '',
         eaei_weight_at_birth: initialData.eaei_weight_at_birth || undefined,
@@ -131,8 +148,8 @@ export const AdverseEventForm = ({
         eaei_patient_zip: initialData.eaei_patient_zip || '',
         eaei_patient_telno: initialData.eaei_patient_telno || '',
         eaei_adverse_events_description: initialData.eaei_adverse_events_description || '',
-        eaei_adverse_event_onset: initialData.eaei_adverse_event_onset || '',
-        eaei_vaccination_date: initialData.eaei_vaccination_date || '',
+        eaei_adverse_event_onset: formatDateForInput(initialData.eaei_adverse_event_onset),
+        eaei_vaccination_date: formatDateForInput(initialData.eaei_vaccination_date),
         eaei_vaccinated_at: initialData.eaei_vaccinated_at || '',
         eaei_administered_by_name: initialData.eaei_administered_by_name || '',
         eaei_form_filled_by_name: initialData.eaei_form_filled_by_name || '',
@@ -151,7 +168,16 @@ export const AdverseEventForm = ({
 
   const handleSubmit = (data: FormData) => {
     console.log('Form submitted with data:', data);
-    onSubmit(data);
+    
+    // Convert date strings to proper format if they exist
+    const processedData = {
+      ...data,
+      eaei_patient_dob: data.eaei_patient_dob || undefined,
+      eaei_adverse_event_onset: data.eaei_adverse_event_onset || undefined,
+      eaei_vaccination_date: data.eaei_vaccination_date || undefined,
+    };
+    
+    onSubmit(processedData);
   };
 
   const handleClose = () => {
