@@ -279,7 +279,7 @@ export default function SiteDefaults() {
                   <Select
                     value={formData.eudd_default_type}
                     onValueChange={(value) => setFormData({ ...formData, eudd_default_type: value })}
-                    className="col-span-3"
+                    
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select default level" />
@@ -300,7 +300,7 @@ export default function SiteDefaults() {
                   <Select
                     value={formData.eudd_lang}
                     onValueChange={(value) => setFormData({ ...formData, eudd_lang: value })}
-                    className="col-span-3"
+                   
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select language" />
@@ -419,7 +419,7 @@ export default function SiteDefaults() {
                 <Select
                   value={formData.eudd_default_type}
                   onValueChange={(value) => setFormData({ ...formData, eudd_default_type: value })}
-                  className="col-span-3"
+                  
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select default level" />
@@ -440,7 +440,7 @@ export default function SiteDefaults() {
                 <Select
                   value={formData.eudd_lang}
                   onValueChange={(value) => setFormData({ ...formData, eudd_lang: value })}
-                  className="col-span-3"
+                  
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select language" />
