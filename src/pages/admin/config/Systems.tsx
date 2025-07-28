@@ -28,7 +28,6 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -117,20 +116,31 @@ export default function Systems() {
     }
   };
 
-  // Safe validation with type checks to avoid trim errors
+  // Safe validation with normalization
   const validateForm = (): boolean => {
     const errors: Partial<Record<keyof CreateSystemDto, string>> = {};
 
-    if (typeof formData.systemType !== 'string' || formData.systemType.trim() === '') {
+    const normalizeString = (value: unknown): string => {
+      if (value === undefined || value === null) return '';
+      if (typeof value !== 'string') return String(value);
+      return value.trim();
+    };
+
+    const systemTypeVal = normalizeString(formData.systemType);
+    const languageVal = normalizeString(formData.language);
+    const systemIdVal = normalizeString(formData.systemId);
+    const descriptionVal = normalizeString(formData.description);
+
+    if (!systemTypeVal) {
       errors.systemType = t('systems.validation.systemTypeRequired');
     }
-    if (typeof formData.language !== 'string' || formData.language.trim() === '') {
+    if (!languageVal) {
       errors.language = t('systems.validation.languageRequired');
     }
-    if (typeof formData.systemId !== 'string' || formData.systemId.trim() === '') {
+    if (!systemIdVal) {
       errors.systemId = t('systems.validation.systemIdRequired');
     }
-    if (typeof formData.description !== 'string' || formData.description.trim() === '') {
+    if (!descriptionVal) {
       errors.description = t('systems.validation.descriptionRequired');
     }
 
@@ -237,6 +247,7 @@ export default function Systems() {
               size="sm"
               onClick={handleDeleteSelected}
               className="flex items-center gap-2"
+              type="button"
             >
               <Trash2 className="h-4 w-4" />
               {t('systems.deleteSelected', { count: selectedSystems.length })}
@@ -245,7 +256,7 @@ export default function Systems() {
 
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="flex items-center gap-2">
+              <Button className="flex items-center gap-2" type="button">
                 <Plus className="h-4 w-4" />
                 {t('systems.createNew')}
               </Button>
@@ -261,19 +272,18 @@ export default function Systems() {
                   <div className="space-y-2">
                     <Label htmlFor="systemType">{t('systems.systemType')}</Label>
                     <Select
-                      value={formData.systemType}
+                      value={String(formData.systemType || '')}
                       onValueChange={(value) => {
                         setFormData((prev) => ({ ...prev, systemType: value }));
                         setFormErrors((prev) => ({ ...prev, systemType: undefined }));
                       }}
                     >
-                      {/* Pass id to SelectTrigger for accessibility */}
                       <SelectTrigger id="systemType">
                         <SelectValue placeholder={t('systems.selectSystemType')} />
                       </SelectTrigger>
                       <SelectContent>
                         {systemTypes.map((type) => (
-                          <SelectItem key={type.est_sys_type} value={type.est_sys_type}>
+                          <SelectItem key={type.est_sys_type} value={String(type.est_sys_type)}>
                             {type.est_desc}
                           </SelectItem>
                         ))}
@@ -287,13 +297,12 @@ export default function Systems() {
                   <div className="space-y-2">
                     <Label htmlFor="language">{t('systems.language')}</Label>
                     <Select
-                      value={formData.language}
+                      value={String(formData.language || '')}
                       onValueChange={(value) => {
                         setFormData((prev) => ({ ...prev, language: value }));
                         setFormErrors((prev) => ({ ...prev, language: undefined }));
                       }}
                     >
-                      {/* Pass id to SelectTrigger for accessibility */}
                       <SelectTrigger id="language">
                         <SelectValue placeholder={t('systems.selectLanguage')} />
                       </SelectTrigger>
@@ -354,10 +363,11 @@ export default function Systems() {
                     setFormErrors({});
                   }}
                   disabled={isSubmitting}
+                  type="button"
                 >
                   {t('common.cancel')}
                 </Button>
-                <Button onClick={handleCreateSystem} disabled={isSubmitting}>
+                <Button onClick={handleCreateSystem} disabled={isSubmitting} type="button">
                   {isSubmitting ? t('common.creating') : t('common.create')}
                 </Button>
               </DialogFooter>
