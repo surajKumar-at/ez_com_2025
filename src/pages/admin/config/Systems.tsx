@@ -3,10 +3,37 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
@@ -34,8 +61,10 @@ export default function Systems() {
     description: ''
   });
 
-  // Validation errors state
-  const [formErrors, setFormErrors] = useState<Partial<Record<keyof CreateSystemDto, string>>>({});
+  // Validation errors
+  const [formErrors, setFormErrors] = useState<
+    Partial<Record<keyof CreateSystemDto, string>>
+  >({});
 
   const languages = [
     { value: 'EN', label: 'English' },
@@ -50,10 +79,11 @@ export default function Systems() {
   }, []);
 
   useEffect(() => {
-    const filtered = systems.filter(system =>
-      system.esd_sys_desc.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      system.esd_sys_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      system.esd_sys_no.toString().includes(searchTerm)
+    const filtered = systems.filter(
+      (system) =>
+        system.esd_sys_desc.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        system.esd_sys_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        system.esd_sys_no.toString().includes(searchTerm)
     );
     setFilteredSystems(filtered);
   }, [systems, searchTerm]);
@@ -87,34 +117,33 @@ export default function Systems() {
     }
   };
 
-  // Form validation
- const validateForm = (): boolean => {
-  const errors: Partial<Record<keyof CreateSystemDto, string>> = {};
+  // Safe validation with type checks to avoid trim errors
+  const validateForm = (): boolean => {
+    const errors: Partial<Record<keyof CreateSystemDto, string>> = {};
 
-  if (typeof formData.systemType !== 'string' || formData.systemType.trim() === '') {
-    errors.systemType = t('systems.validation.systemTypeRequired');
-  }
-  if (typeof formData.language !== 'string' || formData.language.trim() === '') {
-    errors.language = t('systems.validation.languageRequired');
-  }
-  if (typeof formData.systemId !== 'string' || formData.systemId.trim() === '') {
-    errors.systemId = t('systems.validation.systemIdRequired');
-  }
-  if (typeof formData.description !== 'string' || formData.description.trim() === '') {
-    errors.description = t('systems.validation.descriptionRequired');
-  }
+    if (typeof formData.systemType !== 'string' || formData.systemType.trim() === '') {
+      errors.systemType = t('systems.validation.systemTypeRequired');
+    }
+    if (typeof formData.language !== 'string' || formData.language.trim() === '') {
+      errors.language = t('systems.validation.languageRequired');
+    }
+    if (typeof formData.systemId !== 'string' || formData.systemId.trim() === '') {
+      errors.systemId = t('systems.validation.systemIdRequired');
+    }
+    if (typeof formData.description !== 'string' || formData.description.trim() === '') {
+      errors.description = t('systems.validation.descriptionRequired');
+    }
 
-  setFormErrors(errors);
-  return Object.keys(errors).length === 0;
-};
-
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleCreateSystem = async () => {
     if (!validateForm()) {
       toast({
         title: t('common.error'),
         description: t('systems.fixValidationErrors'),
-        variant: 'destructive',
+        variant: 'destructive'
       });
       return;
     }
@@ -125,7 +154,7 @@ export default function Systems() {
 
       toast({
         title: t('common.success'),
-        description: t('systems.createSuccess'),
+        description: t('systems.createSuccess')
       });
 
       setIsCreateDialogOpen(false);
@@ -133,7 +162,7 @@ export default function Systems() {
         systemType: '',
         language: '',
         systemId: '',
-        description: '',
+        description: ''
       });
       setFormErrors({});
 
@@ -142,7 +171,7 @@ export default function Systems() {
       toast({
         title: t('common.error'),
         description: t('systems.createError'),
-        variant: 'destructive',
+        variant: 'destructive'
       });
     } finally {
       setIsSubmitting(false);
@@ -173,7 +202,7 @@ export default function Systems() {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedSystems(filteredSystems.map(system => system.esd_sys_no));
+      setSelectedSystems(filteredSystems.map((system) => system.esd_sys_no));
     } else {
       setSelectedSystems([]);
     }
@@ -181,9 +210,9 @@ export default function Systems() {
 
   const handleSelectSystem = (systemId: number, checked: boolean) => {
     if (checked) {
-      setSelectedSystems(prev => [...prev, systemId]);
+      setSelectedSystems((prev) => [...prev, systemId]);
     } else {
-      setSelectedSystems(prev => prev.filter(id => id !== systemId));
+      setSelectedSystems((prev) => prev.filter((id) => id !== systemId));
     }
   };
 
@@ -234,12 +263,12 @@ export default function Systems() {
                     <Select
                       value={formData.systemType}
                       onValueChange={(value) => {
-                        setFormData(prev => ({ ...prev, systemType: value }));
-                        setFormErrors(prev => ({ ...prev, systemType: undefined }));
+                        setFormData((prev) => ({ ...prev, systemType: value }));
+                        setFormErrors((prev) => ({ ...prev, systemType: undefined }));
                       }}
-                      id="systemType"
                     >
-                      <SelectTrigger>
+                      {/* Pass id to SelectTrigger for accessibility */}
+                      <SelectTrigger id="systemType">
                         <SelectValue placeholder={t('systems.selectSystemType')} />
                       </SelectTrigger>
                       <SelectContent>
@@ -260,12 +289,12 @@ export default function Systems() {
                     <Select
                       value={formData.language}
                       onValueChange={(value) => {
-                        setFormData(prev => ({ ...prev, language: value }));
-                        setFormErrors(prev => ({ ...prev, language: undefined }));
+                        setFormData((prev) => ({ ...prev, language: value }));
+                        setFormErrors((prev) => ({ ...prev, language: undefined }));
                       }}
-                      id="language"
                     >
-                      <SelectTrigger>
+                      {/* Pass id to SelectTrigger for accessibility */}
+                      <SelectTrigger id="language">
                         <SelectValue placeholder={t('systems.selectLanguage')} />
                       </SelectTrigger>
                       <SelectContent>
@@ -288,8 +317,8 @@ export default function Systems() {
                     id="systemId"
                     value={formData.systemId}
                     onChange={(e) => {
-                      setFormData(prev => ({ ...prev, systemId: e.target.value }));
-                      setFormErrors(prev => ({ ...prev, systemId: undefined }));
+                      setFormData((prev) => ({ ...prev, systemId: e.target.value }));
+                      setFormErrors((prev) => ({ ...prev, systemId: undefined }));
                     }}
                     placeholder={t('systems.systemIdPlaceholder')}
                     aria-invalid={!!formErrors.systemId}
@@ -305,8 +334,8 @@ export default function Systems() {
                     id="description"
                     value={formData.description}
                     onChange={(e) => {
-                      setFormData(prev => ({ ...prev, description: e.target.value }));
-                      setFormErrors(prev => ({ ...prev, description: undefined }));
+                      setFormData((prev) => ({ ...prev, description: e.target.value }));
+                      setFormErrors((prev) => ({ ...prev, description: undefined }));
                     }}
                     placeholder={t('systems.descriptionPlaceholder')}
                     aria-invalid={!!formErrors.description}
@@ -385,7 +414,10 @@ export default function Systems() {
                 <TableRow>
                   <TableHead className="w-12">
                     <Checkbox
-                      checked={selectedSystems.length === filteredSystems.length && filteredSystems.length > 0}
+                      checked={
+                        selectedSystems.length === filteredSystems.length &&
+                        filteredSystems.length > 0
+                      }
                       onCheckedChange={handleSelectAll}
                     />
                   </TableHead>
@@ -401,7 +433,9 @@ export default function Systems() {
                     <TableCell>
                       <Checkbox
                         checked={selectedSystems.includes(system.esd_sys_no)}
-                        onCheckedChange={(checked) => handleSelectSystem(system.esd_sys_no, checked as boolean)}
+                        onCheckedChange={(checked) =>
+                          handleSelectSystem(system.esd_sys_no, checked as boolean)
+                        }
                       />
                     </TableCell>
                     <TableCell className="font-medium">{system.esd_sys_no}</TableCell>
