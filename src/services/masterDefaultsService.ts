@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { MasterDefault, MasterDefaultCreate, MasterDefaultUpdate, ApiResponse } from '@/lib/dto/masterDefaults.dto';
-
-const API_BASE_URL = '/api';
+import { API_CONFIG, getApiUrl } from '@/config/api';
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('auth_token');
@@ -14,7 +13,7 @@ const getAuthHeaders = () => {
 export const masterDefaultsService = {
   getAll: async (sysKey: string = '999002'): Promise<ApiResponse<MasterDefault[]>> => {
     try {
-      const response = await axios.get<ApiResponse<MasterDefault[]>>(`${API_BASE_URL}/master-defaults?sys_key=${sysKey}`, {
+      const response = await axios.get<ApiResponse<MasterDefault[]>>(`${getApiUrl(API_CONFIG.ENDPOINTS.MASTER_DEFAULTS)}?sys_key=${sysKey}`, {
         headers: getAuthHeaders()
       });
       return response.data;
@@ -26,7 +25,7 @@ export const masterDefaultsService = {
 
   create: async (masterDefault: MasterDefaultCreate): Promise<ApiResponse<MasterDefault>> => {
     try {
-      const response = await axios.post<ApiResponse<MasterDefault>>(`${API_BASE_URL}/master-defaults`, masterDefault, {
+      const response = await axios.post<ApiResponse<MasterDefault>>(getApiUrl(API_CONFIG.ENDPOINTS.MASTER_DEFAULTS), masterDefault, {
         headers: getAuthHeaders()
       });
       return response.data;
@@ -38,7 +37,7 @@ export const masterDefaultsService = {
 
   update: async (key: string, masterDefault: MasterDefaultUpdate): Promise<ApiResponse<MasterDefault>> => {
     try {
-      const response = await axios.put<ApiResponse<MasterDefault>>(`${API_BASE_URL}/master-defaults`, { ...masterDefault, eudd_key: key }, {
+      const response = await axios.put<ApiResponse<MasterDefault>>(getApiUrl(API_CONFIG.ENDPOINTS.MASTER_DEFAULTS), { ...masterDefault, eudd_key: key }, {
         headers: getAuthHeaders()
       });
       return response.data;
@@ -50,7 +49,7 @@ export const masterDefaultsService = {
 
   delete: async (key: string): Promise<ApiResponse<void>> => {
     try {
-      const response = await axios.delete<ApiResponse<void>>(`${API_BASE_URL}/master-defaults`, {
+      const response = await axios.delete<ApiResponse<void>>(getApiUrl(API_CONFIG.ENDPOINTS.MASTER_DEFAULTS), {
         headers: getAuthHeaders(),
         data: { eudd_key: key }
       });

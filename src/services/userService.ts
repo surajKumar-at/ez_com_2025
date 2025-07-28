@@ -1,13 +1,12 @@
 
 import axios from 'axios';
 import { CreateUserDto, UpdateUserDto, UserDto, ApiResponse } from '@/lib/dto/user.dto';
-
-const API_BASE_URL = '/api';
+import { API_CONFIG, getApiUrl } from '@/config/api';
 
 export const userService = {
   async getAllUsers(): Promise<UserDto[]> {
     try {
-      const response = await axios.get(`${API_BASE_URL}/users`);
+      const response = await axios.get(getApiUrl(API_CONFIG.ENDPOINTS.USERS));
       return response.data.data || [];
     } catch (error: any) {
       console.error('Error fetching users:', error);
@@ -17,7 +16,7 @@ export const userService = {
 
   async createUser(userData: CreateUserDto): Promise<UserDto> {
     try {
-      const response = await axios.post(`${API_BASE_URL}/users`, {
+      const response = await axios.post(getApiUrl(API_CONFIG.ENDPOINTS.USERS), {
         action: 'create-user',
         ...userData
       });
@@ -35,7 +34,7 @@ export const userService = {
 
   async updateUser(userId: string, userData: UpdateUserDto): Promise<void> {
     try {
-      const response = await axios.post(`${API_BASE_URL}/users`, {
+      const response = await axios.post(getApiUrl(API_CONFIG.ENDPOINTS.USERS), {
         action: 'update-user',
         userId,
         ...userData
@@ -52,7 +51,7 @@ export const userService = {
 
   async blockUser(userId: string): Promise<void> {
     try {
-      const response = await axios.post(`${API_BASE_URL}/users`, {
+      const response = await axios.post(getApiUrl(API_CONFIG.ENDPOINTS.USERS), {
         action: 'block-user',
         userId
       });
@@ -68,7 +67,7 @@ export const userService = {
 
   async unblockUser(userId: string): Promise<void> {
     try {
-      const response = await axios.post(`${API_BASE_URL}/users`, {
+      const response = await axios.post(getApiUrl(API_CONFIG.ENDPOINTS.USERS), {
         action: 'unblock-user',
         userId
       });
@@ -84,7 +83,7 @@ export const userService = {
 
   async deleteUser(userId: string): Promise<void> {
     try {
-      const response = await axios.post(`${API_BASE_URL}/users`, {
+      const response = await axios.post(getApiUrl(API_CONFIG.ENDPOINTS.USERS), {
         action: 'delete-user',
         userId
       });
@@ -100,7 +99,7 @@ export const userService = {
 
   async migrateExistingUsers(): Promise<ApiResponse> {
     try {
-      const response = await axios.post(`${API_BASE_URL}/users`, {
+      const response = await axios.post(getApiUrl(API_CONFIG.ENDPOINTS.USERS), {
         action: 'migrate-existing-users'
       });
       

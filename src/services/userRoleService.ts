@@ -1,15 +1,14 @@
 
 import axios from 'axios';
 import { CreateUserRoleDto, UpdateUserRoleDto, UserRoleDto, ApiResponse } from '@/lib/dto/userRole.dto';
-
-const API_BASE_URL = '/api';
+import { API_CONFIG, getApiUrl } from '@/config/api';
 
 export const userRoleService = {
   // Get all user roles
   getAllUserRoles: async (): Promise<UserRoleDto[]> => {
     try {
-      console.log('Fetching user roles from:', `${API_BASE_URL}/user-roles`);
-      const response = await axios.get<ApiResponse>(`${API_BASE_URL}/user-roles`);
+      console.log('Fetching user roles from:', getApiUrl(API_CONFIG.ENDPOINTS.USER_ROLES));
+      const response = await axios.get<ApiResponse>(getApiUrl(API_CONFIG.ENDPOINTS.USER_ROLES));
       console.log('API Response:', response.data);
       
       if (response.data.success) {
@@ -29,7 +28,7 @@ export const userRoleService = {
   // Create new user role
   createUserRole: async (roleData: CreateUserRoleDto): Promise<UserRoleDto> => {
     try {
-      const response = await axios.post<ApiResponse>(`${API_BASE_URL}/user-roles`, roleData);
+      const response = await axios.post<ApiResponse>(getApiUrl(API_CONFIG.ENDPOINTS.USER_ROLES), roleData);
       if (response.data.success) {
         return response.data.data;
       }
@@ -44,7 +43,7 @@ export const userRoleService = {
   updateUserRole: async (roleNr: string, roleData: UpdateUserRoleDto): Promise<void> => {
     try {
       const response = await axios.put<ApiResponse>(
-        `${API_BASE_URL}/user-roles?roleNr=${encodeURIComponent(roleNr)}`,
+        `${getApiUrl(API_CONFIG.ENDPOINTS.USER_ROLES)}?roleNr=${encodeURIComponent(roleNr)}`,
         roleData
       );
       if (!response.data.success) {
@@ -60,7 +59,7 @@ export const userRoleService = {
   deleteUserRole: async (roleNr: string): Promise<void> => {
     try {
       const response = await axios.delete<ApiResponse>(
-        `${API_BASE_URL}/user-roles?roleNr=${encodeURIComponent(roleNr)}`
+        `${getApiUrl(API_CONFIG.ENDPOINTS.USER_ROLES)}?roleNr=${encodeURIComponent(roleNr)}`
       );
       if (!response.data.success) {
         throw new Error(response.data.error || 'Failed to delete user role');

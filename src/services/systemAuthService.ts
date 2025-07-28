@@ -7,7 +7,7 @@ import {
   SystemAuthResponse 
 } from '@/lib/dto/systemAuth.dto';
 
-const API_BASE_URL = '/api';
+import { API_CONFIG, getApiUrl } from '@/config/api';
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('auth_token');
@@ -21,7 +21,7 @@ export const systemAuthService = {
   // Get all systems for dropdown
   async getSystems(): Promise<SystemAuthDto[]> {
     try {
-      const response = await axios.get(`${API_BASE_URL}/system-auth/systems`, {
+      const response = await axios.get(`${getApiUrl(API_CONFIG.ENDPOINTS.SYSTEM_AUTH)}/systems`, {
         headers: getAuthHeaders()
       });
       
@@ -39,7 +39,7 @@ export const systemAuthService = {
   // Get all authorization descriptions
   async getAuthDescriptions(): Promise<AuthDescriptionDto[]> {
     try {
-      const response = await axios.get(`${API_BASE_URL}/system-auth/auth-descriptions`, {
+      const response = await axios.get(`${getApiUrl(API_CONFIG.ENDPOINTS.SYSTEM_AUTH)}/auth-descriptions`, {
         headers: getAuthHeaders()
       });
       
@@ -57,7 +57,7 @@ export const systemAuthService = {
   // Get system's current authorizations
   async getSystemAuthorizations(systemId: number): Promise<SystemAuthAssignmentDto[]> {
     try {
-      const response = await axios.get(`${API_BASE_URL}/system-auth/system-authorizations/${systemId}`, {
+      const response = await axios.get(`${getApiUrl(API_CONFIG.ENDPOINTS.SYSTEM_AUTH)}/system-authorizations/${systemId}`, {
         headers: getAuthHeaders()
       });
       
@@ -75,7 +75,7 @@ export const systemAuthService = {
   // Update system authorizations
   async updateSystemAuthorizations(systemAuthRequest: SystemAuthRequest): Promise<void> {
     try {
-      const response = await axios.post(`${API_BASE_URL}/system-auth/update`, systemAuthRequest, {
+      const response = await axios.post(`${getApiUrl(API_CONFIG.ENDPOINTS.SYSTEM_AUTH)}/update`, systemAuthRequest, {
         headers: getAuthHeaders()
       });
       

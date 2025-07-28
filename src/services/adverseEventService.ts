@@ -1,9 +1,7 @@
 
 import axios from 'axios';
 import { CreateAdverseEventDto, UpdateAdverseEventDto, AdverseEventDto, ApiResponse } from '@/lib/dto/adverseEvent.dto';
-
-// Use local API endpoints that proxy to Supabase
-const API_BASE_URL = '/api';
+import { API_CONFIG, getApiUrl } from '@/config/api';
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('auth_token');
@@ -17,8 +15,8 @@ export const adverseEventService = {
   // Get all adverse events
   getAllAdverseEvents: async (): Promise<AdverseEventDto[]> => {
     try {
-      console.log('Fetching adverse events from:', `${API_BASE_URL}/adverse-events`);
-      const response = await axios.get<ApiResponse>(`${API_BASE_URL}/adverse-events`, {
+      console.log('Fetching adverse events from:', getApiUrl(API_CONFIG.ENDPOINTS.ADVERSE_EVENTS));
+      const response = await axios.get<ApiResponse>(getApiUrl(API_CONFIG.ENDPOINTS.ADVERSE_EVENTS), {
         headers: getAuthHeaders()
       });
       console.log('API Response:', response.data);
@@ -40,7 +38,7 @@ export const adverseEventService = {
   // Create new adverse event
   createAdverseEvent: async (eventData: CreateAdverseEventDto): Promise<AdverseEventDto> => {
     try {
-      const response = await axios.post<ApiResponse>(`${API_BASE_URL}/adverse-events`, eventData, {
+      const response = await axios.post<ApiResponse>(getApiUrl(API_CONFIG.ENDPOINTS.ADVERSE_EVENTS), eventData, {
         headers: getAuthHeaders()
       });
       if (response.data.success) {
@@ -57,7 +55,7 @@ export const adverseEventService = {
   updateAdverseEvent: async (eventId: number, eventData: UpdateAdverseEventDto): Promise<void> => {
     try {
       const response = await axios.put<ApiResponse>(
-        `${API_BASE_URL}/adverse-events?id=${eventId}`,
+        `${getApiUrl(API_CONFIG.ENDPOINTS.ADVERSE_EVENTS)}?id=${eventId}`,
         eventData,
         {
           headers: getAuthHeaders()
@@ -76,7 +74,7 @@ export const adverseEventService = {
   deleteAdverseEvent: async (eventId: number): Promise<void> => {
     try {
       const response = await axios.delete<ApiResponse>(
-        `${API_BASE_URL}/adverse-events?id=${eventId}`,
+        `${getApiUrl(API_CONFIG.ENDPOINTS.ADVERSE_EVENTS)}?id=${eventId}`,
         {
           headers: getAuthHeaders()
         }
@@ -94,7 +92,7 @@ export const adverseEventService = {
   deleteMultipleAdverseEvents: async (eventIds: number[]): Promise<void> => {
     try {
       const response = await axios.delete<ApiResponse>(
-        `${API_BASE_URL}/adverse-events?ids=${eventIds.join(',')}`,
+        `${getApiUrl(API_CONFIG.ENDPOINTS.ADVERSE_EVENTS)}?ids=${eventIds.join(',')}`,
         {
           headers: getAuthHeaders()
         }

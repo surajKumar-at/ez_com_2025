@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { LoginRequestDto, UserSessionDto } from '@/lib/dto/user.dto';
-
-const API_BASE_URL = '/api';
+import { API_CONFIG, getApiUrl } from '@/config/api';
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('auth_token');
@@ -90,9 +89,9 @@ export const authService = {
     try {
       console.log('🔐 Attempting login for:', data.email);
       console.log('🌐 Current location:', window.location.href);
-      console.log('📡 API Base URL:', API_BASE_URL);
+      console.log('📡 API Base URL:', API_CONFIG.BASE_URL);
       
-      const loginUrl = `${API_BASE_URL}/auth-login`;
+      const loginUrl = getApiUrl(API_CONFIG.ENDPOINTS.AUTH_LOGIN);
       console.log('🎯 Login URL:', loginUrl);
       
       const requestData = {
@@ -136,7 +135,7 @@ export const authService = {
     try {
       console.log('📝 Attempting signup for:', data.email);
       
-      const response = await axios.post(`${API_BASE_URL}/auth-signup`, data);
+      const response = await axios.post(getApiUrl(API_CONFIG.ENDPOINTS.AUTH_SIGNUP), data);
       
       console.log('✅ Signup response:', response.data);
       
@@ -155,7 +154,7 @@ export const authService = {
     try {
       console.log('🔓 Attempting logout');
       
-      const response = await axios.post(`${API_BASE_URL}/auth-logout`, {}, {
+      const response = await axios.post(getApiUrl(API_CONFIG.ENDPOINTS.AUTH_LOGOUT), {}, {
         headers: getAuthHeaders()
       });
       
@@ -176,7 +175,7 @@ export const authService = {
     try {
       console.log('🔍 Checking current session');
       
-      const response = await axios.get(`${API_BASE_URL}/auth-session`, {
+      const response = await axios.get(getApiUrl(API_CONFIG.ENDPOINTS.AUTH_SESSION), {
         headers: getAuthHeaders()
       });
       

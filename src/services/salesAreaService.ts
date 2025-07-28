@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { CreateSalesAreaDto, SalesArea, SalesAreaResponse } from '@/lib/dto/salesArea.dto';
-
-const API_BASE_URL = '/api';
+import { API_CONFIG, getApiUrl } from '@/config/api';
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('auth_token');
@@ -14,7 +13,7 @@ const getAuthHeaders = () => {
 export const salesAreaService = {
   getSalesAreas: async (): Promise<SalesArea[]> => {
     try {
-      const response = await axios.get<SalesAreaResponse>(`${API_BASE_URL}/sales-areas`, {
+      const response = await axios.get<SalesAreaResponse>(getApiUrl(API_CONFIG.ENDPOINTS.SALES_AREAS), {
         headers: getAuthHeaders()
       });
       
@@ -30,7 +29,7 @@ export const salesAreaService = {
 
   createSalesArea: async (salesAreaData: CreateSalesAreaDto): Promise<SalesArea> => {
     try {
-      const response = await axios.post<SalesAreaResponse>(`${API_BASE_URL}/sales-areas`, salesAreaData, {
+      const response = await axios.post<SalesAreaResponse>(getApiUrl(API_CONFIG.ENDPOINTS.SALES_AREAS), salesAreaData, {
         headers: getAuthHeaders()
       });
       
@@ -46,7 +45,7 @@ export const salesAreaService = {
 
   updateSalesArea: async (salesAreaData: CreateSalesAreaDto & { eskd_sys_no: number }): Promise<SalesArea> => {
     try {
-      const response = await axios.put<SalesAreaResponse>(`${API_BASE_URL}/sales-areas`, salesAreaData, {
+      const response = await axios.put<SalesAreaResponse>(getApiUrl(API_CONFIG.ENDPOINTS.SALES_AREAS), salesAreaData, {
         headers: getAuthHeaders()
       });
       

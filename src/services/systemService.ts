@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { CreateSystemDto, System, SystemResponse, SystemType, SystemTypeResponse } from '@/lib/dto/system.dto';
-
-const API_BASE_URL = '/api';
+import { API_CONFIG, getApiUrl } from '@/config/api';
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('auth_token');
@@ -15,7 +14,7 @@ const getAuthHeaders = () => {
 export const systemService = {
   getSystems: async (): Promise<System[]> => {
     try {
-      const response = await axios.get<SystemResponse>(`${API_BASE_URL}/systems`, {
+      const response = await axios.get<SystemResponse>(getApiUrl(API_CONFIG.ENDPOINTS.SYSTEMS), {
         headers: getAuthHeaders()
       });
       
@@ -31,7 +30,7 @@ export const systemService = {
 
   createSystem: async (systemData: CreateSystemDto): Promise<System> => {
     try {
-      const response = await axios.post<SystemResponse>(`${API_BASE_URL}/systems`, systemData, {
+      const response = await axios.post<SystemResponse>(getApiUrl(API_CONFIG.ENDPOINTS.SYSTEMS), systemData, {
         headers: getAuthHeaders()
       });
       
@@ -47,7 +46,7 @@ export const systemService = {
 
   deleteSystems: async (systemIds: number[]): Promise<void> => {
     try {
-      const response = await axios.delete<SystemResponse>(`${API_BASE_URL}/systems?ids=${systemIds.join(',')}`, {
+      const response = await axios.delete<SystemResponse>(`${getApiUrl(API_CONFIG.ENDPOINTS.SYSTEMS)}?ids=${systemIds.join(',')}`, {
         headers: getAuthHeaders()
       });
       
@@ -62,7 +61,7 @@ export const systemService = {
 
   getSystemTypes: async (): Promise<SystemType[]> => {
     try {
-      const response = await axios.get<SystemTypeResponse>(`${API_BASE_URL}/system-types`, {
+      const response = await axios.get<SystemTypeResponse>(getApiUrl(API_CONFIG.ENDPOINTS.SYSTEM_TYPES), {
         headers: getAuthHeaders()
       });
       
