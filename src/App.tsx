@@ -35,8 +35,9 @@ const AppContent = () => {
   return (
     <BrowserRouter>
       <Routes>
-          <Route path="/" element={<Auth />} />
-          <Route path="/index" element={<Index />} />
+        <Route path="/" element={<Auth />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/index" element={<Index />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/config/user-roles" element={
             <AdminLayout>
