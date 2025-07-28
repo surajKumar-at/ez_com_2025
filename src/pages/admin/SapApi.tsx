@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import axios from 'axios';
 import { Loader2, Search } from 'lucide-react';
 
+import { API_CONFIG, getApiUrl } from '@/config/api';
 
 const SapApi: React.FC = () => {
   const { toast } = useToast();
@@ -27,7 +28,7 @@ const SapApi: React.FC = () => {
     if (!sapDate || !sapDate.includes('/Date(')) {
       return sapDate;
     }
-    
+
     try {
       const timestamp = sapDate.match(/\/Date\((\d+)/)?.[1];
       if (timestamp) {
@@ -43,7 +44,7 @@ const SapApi: React.FC = () => {
     } catch (error) {
       console.error('Error converting date:', error);
     }
-    
+
     return sapDate;
   };
 
@@ -76,9 +77,39 @@ const SapApi: React.FC = () => {
     }));
   };
 
+  const checkCustomerExists = async (soldTo: string) => {
+    try {
+      const url = getApiUrl(API_CONFIG.ENDPOINTS.CHECK_CUSTOMER_EXISTS);
+      console.log('[SAP] Checking customer exists:', url, soldTo);
+
+      const response = await axios.post(url, { soldTo });
+      console.log('[SAP] Check exists response:', response.data);
+
+      return response.data;
+    } catch (error: any) {
+      console.error('[SAP] Check exists error:', error);
+      throw error;
+    }
+  };
+
+  const fetchBusinessPartner = async (form: typeof formData) => {
+    try {
+      const url = getApiUrl(API_CONFIG.ENDPOINTS.SAP_BUSINESS_PARTNER);
+      console.log('[SAP] Fetching business partner:', url, form);
+
+      const response = await axios.post(url, form);
+      console.log('[SAP] Fetch response:', response.data);
+
+      return response.data;
+    } catch (error: any) {
+      console.error('[SAP] Fetch error:', error);
+      throw error;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.soldTo.trim()) {
       toast({
         title: 'Error',
@@ -94,13 +125,9 @@ const SapApi: React.FC = () => {
     setCustomerExists(false);
 
     try {
-      // First check if customer already exists using edge function
-      const checkResponse = await axios.post('/api/check-customer-exists', {
-        soldTo: formData.soldTo
-      });
-      
-      const checkResult = checkResponse.data;
-      
+      // Check if customer exists first
+      const checkResult = await checkCustomerExists(formData.soldTo);
+
       if (!checkResult.success) {
         throw new Error(checkResult.error || 'Failed to check existing customer');
       }
@@ -115,10 +142,9 @@ const SapApi: React.FC = () => {
         return;
       }
 
-      // If customer doesn't exist, fetch from SAP
-      const response = await axios.post('/api/sap-business-partner', formData);
-      const result = response.data;
-      
+      // Fetch business partner data from SAP
+      const result = await fetchBusinessPartner(formData);
+
       if (result.success && result.data) {
         setBusinessPartnerData(result.data);
         toast({
@@ -135,7 +161,7 @@ const SapApi: React.FC = () => {
       }
     } catch (error: any) {
       console.error('Error fetching customer:', error);
-      const errorMessage = error.response?.data?.error || 'An error occurred while fetching customer data';
+      const errorMessage = error.response?.data?.error || error.message || 'An error occurred while fetching customer data';
       setError(errorMessage);
       toast({
         title: 'Error',
@@ -157,7 +183,7 @@ const SapApi: React.FC = () => {
     }
 
     const results = data.d.results;
-    
+
     return (
       <div className="space-y-6">
         {results.map((partner: any, index: number) => (
@@ -169,7 +195,7 @@ const SapApi: React.FC = () => {
                 </h3>
               </div>
             )}
-            
+
             {partner.to_BusinessPartnerAddress?.results && (
               <div>
                 <h4 className="text-md font-medium mb-3">Customer Information</h4>
@@ -182,16 +208,16 @@ const SapApi: React.FC = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {partner.to_BusinessPartnerAddress.results.map((address: any) => (
+                      {partner.to_BusinessPartnerAddress.results.map((address: any) =>
                         displayFields.map((field) => {
                           const value = address[field];
                           if (value !== null && value !== undefined && value !== '' && value !== false) {
-                            const displayValue = (field === 'ValidityStartDate' || field === 'ValidityEndDate') 
+                            const displayValue = (field === 'ValidityStartDate' || field === 'ValidityEndDate')
                               ? convertSapDate(String(value))
                               : String(value);
-                            
+
                             return (
-                              <TableRow key={field}>
+                              <TableRow key={`${field}-${address.AddressID}`}>
                                 <TableCell className="font-medium">
                                   {field.replace(/([A-Z])/g, ' $1').trim()}
                                 </TableCell>
@@ -201,7 +227,7 @@ const SapApi: React.FC = () => {
                           }
                           return null;
                         })
-                      ))}
+                      )}
                     </TableBody>
                   </Table>
                 </div>
@@ -241,9 +267,10 @@ const SapApi: React.FC = () => {
                   onChange={handleInputChange}
                   placeholder="Enter Sold To"
                   required
+                  autoComplete="off"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="salesOrg">Sales Organization</Label>
                 <Input
@@ -252,9 +279,10 @@ const SapApi: React.FC = () => {
                   value={formData.salesOrg}
                   onChange={handleInputChange}
                   placeholder="Enter Sales Org"
+                  autoComplete="off"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="division">Division</Label>
                 <Input
@@ -263,9 +291,10 @@ const SapApi: React.FC = () => {
                   value={formData.division}
                   onChange={handleInputChange}
                   placeholder="Enter Division"
+                  autoComplete="off"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="distributionChannel">Distribution Channel</Label>
                 <Input
@@ -274,10 +303,11 @@ const SapApi: React.FC = () => {
                   value={formData.distributionChannel}
                   onChange={handleInputChange}
                   placeholder="Enter Distribution Channel"
+                  autoComplete="off"
                 />
               </div>
             </div>
-            
+
             <Button type="submit" disabled={isLoading} className="flex items-center gap-2">
               {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
               Search Customer

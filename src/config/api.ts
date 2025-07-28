@@ -25,7 +25,8 @@ export const API_CONFIG = {
     USERS: '/users',
     USER_ROLES: '/user-roles',
     ADVERSE_EVENTS: '/adverse-events',
-    SITE_DEFAULTS: '/site-defaults'
+    SITE_DEFAULTS: '/site-defaults',
+    CHECK_CUSTOMER_EXISTS: '/check-customer-exists'
   }
 };
 
