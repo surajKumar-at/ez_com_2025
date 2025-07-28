@@ -1,16 +1,23 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Plus, Edit2, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Plus, Edit2, MapPin } from 'lucide-react';
 import { salesAreaService } from '@/services/salesAreaService';
 import { systemService } from '@/services/systemService';
 import { SalesArea, CreateSalesAreaDto } from '@/lib/dto/salesArea.dto';
@@ -29,6 +36,7 @@ export default function SalesAreas() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingSalesArea, setEditingSalesArea] = useState<SalesArea | null>(null);
 
+  // Form state
   const [formData, setFormData] = useState<CreateSalesAreaDto>({
     systemNo: 0,
     code: '',
@@ -36,6 +44,14 @@ export default function SalesAreas() {
     description: '',
     synchronizable: 'N'
   });
+
+  // Validation error states for create and edit forms
+  const [formErrors, setFormErrors] = useState<{
+    systemNo?: string;
+    code?: string;
+    language?: string;
+    description?: string;
+  }>({});
 
   const languages = [
     { value: 'EN', label: 'English' },
@@ -87,11 +103,51 @@ export default function SalesAreas() {
     }
   };
 
+  const validateForm = (): boolean => {
+    const errors: typeof formErrors = {};
+
+    if (!formData.systemNo || formData.systemNo === 0) {
+      errors.systemNo = 'Please select a system';
+    }
+    if (!formData.code.trim()) {
+      errors.code = 'Code is required';
+    }
+    if (!formData.language.trim()) {
+      errors.language = 'Language is required';
+    }
+    if (!formData.description.trim()) {
+      errors.description = 'Description is required';
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const resetForm = () => {
+    setFormData({
+      systemNo: 0,
+      code: '',
+      language: '',
+      description: '',
+      synchronizable: 'N'
+    });
+    setFormErrors({});
+  };
+
   const handleCreateSalesArea = async () => {
+    if (!validateForm()) {
+      toast({
+        title: t('common.error'),
+        description: 'Please fix the validation errors before submitting.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       await salesAreaService.createSalesArea(formData);
-      
+
       toast({
         title: t('common.success'),
         description: 'Sales area created successfully'
@@ -112,6 +168,15 @@ export default function SalesAreas() {
   };
 
   const handleUpdateSalesArea = async () => {
+    if (!validateForm()) {
+      toast({
+        title: t('common.error'),
+        description: 'Please fix the validation errors before submitting.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     if (!editingSalesArea) return;
 
     try {
@@ -120,7 +185,7 @@ export default function SalesAreas() {
         ...formData,
         eskd_sys_no: editingSalesArea.eskd_sys_no
       });
-      
+
       toast({
         title: t('common.success'),
         description: 'Sales area updated successfully'
@@ -141,25 +206,16 @@ export default function SalesAreas() {
     }
   };
 
-  const resetForm = () => {
-    setFormData({
-      systemNo: 0,
-      code: '',
-      language: '',
-      description: '',
-      synchronizable: 'N'
-    });
-  };
-
   const handleEdit = (salesArea: SalesArea) => {
     setEditingSalesArea(salesArea);
     setFormData({
       systemNo: salesArea.eskd_sys_no,
       code: salesArea.eskd_sys_key,
-      language: 'EN', // Default since language info is not in the table
+      language: 'EN', // default or adjust accordingly if language is available
       description: salesArea.eskd_sys_key_desc,
       synchronizable: salesArea.eskd_sync_flag
     });
+    setFormErrors({});
     setIsEditDialogOpen(true);
   };
 
@@ -181,7 +237,7 @@ export default function SalesAreas() {
             <p className="text-sm text-muted-foreground">Manage sales area configurations</p>
           </div>
         </div>
-        
+
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button className="flex items-center gap-2">
@@ -194,66 +250,98 @@ export default function SalesAreas() {
               <DialogTitle>Create Sales Area</DialogTitle>
               <DialogDescription>Add a new sales area configuration</DialogDescription>
             </DialogHeader>
-            
+
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="system">System *</Label>
-                <Select 
-                  value={formData.systemNo.toString()} 
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, systemNo: parseInt(value) }))}
+                <Select
+                  value={formData.systemNo.toString()}
+                  onValueChange={(value) => {
+                    setFormData(prev => ({ ...prev, systemNo: parseInt(value) }));
+                    if (formErrors.systemNo) {
+                      setFormErrors(prev => ({ ...prev, systemNo: undefined }));
+                    }
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="--Select System--" />
                   </SelectTrigger>
                   <SelectContent>
-                    {systems.map((system) => (
+                    {systems.map(system => (
                       <SelectItem key={system.esd_sys_no} value={system.esd_sys_no.toString()}>
                         {system.esd_sys_no} - {system.esd_sys_desc}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {formErrors.systemNo && (
+                  <p className="text-destructive text-sm mt-1">{formErrors.systemNo}</p>
+                )}
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="code">Code *</Label>
                 <Input
                   id="code"
                   value={formData.code}
-                  onChange={(e) => setFormData(prev => ({ ...prev, code: e.target.value }))}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, code: e.target.value }));
+                    if (formErrors.code) {
+                      setFormErrors(prev => ({ ...prev, code: undefined }));
+                    }
+                  }}
                   placeholder="Enter sales area code"
                 />
+                {formErrors.code && (
+                  <p className="text-destructive text-sm mt-1">{formErrors.code}</p>
+                )}
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="language">Language *</Label>
-                <Select 
-                  value={formData.language} 
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, language: value }))}
+                <Select
+                  value={formData.language}
+                  onValueChange={(value) => {
+                    setFormData(prev => ({ ...prev, language: value }));
+                    if (formErrors.language) {
+                      setFormErrors(prev => ({ ...prev, language: undefined }));
+                    }
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select language" />
                   </SelectTrigger>
                   <SelectContent>
-                    {languages.map((lang) => (
+                    {languages.map(lang => (
                       <SelectItem key={lang.value} value={lang.value}>
                         {lang.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {formErrors.language && (
+                  <p className="text-destructive text-sm mt-1">{formErrors.language}</p>
+                )}
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="description">Description *</Label>
                 <Input
                   id="description"
                   value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, description: e.target.value }));
+                    if (formErrors.description) {
+                      setFormErrors(prev => ({ ...prev, description: undefined }));
+                    }
+                  }}
                   placeholder="Enter description"
                 />
+                {formErrors.description && (
+                  <p className="text-destructive text-sm mt-1">{formErrors.description}</p>
+                )}
               </div>
-              
+
               <div className="space-y-2">
                 <Label>Synchronizable</Label>
                 <RadioGroup
@@ -272,10 +360,10 @@ export default function SalesAreas() {
                 </RadioGroup>
               </div>
             </div>
-            
+
             <DialogFooter>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => {
                   setIsCreateDialogOpen(false);
                   resetForm();
@@ -380,66 +468,98 @@ export default function SalesAreas() {
             <DialogTitle>Edit Sales Area</DialogTitle>
             <DialogDescription>Update sales area configuration</DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="edit-system">System *</Label>
-              <Select 
-                value={formData.systemNo.toString()} 
-                onValueChange={(value) => setFormData(prev => ({ ...prev, systemNo: parseInt(value) }))}
+              <Select
+                value={formData.systemNo.toString()}
+                onValueChange={(value) => {
+                  setFormData(prev => ({ ...prev, systemNo: parseInt(value) }));
+                  if (formErrors.systemNo) {
+                    setFormErrors(prev => ({ ...prev, systemNo: undefined }));
+                  }
+                }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="--Select System--" />
                 </SelectTrigger>
                 <SelectContent>
-                  {systems.map((system) => (
+                  {systems.map(system => (
                     <SelectItem key={system.esd_sys_no} value={system.esd_sys_no.toString()}>
                       {system.esd_sys_no} - {system.esd_sys_desc}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              {formErrors.systemNo && (
+                <p className="text-destructive text-sm mt-1">{formErrors.systemNo}</p>
+              )}
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="edit-code">Code *</Label>
               <Input
                 id="edit-code"
                 value={formData.code}
-                onChange={(e) => setFormData(prev => ({ ...prev, code: e.target.value }))}
+                onChange={(e) => {
+                  setFormData(prev => ({ ...prev, code: e.target.value }));
+                  if (formErrors.code) {
+                    setFormErrors(prev => ({ ...prev, code: undefined }));
+                  }
+                }}
                 placeholder="Enter sales area code"
               />
+              {formErrors.code && (
+                <p className="text-destructive text-sm mt-1">{formErrors.code}</p>
+              )}
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="edit-language">Language *</Label>
-              <Select 
-                value={formData.language} 
-                onValueChange={(value) => setFormData(prev => ({ ...prev, language: value }))}
+              <Select
+                value={formData.language}
+                onValueChange={(value) => {
+                  setFormData(prev => ({ ...prev, language: value }));
+                  if (formErrors.language) {
+                    setFormErrors(prev => ({ ...prev, language: undefined }));
+                  }
+                }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select language" />
                 </SelectTrigger>
                 <SelectContent>
-                  {languages.map((lang) => (
+                  {languages.map(lang => (
                     <SelectItem key={lang.value} value={lang.value}>
                       {lang.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              {formErrors.language && (
+                <p className="text-destructive text-sm mt-1">{formErrors.language}</p>
+              )}
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="edit-description">Description *</Label>
               <Input
                 id="edit-description"
                 value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                onChange={(e) => {
+                  setFormData(prev => ({ ...prev, description: e.target.value }));
+                  if (formErrors.description) {
+                    setFormErrors(prev => ({ ...prev, description: undefined }));
+                  }
+                }}
                 placeholder="Enter description"
               />
+              {formErrors.description && (
+                <p className="text-destructive text-sm mt-1">{formErrors.description}</p>
+              )}
             </div>
-            
+
             <div className="space-y-2">
               <Label>Synchronizable</Label>
               <RadioGroup
@@ -458,10 +578,10 @@ export default function SalesAreas() {
               </RadioGroup>
             </div>
           </div>
-          
+
           <DialogFooter>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => {
                 setIsEditDialogOpen(false);
                 setEditingSalesArea(null);
