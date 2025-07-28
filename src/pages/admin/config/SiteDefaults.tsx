@@ -29,6 +29,17 @@ export default function SiteDefaults() {
     eudd_default_type: '1',
   });
 
+  // Validation error states for create form
+  const [createFormErrors, setCreateFormErrors] = useState<{
+    eudd_key?: string;
+    eudd_defaults_desc?: string;
+  }>({});
+
+  // Validation error states for edit form
+  const [editFormErrors, setEditFormErrors] = useState<{
+    eudd_defaults_desc?: string;
+  }>({});
+
   useEffect(() => {
     fetchSiteDefaults();
   }, []);
@@ -51,7 +62,43 @@ export default function SiteDefaults() {
     }
   };
 
+  // Validation for Create form
+  const validateCreateForm = (): boolean => {
+    const errors: { eudd_key?: string; eudd_defaults_desc?: string } = {};
+
+    if (!formData.eudd_key.trim()) {
+      errors.eudd_key = 'Default Key is required'; // You can use t('...') for i18n here
+    }
+    if (!formData.eudd_defaults_desc.trim()) {
+      errors.eudd_defaults_desc = 'Description is required';
+    }
+
+    setCreateFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  // Validation for Edit form
+  const validateEditForm = (): boolean => {
+    const errors: { eudd_defaults_desc?: string } = {};
+
+    if (!formData.eudd_defaults_desc.trim()) {
+      errors.eudd_defaults_desc = 'Description is required';
+    }
+
+    setEditFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleCreate = async () => {
+    if (!validateCreateForm()) {
+      toast({
+        title: t('common.error'),
+        description: 'Please fix validation errors before submitting.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
       const response = await siteDefaultsService.create(formData);
       if (response.success) {
@@ -67,6 +114,7 @@ export default function SiteDefaults() {
           eudd_lang: 'EN',
           eudd_default_type: '1',
         });
+        setCreateFormErrors({});
         fetchSiteDefaults();
       }
     } catch (error) {
@@ -88,10 +136,20 @@ export default function SiteDefaults() {
       eudd_default_type: siteDefault.eudd_default_type,
       eudd_is_master: siteDefault.eudd_is_master,
     });
+    setEditFormErrors({});
     setIsEditDialogOpen(true);
   };
 
   const handleUpdate = async () => {
+    if (!validateEditForm()) {
+      toast({
+        title: t('common.error'),
+        description: 'Please fix validation errors before submitting.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     if (!editingSiteDefault) return;
 
     try {
@@ -110,6 +168,7 @@ export default function SiteDefaults() {
         setIsEditDialogOpen(false);
         setEditingSiteDefault(null);
         fetchSiteDefaults();
+        setEditFormErrors({});
       }
     } catch (error) {
       toast({
@@ -175,23 +234,43 @@ export default function SiteDefaults() {
                   <Label htmlFor="key" className="text-right">
                     Default Key
                   </Label>
-                  <Input
-                    id="key"
-                    value={formData.eudd_key}
-                    onChange={(e) => setFormData({ ...formData, eudd_key: e.target.value })}
-                    className="col-span-3"
-                  />
+                  <div className="col-span-3 flex flex-col">
+                    <Input
+                      id="key"
+                      value={formData.eudd_key}
+                      onChange={(e) => {
+                        setFormData({ ...formData, eudd_key: e.target.value });
+                        // Clear error on input change
+                        if (createFormErrors.eudd_key) {
+                          setCreateFormErrors((prev) => ({ ...prev, eudd_key: undefined }));
+                        }
+                      }}
+                    />
+                    {createFormErrors.eudd_key && (
+                      <p className="text-destructive text-sm mt-1">{createFormErrors.eudd_key}</p>
+                    )}
+                  </div>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="description" className="text-right">
                     Description
                   </Label>
-                  <Input
-                    id="description"
-                    value={formData.eudd_defaults_desc}
-                    onChange={(e) => setFormData({ ...formData, eudd_defaults_desc: e.target.value })}
-                    className="col-span-3"
-                  />
+                  <div className="col-span-3 flex flex-col">
+                    <Input
+                      id="description"
+                      value={formData.eudd_defaults_desc}
+                      onChange={(e) => {
+                        setFormData({ ...formData, eudd_defaults_desc: e.target.value });
+                        // Clear error on input change
+                        if (createFormErrors.eudd_defaults_desc) {
+                          setCreateFormErrors((prev) => ({ ...prev, eudd_defaults_desc: undefined }));
+                        }
+                      }}
+                    />
+                    {createFormErrors.eudd_defaults_desc && (
+                      <p className="text-destructive text-sm mt-1">{createFormErrors.eudd_defaults_desc}</p>
+                    )}
+                  </div>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="defaultLevel" className="text-right">
@@ -200,8 +279,9 @@ export default function SiteDefaults() {
                   <Select
                     value={formData.eudd_default_type}
                     onValueChange={(value) => setFormData({ ...formData, eudd_default_type: value })}
+                    className="col-span-3"
                   >
-                    <SelectTrigger className="col-span-3">
+                    <SelectTrigger>
                       <SelectValue placeholder="Select default level" />
                     </SelectTrigger>
                     <SelectContent>
@@ -220,8 +300,9 @@ export default function SiteDefaults() {
                   <Select
                     value={formData.eudd_lang}
                     onValueChange={(value) => setFormData({ ...formData, eudd_lang: value })}
+                    className="col-span-3"
                   >
-                    <SelectTrigger className="col-span-3">
+                    <SelectTrigger>
                       <SelectValue placeholder="Select language" />
                     </SelectTrigger>
                     <SelectContent>
@@ -315,12 +396,21 @@ export default function SiteDefaults() {
                 <Label htmlFor="edit-description" className="text-right">
                   Description
                 </Label>
-                <Input
-                  id="edit-description"
-                  value={formData.eudd_defaults_desc}
-                  onChange={(e) => setFormData({ ...formData, eudd_defaults_desc: e.target.value })}
-                  className="col-span-3"
-                />
+                <div className="col-span-3 flex flex-col">
+                  <Input
+                    id="edit-description"
+                    value={formData.eudd_defaults_desc}
+                    onChange={(e) => {
+                      setFormData({ ...formData, eudd_defaults_desc: e.target.value });
+                      if (editFormErrors.eudd_defaults_desc) {
+                        setEditFormErrors((prev) => ({ ...prev, eudd_defaults_desc: undefined }));
+                      }
+                    }}
+                  />
+                  {editFormErrors.eudd_defaults_desc && (
+                    <p className="text-destructive text-sm mt-1">{editFormErrors.eudd_defaults_desc}</p>
+                  )}
+                </div>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="edit-defaultLevel" className="text-right">
@@ -329,8 +419,9 @@ export default function SiteDefaults() {
                 <Select
                   value={formData.eudd_default_type}
                   onValueChange={(value) => setFormData({ ...formData, eudd_default_type: value })}
+                  className="col-span-3"
                 >
-                  <SelectTrigger className="col-span-3">
+                  <SelectTrigger>
                     <SelectValue placeholder="Select default level" />
                   </SelectTrigger>
                   <SelectContent>
@@ -349,8 +440,9 @@ export default function SiteDefaults() {
                 <Select
                   value={formData.eudd_lang}
                   onValueChange={(value) => setFormData({ ...formData, eudd_lang: value })}
+                  className="col-span-3"
                 >
-                  <SelectTrigger className="col-span-3">
+                  <SelectTrigger>
                     <SelectValue placeholder="Select language" />
                   </SelectTrigger>
                   <SelectContent>
