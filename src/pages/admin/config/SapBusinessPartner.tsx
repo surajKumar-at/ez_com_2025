@@ -342,10 +342,71 @@ const SapBusinessPartner: React.FC = () => {
                         <div className="text-red-600 bg-red-50 p-3 rounded-md">
                           <strong>Error:</strong> {partnerResult.error}
                         </div>
-                      ) : partnerResult.data?.d?.results ? (
-                        <div>
-                          <h6 className="font-medium mb-2 text-gray-700">Business Partner Details:</h6>
-                          {renderDataTable(partnerResult.data.d.results)}
+                      ) : partnerResult.data?.d?.results && partnerResult.data.d.results.length > 0 ? (
+                        <div className="space-y-4">
+                          {partnerResult.data.d.results.map((bpData: any, bpIndex: number) => (
+                            <div key={bpIndex} className="space-y-3">
+                              {/* Business Partner Name */}
+                              {bpData.BusinessPartnerFullName && (
+                                <div className="bg-blue-50 p-3 rounded-md">
+                                  <h6 className="font-medium text-blue-800">Business Partner Name:</h6>
+                                  <p className="text-blue-700">{bpData.BusinessPartnerFullName}</p>
+                                </div>
+                              )}
+                              
+                              {/* Address Information */}
+                              {bpData.to_BusinessPartnerAddress?.results && bpData.to_BusinessPartnerAddress.results.length > 0 ? (
+                                <div>
+                                  <h6 className="font-medium mb-2 text-gray-700">Address Information:</h6>
+                                  <div className="space-y-2">
+                                    {bpData.to_BusinessPartnerAddress.results.map((address: any, addressIndex: number) => (
+                                      <div key={addressIndex} className="bg-gray-50 p-3 rounded-md border">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                                          {address.AddressID && (
+                                            <div><strong>Address ID:</strong> {address.AddressID}</div>
+                                          )}
+                                          {address.Country && (
+                                            <div><strong>Country:</strong> {address.Country}</div>
+                                          )}
+                                          {address.Region && (
+                                            <div><strong>Region:</strong> {address.Region}</div>
+                                          )}
+                                          {address.CityName && (
+                                            <div><strong>City:</strong> {address.CityName}</div>
+                                          )}
+                                          {address.PostalCode && (
+                                            <div><strong>Postal Code:</strong> {address.PostalCode}</div>
+                                          )}
+                                          {address.StreetName && (
+                                            <div><strong>Street:</strong> {address.StreetName}</div>
+                                          )}
+                                          {address.HouseNumber && (
+                                            <div><strong>House Number:</strong> {address.HouseNumber}</div>
+                                          )}
+                                        </div>
+                                        
+                                        {/* Show all address fields in a table for complete data */}
+                                        <div className="mt-3">
+                                          <div className="font-medium text-xs text-gray-600">Complete Address Data:</div>
+                                          {renderDataTable([address])}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="text-gray-500 italic bg-gray-50 p-3 rounded-md">
+                                  No address information available
+                                </div>
+                              )}
+                              
+                              {/* Show complete BP data */}
+                              <div className="bg-gray-50 p-3 rounded-md">
+                                <h6 className="font-medium mb-2 text-gray-700">Complete Business Partner Data:</h6>
+                                {renderDataTable([bpData])}
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       ) : (
                         <div className="text-gray-500 italic">
