@@ -49,79 +49,41 @@ const SapBusinessPartner: React.FC = () => {
 
     try {
       const result = await sapBusinessPartnerService.getBusinessPartner(formData);
-      console.log('[SAP] Fetch response:', result);
       
-      // Handle whatever response comes back with try-catch
-      let processedData: SapBusinessPartnerApiResponse | null = null;
+      // RAW DATA LOGGING - Log everything for debugging
+      console.log('=== RAW API RESPONSE START ===');
+      console.log('Raw result type:', typeof result);
+      console.log('Raw result:', JSON.stringify(result, null, 2));
+      console.log('Raw result keys:', result ? Object.keys(result) : 'No keys');
+      console.log('Raw result.success:', (result as any)?.success);
+      console.log('Raw result.businessPartnersData:', (result as any)?.businessPartnersData);
+      console.log('Raw result.businessPartnerResults:', (result as any)?.businessPartnerResults);
+      console.log('Raw result.uniqueBPCustomerNumbers:', (result as any)?.uniqueBPCustomerNumbers);
+      console.log('=== RAW API RESPONSE END ===');
       
-      try {
-        if (result && typeof result === 'object') {
-          if ('success' in result && result.success) {
-            // Standard success response
-            processedData = result as SapBusinessPartnerApiResponse;
-          } else if ('businessPartnersData' in result || 'businessPartnerResults' in result) {
-            // Partial response - use what we have
-            processedData = {
-              success: true,
-              businessPartnersData: result.businessPartnersData || { d: { results: [] } },
-              businessPartnerResults: result.businessPartnerResults || [],
-              uniqueBPCustomerNumbers: result.uniqueBPCustomerNumbers || [],
-              requestData: result.requestData || formData
-            };
-          } else if ('d' in result && result.d) {
-            // Direct SAP response format
-            processedData = {
-              success: true,
-              businessPartnersData: result,
-              businessPartnerResults: [{ 
-                bpCustomerNumber: formData.soldTo, 
-                success: true, 
-                error: null, 
-                data: result 
-              }],
-              uniqueBPCustomerNumbers: [formData.soldTo],
-              requestData: formData
-            };
-          }
-        }
-      } catch (parseError) {
-        console.warn('[SAP] Error parsing response:', parseError);
-        // Try to create a minimal response with available data
-        processedData = {
+      // Simple approach - just use whatever we get and display it
+      if (result && typeof result === 'object') {
+        const resultAny = result as any;
+        const processedData: SapBusinessPartnerApiResponse = {
           success: true,
-          businessPartnersData: (result && typeof result === 'object' && 'd' in result) ? result : { d: { results: [] } },
-          businessPartnerResults: [],
-          uniqueBPCustomerNumbers: [],
-          requestData: formData
+          businessPartnersData: resultAny.businessPartnersData || result,
+          businessPartnerResults: resultAny.businessPartnerResults || [],
+          uniqueBPCustomerNumbers: resultAny.uniqueBPCustomerNumbers || [],
+          requestData: resultAny.requestData || formData
         };
-      }
-      
-      if (processedData) {
+        
         setBusinessPartnerData(processedData);
-        const count = processedData.businessPartnerResults?.length || 0;
+        setError(null);
+        
         toast({
           title: t('success'),
-          description: count > 0 ? `Found ${count} business partner(s)` : 'Data retrieved (may be partial)',
+          description: 'Data retrieved successfully',
         });
       } else {
-        // Last resort - show error but try to display raw data
-        const errorMessage = ('error' in result && result.error) || 'Unexpected response format';
-        setError(errorMessage);
-        
-        // Still try to set some data if available
-        if (result && typeof result === 'object') {
-          setBusinessPartnerData({
-            success: false,
-            businessPartnersData: (result && typeof result === 'object' && 'd' in result) ? result : { d: { results: [] } },
-            businessPartnerResults: [],
-            uniqueBPCustomerNumbers: [],
-            requestData: formData
-          });
-        }
-        
+        setError('No data received from API');
         toast({
           title: t('error'),
-          description: errorMessage,
+          description: 'No data received from API',
           variant: 'destructive',
         });
       }
@@ -319,59 +281,44 @@ const SapBusinessPartner: React.FC = () => {
             <CardTitle>Business Partner Results</CardTitle>
           </CardHeader>
           <CardContent>
-            {businessPartnerData.businessPartnerResults && businessPartnerData.businessPartnerResults.length > 0 ? (
-              <div className="space-y-6">
-                {businessPartnerData.businessPartnerResults.map((partnerResult, index) => (
-                  <div key={partnerResult.bpCustomerNumber} className="space-y-4">
-                    <div className="border-b pb-4">
-                      <h3 className="text-lg font-semibold mb-2">
-                        Business Partner: {partnerResult.bpCustomerNumber}
-                      </h3>
-                      
-                      {!partnerResult.success ? (
-                        <div className="text-destructive bg-destructive/10 p-3 rounded-md">
-                          <strong>Error:</strong> {partnerResult.error}
-                        </div>
-                      ) : partnerResult.data?.d?.results ? (
-                        <div className="space-y-4">
-                          {partnerResult.data.d.results.map((partner, partnerIndex) => (
-                            <div key={partnerIndex} className="space-y-3">
-                              {partner.BusinessPartnerFullName && (
-                                <div>
-                                  <h4 className="text-md font-medium">
-                                    {partner.BusinessPartnerFullName}
-                                  </h4>
-                                </div>
-                              )}
-                              
-                              {partner.to_BusinessPartnerAddress?.results && partner.to_BusinessPartnerAddress.results.length > 0 ? (
-                                <div>
-                                  <h5 className="text-sm font-medium mb-2">Address Information</h5>
-                                  {renderDataTable(partner.to_BusinessPartnerAddress.results)}
-                                </div>
-                              ) : (
-                                <div>
-                                  <h5 className="text-sm font-medium mb-2">Business Partner Data</h5>
-                                  {renderDataTable(partner)}
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-muted-foreground">
-                          No business partner data available
-                        </div>
-                      )}
+            <div className="space-y-6">
+              {/* Show raw data first for debugging */}
+              <div className="bg-muted p-4 rounded-md">
+                <h4 className="font-medium mb-2">Raw Response Data:</h4>
+                <pre className="text-xs overflow-auto max-h-60">
+                  {JSON.stringify(businessPartnerData, null, 2)}
+                </pre>
+              </div>
+              
+              {/* Display business partner results if available */}
+              {businessPartnerData.businessPartnerResults && businessPartnerData.businessPartnerResults.length > 0 ? (
+                <div className="space-y-4">
+                  <h4 className="font-medium">Business Partner Results:</h4>
+                  {businessPartnerData.businessPartnerResults.map((partnerResult, index) => (
+                    <div key={partnerResult.bpCustomerNumber || index} className="border p-4 rounded-md">
+                      <h5 className="font-medium mb-2">BP: {partnerResult.bpCustomerNumber}</h5>
+                      {partnerResult.data?.d?.results && renderDataTable(partnerResult.data.d.results)}
                     </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                No business partner results found
-              </div>
-            )}
+                  ))}
+                </div>
+              ) : null}
+              
+              {/* Display business partners data if available */}
+              {businessPartnerData.businessPartnersData?.d?.results && (
+                <div className="space-y-4">
+                  <h4 className="font-medium">Business Partners Data:</h4>
+                  {renderDataTable(businessPartnerData.businessPartnersData.d.results)}
+                </div>
+              )}
+              
+              {/* Display any other data structure */}
+              {businessPartnerData.businessPartnersData && !businessPartnerData.businessPartnersData.d && (
+                <div className="space-y-4">
+                  <h4 className="font-medium">Raw Business Partner Data:</h4>
+                  {renderDataTable(businessPartnerData.businessPartnersData)}
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
       )}
