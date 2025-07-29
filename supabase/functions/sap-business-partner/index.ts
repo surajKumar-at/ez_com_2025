@@ -40,9 +40,9 @@ serve(async (req) => {
       // Get SAP credentials
       const { data: credentials, error: credError } = await supabase
         .from('ezc_sap_credentials')
-        .select('username, password, base_url')
-        .eq('environment', 'DEMO')
-        .order('created_at', { ascending: false })
+        .select('esc_user_name, esc_password, esc_base_url')
+        .eq('esc_name', 'DEMO')
+        .eq('esc_is_active', 'TRUE')
         .limit(1)
         .single();
 
@@ -87,7 +87,7 @@ serve(async (req) => {
         );
       }
 
-      const baseUrl = credentials.base_url;
+      const baseUrl = credentials.esc_base_url;
       
       // Step 1: Call GET_BUSINESS_PARTNERS to get BPCustomerNumber
       const businessPartnersEndpoint = businessPartnersEndpointData.value
@@ -100,7 +100,7 @@ serve(async (req) => {
       console.log(`Step 1 - Calling GET_BUSINESS_PARTNERS: ${businessPartnersUrl}`);
 
       // Create basic auth header
-      const authHeader = btoa(`${credentials.username}:${credentials.password}`);
+      const authHeader = btoa(`${credentials.esc_user_name}:${credentials.esc_password}`);
 
       // Call GET_BUSINESS_PARTNERS API
       const businessPartnersResponse = await fetch(businessPartnersUrl, {
