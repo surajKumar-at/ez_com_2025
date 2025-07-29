@@ -51,15 +51,74 @@ const SapBusinessPartner: React.FC = () => {
       const result = await sapBusinessPartnerService.getBusinessPartner(formData);
       console.log('[SAP] Fetch response:', result);
       
-      if (result.success) {
-        setBusinessPartnerData(result);
+      // Handle whatever response comes back with try-catch
+      let processedData: SapBusinessPartnerApiResponse | null = null;
+      
+      try {
+        if (result && typeof result === 'object') {
+          if ('success' in result && result.success) {
+            // Standard success response
+            processedData = result as SapBusinessPartnerApiResponse;
+          } else if ('businessPartnersData' in result || 'businessPartnerResults' in result) {
+            // Partial response - use what we have
+            processedData = {
+              success: true,
+              businessPartnersData: result.businessPartnersData || { d: { results: [] } },
+              businessPartnerResults: result.businessPartnerResults || [],
+              uniqueBPCustomerNumbers: result.uniqueBPCustomerNumbers || [],
+              requestData: result.requestData || formData
+            };
+          } else if ('d' in result && result.d) {
+            // Direct SAP response format
+            processedData = {
+              success: true,
+              businessPartnersData: result,
+              businessPartnerResults: [{ 
+                bpCustomerNumber: formData.soldTo, 
+                success: true, 
+                error: null, 
+                data: result 
+              }],
+              uniqueBPCustomerNumbers: [formData.soldTo],
+              requestData: formData
+            };
+          }
+        }
+      } catch (parseError) {
+        console.warn('[SAP] Error parsing response:', parseError);
+        // Try to create a minimal response with available data
+        processedData = {
+          success: true,
+          businessPartnersData: (result && typeof result === 'object' && 'd' in result) ? result : { d: { results: [] } },
+          businessPartnerResults: [],
+          uniqueBPCustomerNumbers: [],
+          requestData: formData
+        };
+      }
+      
+      if (processedData) {
+        setBusinessPartnerData(processedData);
+        const count = processedData.businessPartnerResults?.length || 0;
         toast({
           title: t('success'),
-          description: 'Business partner data retrieved successfully',
+          description: count > 0 ? `Found ${count} business partner(s)` : 'Data retrieved (may be partial)',
         });
       } else {
-        const errorMessage = ('error' in result && result.error) || 'Failed to retrieve business partner data';
+        // Last resort - show error but try to display raw data
+        const errorMessage = ('error' in result && result.error) || 'Unexpected response format';
         setError(errorMessage);
+        
+        // Still try to set some data if available
+        if (result && typeof result === 'object') {
+          setBusinessPartnerData({
+            success: false,
+            businessPartnersData: (result && typeof result === 'object' && 'd' in result) ? result : { d: { results: [] } },
+            businessPartnerResults: [],
+            uniqueBPCustomerNumbers: [],
+            requestData: formData
+          });
+        }
+        
         toast({
           title: t('error'),
           description: errorMessage,
@@ -68,7 +127,32 @@ const SapBusinessPartner: React.FC = () => {
       }
     } catch (error) {
       console.error('Error fetching business partner:', error);
-      const errorMessage = 'An error occurred while fetching business partner data';
+      
+      // Try to extract any useful data from the error
+      try {
+        if (error && typeof error === 'object' && 'response' in error) {
+          const errorResponse = (error as any).response;
+          if (errorResponse?.data) {
+            setBusinessPartnerData({
+              success: false,
+              businessPartnersData: errorResponse.data,
+              businessPartnerResults: [],
+              uniqueBPCustomerNumbers: [],
+              requestData: formData
+            });
+            toast({
+              title: 'Partial Data',
+              description: 'Some data retrieved despite errors',
+              variant: 'default',
+            });
+            return;
+          }
+        }
+      } catch (fallbackError) {
+        console.warn('[SAP] Fallback processing failed:', fallbackError);
+      }
+      
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred while fetching business partner data';
       setError(errorMessage);
       toast({
         title: t('error'),
