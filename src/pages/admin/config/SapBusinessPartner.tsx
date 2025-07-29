@@ -75,6 +75,18 @@ const SapBusinessPartner: React.FC = () => {
           
           if (bpResult.data?.d?.results) {
             console.log(`BP ${bpResult.bpCustomerNumber} detailed results:`, bpResult.data.d.results);
+            
+            // Log address data specifically
+            bpResult.data.d.results.forEach((bpData: any, bpDataIndex: number) => {
+              console.log(`BP ${bpResult.bpCustomerNumber} - Entry ${bpDataIndex + 1}:`, {
+                BusinessPartnerFullName: bpData.BusinessPartnerFullName,
+                addressData: bpData.to_BusinessPartnerAddress
+              });
+              
+              if (bpData.to_BusinessPartnerAddress?.results) {
+                console.log(`BP ${bpResult.bpCustomerNumber} - Address Details:`, bpData.to_BusinessPartnerAddress.results);
+              }
+            });
           }
         });
         console.log('=== INDIVIDUAL BP RESULTS END ===');
@@ -199,6 +211,107 @@ const SapBusinessPartner: React.FC = () => {
                   const displayValue = value === null || value === undefined ? '' : String(value);
                   return (
                     <TableCell key={field} className="whitespace-nowrap">
+                      {displayValue}
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    );
+  };
+
+  const renderAddressTable = (addresses: any[]) => {
+    if (!addresses || addresses.length === 0) {
+      return (
+        <div className="text-center py-4 text-muted-foreground">
+          No address data available
+        </div>
+      );
+    }
+
+    // Define the specific fields we want to display as mentioned by the user
+    const addressFields = [
+      'BusinessPartner',
+      'AddressID',
+      'ValidityStartDate',
+      'ValidityEndDate',
+      'AuthorizationGroup',
+      'AddressUUID',
+      'AdditionalStreetPrefixName',
+      'AdditionalStreetSuffixName',
+      'AddressTimeZone',
+      'CareOfName',
+      'CityCode',
+      'CityName',
+      'CompanyPostalCode',
+      'Country',
+      'County',
+      'DeliveryServiceNumber',
+      'DeliveryServiceTypeCode',
+      'District',
+      'FormOfAddress',
+      'FullName',
+      'HomeCityName',
+      'HouseNumber',
+      'HouseNumberSupplementText',
+      'Language',
+      'POBox',
+      'POBoxDeviatingCityName',
+      'POBoxDeviatingCountry',
+      'POBoxDeviatingRegion',
+      'POBoxIsWithoutNumber',
+      'POBoxLobbyName',
+      'POBoxPostalCode',
+      'Person',
+      'PostalCode',
+      'PrfrdCommMediumType',
+      'Region',
+      'StreetName',
+      'StreetPrefixName',
+      'StreetSuffixName',
+      'TaxJurisdiction',
+      'TransportZone',
+      'AddressIDByExternalSystem',
+      'CountyCode',
+      'TownshipCode',
+      'TownshipName'
+    ];
+
+    // Log the address data to console
+    console.log('=== ADDRESS DATA FOR TABLE ===');
+    addresses.forEach((address, index) => {
+      console.log(`Address ${index + 1}:`, address);
+      addressFields.forEach(field => {
+        if (address[field] !== undefined && address[field] !== null && address[field] !== '') {
+          console.log(`  ${field}: ${address[field]}`);
+        }
+      });
+    });
+    console.log('=== END ADDRESS DATA ===');
+
+    return (
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              {addressFields.map(field => (
+                <TableHead key={field} className="whitespace-nowrap text-xs">
+                  {field.replace(/([A-Z])/g, ' $1').trim()}
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {addresses.map((address, index) => (
+              <TableRow key={index}>
+                {addressFields.map(field => {
+                  const value = address?.[field];
+                  const displayValue = value === null || value === undefined || value === '' ? '-' : String(value);
+                  return (
+                    <TableCell key={field} className="whitespace-nowrap text-xs">
                       {displayValue}
                     </TableCell>
                   );
@@ -388,7 +501,7 @@ const SapBusinessPartner: React.FC = () => {
                                         {/* Show all address fields in a table for complete data */}
                                         <div className="mt-3">
                                           <div className="font-medium text-xs text-gray-600">Complete Address Data:</div>
-                                          {renderDataTable([address])}
+                                          {renderAddressTable([address])}
                                         </div>
                                       </div>
                                     ))}
