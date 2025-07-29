@@ -113,12 +113,32 @@ const SapBusinessPartner: React.FC = () => {
           description: 'Data retrieved successfully',
         });
       } else {
-        setError('No data received from API');
-        toast({
-          title: t('error'),
-          description: 'No data received from API',
-          variant: 'destructive',
-        });
+        // Still check if we have business partner results
+        const anyBusinessPartnerResults = (result as any)?.businessPartnerResults;
+        if (anyBusinessPartnerResults && anyBusinessPartnerResults.length > 0) {
+          const processedData: SapBusinessPartnerApiResponse = {
+            success: true,
+            businessPartnersData: (result as any).businessPartnersData || {},
+            businessPartnerResults: anyBusinessPartnerResults,
+            uniqueBPCustomerNumbers: (result as any).uniqueBPCustomerNumbers || [],
+            requestData: (result as any).requestData || formData
+          };
+          
+          setBusinessPartnerData(processedData);
+          setError(null);
+          
+          toast({
+            title: t('success'),
+            description: 'Customer data retrieved successfully',
+          });
+        } else {
+          setError('No business partner data found');
+          toast({
+            title: t('error'),
+            description: 'No business partner data found',
+            variant: 'destructive',
+          });
+        }
       }
     } catch (error) {
       console.error('Error fetching business partner:', error);
