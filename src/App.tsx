@@ -31,12 +31,17 @@ import { AdminLayout } from "./components/admin/AdminLayout";
 
 const queryClient = new QueryClient();
 
+const PageViewTracker = () => {
+  usePageViewTracker();
+  return null;
+};
+
 const AppContent = () => {
   useAuth(); // Initialize auth state
-  usePageViewTracker(); // Track page views with GA4
   
   return (
     <BrowserRouter>
+      <PageViewTracker />
       <Routes>
         <Route path="/" element={<Auth />} />
         <Route path="/auth" element={<Auth />} />
