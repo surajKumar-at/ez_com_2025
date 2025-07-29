@@ -131,7 +131,7 @@ serve(async (req) => {
       const businessPartnersData = await businessPartnersResponse.json();
       console.log('GET_BUSINESS_PARTNERS Response received:', JSON.stringify(businessPartnersData, null, 2));
 
-      // Extract BPCustomerNumber from the response
+      // Extract all unique BPCustomerNumber values from the response
       const partnerFunctions = businessPartnersData?.d?.results || [];
       if (!partnerFunctions.length) {
         return new Response(
@@ -146,13 +146,18 @@ serve(async (req) => {
         );
       }
 
-      // Use the first BPCustomerNumber found (you can modify this logic if needed)
-      const bpCustomerNumber = partnerFunctions[0].BPCustomerNumber;
-      if (!bpCustomerNumber) {
+      // Get all unique BPCustomerNumber values
+      const uniqueBPCustomerNumbers = [...new Set(
+        partnerFunctions
+          .map(pf => pf.BPCustomerNumber)
+          .filter(bpNum => bpNum && bpNum.trim() !== '')
+      )];
+
+      if (!uniqueBPCustomerNumbers.length) {
         return new Response(
           JSON.stringify({ 
             success: false, 
-            error: 'BPCustomerNumber not found in partner functions' 
+            error: 'No valid BPCustomerNumber found in partner functions' 
           }),
           { 
             status: 404, 
@@ -161,49 +166,65 @@ serve(async (req) => {
         );
       }
 
-      console.log(`Extracted BPCustomerNumber: ${bpCustomerNumber}`);
+      console.log(`Extracted unique BPCustomerNumbers: ${uniqueBPCustomerNumbers.join(', ')}`);
 
-      // Step 2: Call GET_SELECTED_SOLDTO with the BPCustomerNumber
-      const selectedSoldToEndpoint = selectedSoldToEndpointData.value.replace('{PARTNER}', bpCustomerNumber);
-      const selectedSoldToUrl = `${baseUrl}${selectedSoldToEndpoint}`;
+      // Step 2: Call GET_SELECTED_SOLDTO for each unique BPCustomerNumber
+      const businessPartnerResults = [];
       
-      console.log(`Step 2 - Calling GET_SELECTED_SOLDTO: ${selectedSoldToUrl}`);
-
-      // Call GET_SELECTED_SOLDTO API
-      const selectedSoldToResponse = await fetch(selectedSoldToUrl, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Basic ${authHeader}`,
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!selectedSoldToResponse.ok) {
-        const errorText = await selectedSoldToResponse.text();
-        console.error('GET_SELECTED_SOLDTO API Error:', errorText);
+      for (const bpCustomerNumber of uniqueBPCustomerNumbers) {
+        const selectedSoldToEndpoint = selectedSoldToEndpointData.value.replace('{PARTNER}', bpCustomerNumber);
+        const selectedSoldToUrl = `${baseUrl}${selectedSoldToEndpoint}`;
         
-        return new Response(
-          JSON.stringify({ 
-            success: false, 
-            error: `GET_SELECTED_SOLDTO API Error: ${selectedSoldToResponse.status} - ${errorText}` 
-          }),
-          { 
-            status: selectedSoldToResponse.status, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
-        );
-      }
+        console.log(`Step 2.${uniqueBPCustomerNumbers.indexOf(bpCustomerNumber) + 1} - Calling GET_SELECTED_SOLDTO for ${bpCustomerNumber}: ${selectedSoldToUrl}`);
 
-      const selectedSoldToData = await selectedSoldToResponse.json();
-      console.log('GET_SELECTED_SOLDTO Response received');
+        try {
+          const selectedSoldToResponse = await fetch(selectedSoldToUrl, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Basic ${authHeader}`,
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (!selectedSoldToResponse.ok) {
+            const errorText = await selectedSoldToResponse.text();
+            console.error(`GET_SELECTED_SOLDTO API Error for ${bpCustomerNumber}:`, errorText);
+            
+            businessPartnerResults.push({
+              bpCustomerNumber,
+              success: false,
+              error: `API Error: ${selectedSoldToResponse.status} - ${errorText}`,
+              data: null
+            });
+          } else {
+            const selectedSoldToData = await selectedSoldToResponse.json();
+            console.log(`GET_SELECTED_SOLDTO Response received for ${bpCustomerNumber}`);
+            
+            businessPartnerResults.push({
+              bpCustomerNumber,
+              success: true,
+              error: null,
+              data: selectedSoldToData
+            });
+          }
+        } catch (error) {
+          console.error(`Error calling GET_SELECTED_SOLDTO for ${bpCustomerNumber}:`, error);
+          businessPartnerResults.push({
+            bpCustomerNumber,
+            success: false,
+            error: `Request failed: ${error.message}`,
+            data: null
+          });
+        }
+      }
 
       return new Response(
         JSON.stringify({ 
           success: true, 
-          data: selectedSoldToData,
           businessPartnersData: businessPartnersData,
-          bpCustomerNumber: bpCustomerNumber,
+          businessPartnerResults: businessPartnerResults,
+          uniqueBPCustomerNumbers: uniqueBPCustomerNumbers,
           requestData: {
             soldTo,
             salesOrg,
