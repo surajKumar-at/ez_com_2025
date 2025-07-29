@@ -282,40 +282,71 @@ const SapBusinessPartner: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {/* Show raw data first for debugging */}
+              {/* Debug: Show complete raw data */}
               <div className="bg-muted p-4 rounded-md">
-                <h4 className="font-medium mb-2">Raw Response Data:</h4>
+                <h4 className="font-medium mb-2">Complete Raw Response:</h4>
                 <pre className="text-xs overflow-auto max-h-60">
                   {JSON.stringify(businessPartnerData, null, 2)}
                 </pre>
               </div>
               
-              {/* Display business partner results if available */}
-              {businessPartnerData.businessPartnerResults && businessPartnerData.businessPartnerResults.length > 0 ? (
-                <div className="space-y-4">
-                  <h4 className="font-medium">Business Partner Results:</h4>
-                  {businessPartnerData.businessPartnerResults.map((partnerResult, index) => (
-                    <div key={partnerResult.bpCustomerNumber || index} className="border p-4 rounded-md">
-                      <h5 className="font-medium mb-2">BP: {partnerResult.bpCustomerNumber}</h5>
-                      {partnerResult.data?.d?.results && renderDataTable(partnerResult.data.d.results)}
-                    </div>
-                  ))}
-                </div>
-              ) : null}
-              
-              {/* Display business partners data if available */}
-              {businessPartnerData.businessPartnersData?.d?.results && (
-                <div className="space-y-4">
-                  <h4 className="font-medium">Business Partners Data:</h4>
-                  {renderDataTable(businessPartnerData.businessPartnersData.d.results)}
+              {/* Debug: Show uniqueBPCustomerNumbers */}
+              {businessPartnerData.uniqueBPCustomerNumbers && businessPartnerData.uniqueBPCustomerNumbers.length > 0 && (
+                <div className="bg-blue-50 p-4 rounded-md">
+                  <h4 className="font-medium mb-2">Unique BP Customer Numbers ({businessPartnerData.uniqueBPCustomerNumbers.length}):</h4>
+                  <div className="text-sm">
+                    {businessPartnerData.uniqueBPCustomerNumbers.map((num, index) => (
+                      <span key={index} className="inline-block bg-blue-100 px-2 py-1 rounded mr-2 mb-1">
+                        {num}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               )}
               
-              {/* Display any other data structure */}
-              {businessPartnerData.businessPartnersData && !businessPartnerData.businessPartnersData.d && (
+              {/* Display detailed business partner results from GET_SELECTED_SOLDTO calls */}
+              {businessPartnerData.businessPartnerResults && businessPartnerData.businessPartnerResults.length > 0 ? (
                 <div className="space-y-4">
-                  <h4 className="font-medium">Raw Business Partner Data:</h4>
-                  {renderDataTable(businessPartnerData.businessPartnersData)}
+                  <h4 className="font-medium text-lg">Detailed Business Partner Information (GET_SELECTED_SOLDTO Results):</h4>
+                  {businessPartnerData.businessPartnerResults.map((partnerResult, index) => (
+                    <div key={partnerResult.bpCustomerNumber || index} className="border border-gray-200 p-4 rounded-md bg-white">
+                      <h5 className="font-semibold text-md mb-3 text-blue-600">
+                        Business Partner: {partnerResult.bpCustomerNumber}
+                        <span className={`ml-2 px-2 py-1 text-xs rounded ${partnerResult.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                          {partnerResult.success ? 'Success' : 'Error'}
+                        </span>
+                      </h5>
+                      
+                      {!partnerResult.success ? (
+                        <div className="text-red-600 bg-red-50 p-3 rounded-md">
+                          <strong>Error:</strong> {partnerResult.error}
+                        </div>
+                      ) : partnerResult.data?.d?.results ? (
+                        <div>
+                          <h6 className="font-medium mb-2 text-gray-700">Business Partner Details:</h6>
+                          {renderDataTable(partnerResult.data.d.results)}
+                        </div>
+                      ) : (
+                        <div className="text-gray-500 italic">
+                          No detailed data available for this business partner
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-md">
+                  <p className="text-yellow-800">No detailed business partner results found from GET_SELECTED_SOLDTO calls</p>
+                </div>
+              )}
+              
+              {/* Display initial business partners data from first API call */}
+              {businessPartnerData.businessPartnersData?.d?.results && (
+                <div className="space-y-4">
+                  <h4 className="font-medium text-lg">Initial Business Partners Data (First API Call):</h4>
+                  <div className="border border-gray-200 p-4 rounded-md bg-gray-50">
+                    {renderDataTable(businessPartnerData.businessPartnersData.d.results)}
+                  </div>
                 </div>
               )}
             </div>
