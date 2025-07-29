@@ -66,48 +66,16 @@ const SapBusinessPartner: React.FC = () => {
     try {
       const result = await sapBusinessPartnerService.getBusinessPartner(formData);
       
-      console.log('🔍 SAP API Response:', result);
+      console.log('🔍 RAW SAP API Response:', result);
       
-      // Check if we have a valid response with business partner results
-      if (result && (result as any).success && (result as any).businessPartnerResults) {
-        const resultAny = result as any;
-        
-        console.log('✅ Processing valid response with business partner results');
-        console.log('Business Partner Results Count:', resultAny.businessPartnerResults.length);
-        
-        // Log each business partner result for debugging
-        resultAny.businessPartnerResults.forEach((bpResult: any, index: number) => {
-          console.log(`BP ${index + 1} (${bpResult.bpCustomerNumber}):`, {
-            success: bpResult.success,
-            hasData: !!bpResult.data,
-            hasResults: bpResult.data?.d?.results?.length > 0,
-            hasAddress: bpResult.data?.d?.results?.[0]?.to_BusinessPartnerAddress?.results?.length > 0
-          });
-        });
-        
-        const processedData: SapBusinessPartnerApiResponse = {
-          success: true,
-          businessPartnersData: resultAny.businessPartnersData || {},
-          businessPartnerResults: resultAny.businessPartnerResults,
-          uniqueBPCustomerNumbers: resultAny.uniqueBPCustomerNumbers || [],
-          requestData: resultAny.requestData || formData
-        };
-        
-        setBusinessPartnerData(processedData);
-        setError(null);
-        
-        toast({
-          title: t('success'),
-          description: 'Data retrieved successfully',
-        });
-      } else {
-        setError('No business partner data found');
-        toast({
-          title: t('error'),
-          description: 'No business partner data found',
-          variant: 'destructive',
-        });
-      }
+      // Always set the data regardless of structure - show everything
+      setBusinessPartnerData(result as any);
+      setError(null);
+      
+      toast({
+        title: 'Success',
+        description: 'Data retrieved - check results below',
+      });
     } catch (error) {
       console.error('Error fetching business partner:', error);
       const errorMessage = error instanceof Error ? error.message : 'An error occurred while fetching business partner data';
@@ -122,42 +90,34 @@ const SapBusinessPartner: React.FC = () => {
     }
   };
 
-  const renderAddressFields = (address: any) => {
-    if (!address) return null;
-
-    console.log('📍 Address data being rendered:', address);
-
-    const addressFields = [
-      { label: 'Business Partner', value: address.BusinessPartner },
-      { label: 'Address ID', value: address.AddressID },
-      { label: 'Full Name', value: address.FullName },
-      { label: 'Street', value: `${address.HouseNumber || ''} ${address.StreetName || ''}`.trim() },
-      { label: 'City', value: address.CityName },
-      { label: 'Postal Code', value: address.PostalCode },
-      { label: 'Region', value: address.Region },
-      { label: 'Country', value: address.Country },
-      { label: 'Time Zone', value: address.AddressTimeZone },
-      { label: 'Language', value: address.Language },
-      { label: 'Tax Jurisdiction', value: address.TaxJurisdiction },
-      { label: 'Transport Zone', value: address.TransportZone },
-      { label: 'County', value: address.County },
-      { label: 'District', value: address.District },
-      { label: 'PO Box', value: address.POBox },
-      { label: 'Form of Address', value: address.FormOfAddress },
-      { label: 'Valid From', value: convertSapDate(address.ValidityStartDate) },
-      { label: 'Valid Until', value: convertSapDate(address.ValidityEndDate) },
-    ];
-
+  const renderRawData = (data: any) => {
+    if (!data) return <div>No data</div>;
+    
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 text-sm">
-        {addressFields.map((field, index) => {
-          if (!field.value || field.value === 'N/A') return null;
-          return (
-            <div key={index} className="p-2 bg-gray-50 rounded">
-              <strong>{field.label}:</strong> {field.value}
-            </div>
-          );
-        })}
+      <div className="bg-gray-50 p-4 rounded-md">
+        <pre className="text-xs overflow-auto max-h-96 whitespace-pre-wrap">
+          {JSON.stringify(data, null, 2)}
+        </pre>
+      </div>
+    );
+  };
+
+  const renderAddressAsStrings = (address: any) => {
+    if (!address) return <div>No address data</div>;
+
+    console.log('📍 Raw address data:', address);
+
+    // Show all fields as raw strings
+    const allFields = Object.keys(address);
+    
+    return (
+      <div className="space-y-1">
+        {allFields.map((field) => (
+          <div key={field} className="flex text-sm">
+            <strong className="w-48 text-gray-700">{field}:</strong>
+            <span className="text-gray-900">{String(address[field] || '')}</span>
+          </div>
+        ))}
       </div>
     );
   };
@@ -250,60 +210,68 @@ const SapBusinessPartner: React.FC = () => {
       {businessPartnerData && (
         <Card>
           <CardHeader>
-            <CardTitle>Business Partner Results</CardTitle>
+            <CardTitle>Business Partner Results (Raw Data)</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {/* Display detailed business partner results */}
-              {businessPartnerData.businessPartnerResults && businessPartnerData.businessPartnerResults.length > 0 ? (
+              {/* Show complete raw response */}
+              <div>
+                <h4 className="font-medium text-lg mb-2">Complete Raw Response:</h4>
+                {renderRawData(businessPartnerData)}
+              </div>
+              
+              {/* Display detailed business partner results as strings */}
+              {(businessPartnerData as any).businessPartnerResults && (businessPartnerData as any).businessPartnerResults.length > 0 ? (
                 <div className="space-y-4">
-                  <h4 className="font-medium text-lg">Business Partner Information:</h4>
-                  {businessPartnerData.businessPartnerResults.map((partnerResult, index) => (
+                  <h4 className="font-medium text-lg">Business Partner Information (Raw Strings):</h4>
+                  {(businessPartnerData as any).businessPartnerResults.map((partnerResult: any, index: number) => (
                     <div key={partnerResult.bpCustomerNumber || index} className="border border-gray-200 p-4 rounded-md bg-white">
                       <h5 className="font-semibold text-md mb-3 text-blue-600">
-                        Business Partner: {partnerResult.bpCustomerNumber}
-                        <span className={`ml-2 px-2 py-1 text-xs rounded ${partnerResult.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                          {partnerResult.success ? 'Success' : 'Error'}
-                        </span>
+                        Business Partner: {String(partnerResult.bpCustomerNumber)}
                       </h5>
                       
-                      {!partnerResult.success ? (
-                        <div className="text-red-600 bg-red-50 p-3 rounded-md">
-                          <strong>Error:</strong> {partnerResult.error}
+                      <div className="space-y-4">
+                        <div>
+                          <strong>Success:</strong> {String(partnerResult.success)}
                         </div>
-                      ) : partnerResult.data?.d?.results && partnerResult.data.d.results.length > 0 ? (
-                        <div className="space-y-4">
-                          {partnerResult.data.d.results.map((bpData: any, bpIndex: number) => (
-                            <div key={bpIndex} className="space-y-3">
-                              {/* Business Partner Name */}
-                              {bpData.BusinessPartnerFullName && (
-                                <div className="bg-blue-50 p-3 rounded-md">
-                                  <h6 className="font-medium text-blue-800">Business Partner Name:</h6>
-                                  <p className="text-blue-700">{bpData.BusinessPartnerFullName}</p>
-                                </div>
-                              )}
-                              
-                              {/* Address Information */}
-                              {bpData.to_BusinessPartnerAddress?.results && bpData.to_BusinessPartnerAddress.results.length > 0 ? (
+                        
+                        {partnerResult.data?.d?.results && partnerResult.data.d.results.length > 0 ? (
+                          <div className="space-y-4">
+                            {partnerResult.data.d.results.map((bpData: any, bpIndex: number) => (
+                              <div key={bpIndex} className="space-y-3 border-l-4 border-blue-200 pl-4">
+                                {/* Business Partner Name */}
                                 <div>
-                                  <h6 className="font-medium mb-2 text-gray-700">Address Information:</h6>
-                                  <div className="space-y-2">
-                                    {bpData.to_BusinessPartnerAddress.results.map((address: any, addressIndex: number) => (
-                                      <div key={addressIndex} className="bg-gray-50 p-3 rounded-md border">
-                                        {renderAddressFields(address)}
-                                      </div>
-                                    ))}
-                                  </div>
+                                  <strong>BusinessPartnerFullName:</strong> {String(bpData.BusinessPartnerFullName || '')}
                                 </div>
-                              ) : (
-                                <div className="text-gray-500 italic">No address information available</div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-gray-500 italic">No detailed data available</div>
-                      )}
+                                
+                                {/* Address Information as Raw Strings */}
+                                {bpData.to_BusinessPartnerAddress?.results && bpData.to_BusinessPartnerAddress.results.length > 0 ? (
+                                  <div>
+                                    <h6 className="font-medium mb-2 text-gray-700">Address Information (Raw Strings):</h6>
+                                    <div className="space-y-2">
+                                      {bpData.to_BusinessPartnerAddress.results.map((address: any, addressIndex: number) => (
+                                        <div key={addressIndex} className="bg-gray-50 p-3 rounded-md border">
+                                          {renderAddressAsStrings(address)}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="text-gray-500 italic">No address information available</div>
+                                )}
+                                
+                                {/* Show raw data structure */}
+                                <div>
+                                  <h6 className="font-medium mb-2 text-gray-700">Raw BP Data:</h6>
+                                  {renderRawData(bpData)}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-gray-500 italic">No detailed data available</div>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
