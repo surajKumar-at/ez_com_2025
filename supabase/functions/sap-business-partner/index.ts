@@ -39,8 +39,8 @@ serve(async (req) => {
 
       // Get SAP credentials
       const { data: credentials, error: credError } = await supabase
-        .from('ezc_sap_credincials')
-        .select('username, password')
+        .from('ezc_sap_credentials')
+        .select('username, password, base_url')
         .eq('environment', 'DEMO')
         .order('created_at', { ascending: false })
         .limit(1)
@@ -61,12 +61,6 @@ serve(async (req) => {
       }
 
       // Get SAP URLs
-      const { data: baseUrlData, error: baseUrlError } = await supabase
-        .from('ezc_sap_urls')
-        .select('value')
-        .eq('key', 'BASE_URL')
-        .single();
-
       const { data: businessPartnersEndpointData, error: businessPartnersError } = await supabase
         .from('ezc_sap_urls')
         .select('value')
@@ -79,8 +73,8 @@ serve(async (req) => {
         .eq('key', 'GET_SELECTED_SOLDTO')
         .single();
 
-      if (baseUrlError || businessPartnersError || selectedSoldToError || !baseUrlData || !businessPartnersEndpointData || !selectedSoldToEndpointData) {
-        console.error('Error fetching SAP URLs:', baseUrlError, businessPartnersError, selectedSoldToError);
+      if (businessPartnersError || selectedSoldToError || !businessPartnersEndpointData || !selectedSoldToEndpointData) {
+        console.error('Error fetching SAP URLs:', businessPartnersError, selectedSoldToError);
         return new Response(
           JSON.stringify({ 
             success: false, 
@@ -93,7 +87,7 @@ serve(async (req) => {
         );
       }
 
-      const baseUrl = baseUrlData.value;
+      const baseUrl = credentials.base_url;
       
       // Step 1: Call GET_BUSINESS_PARTNERS to get BPCustomerNumber
       const businessPartnersEndpoint = businessPartnersEndpointData.value
