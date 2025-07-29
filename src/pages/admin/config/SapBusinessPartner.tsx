@@ -64,20 +64,17 @@ const SapBusinessPartner: React.FC = () => {
     setBusinessPartnerData(null);
 
     try {
-      console.log('🚀 Starting SAP API call...');
       const result = await sapBusinessPartnerService.getBusinessPartner(formData);
       
-      console.log('🔍 RAW SAP API Response (typeof):', typeof result);
-      console.log('🔍 RAW SAP API Response (keys):', result ? Object.keys(result) : 'null');
-      console.log('🔍 RAW SAP API Response (full):', JSON.stringify(result, null, 2));
+      console.log('🔍 RAW SAP API Response:', result);
       
-      // FORCE SUCCESS - Always show data regardless of structure
+      // Always set the data regardless of structure - show everything
       setBusinessPartnerData(result as any);
       setError(null);
       
       toast({
-        title: 'Data Retrieved',
-        description: 'Check the results section below',
+        title: 'Success',
+        description: 'Data retrieved - check results below',
       });
     } catch (error) {
       console.error('Error fetching business partner:', error);
