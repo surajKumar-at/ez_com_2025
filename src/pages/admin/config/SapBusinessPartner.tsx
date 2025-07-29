@@ -59,6 +59,27 @@ const SapBusinessPartner: React.FC = () => {
       console.log('Raw result.businessPartnersData:', (result as any)?.businessPartnersData);
       console.log('Raw result.businessPartnerResults:', (result as any)?.businessPartnerResults);
       console.log('Raw result.uniqueBPCustomerNumbers:', (result as any)?.uniqueBPCustomerNumbers);
+      
+      // LOG INDIVIDUAL BUSINESS PARTNER RESULTS
+      if ((result as any)?.businessPartnerResults) {
+        console.log('=== INDIVIDUAL BP RESULTS START ===');
+        (result as any).businessPartnerResults.forEach((bpResult: any, index: number) => {
+          console.log(`BP Result ${index + 1}:`, {
+            bpCustomerNumber: bpResult.bpCustomerNumber,
+            success: bpResult.success,
+            error: bpResult.error,
+            dataExists: !!bpResult.data,
+            dataStructure: bpResult.data ? Object.keys(bpResult.data) : 'No data',
+            fullData: bpResult.data
+          });
+          
+          if (bpResult.data?.d?.results) {
+            console.log(`BP ${bpResult.bpCustomerNumber} detailed results:`, bpResult.data.d.results);
+          }
+        });
+        console.log('=== INDIVIDUAL BP RESULTS END ===');
+      }
+      
       console.log('=== RAW API RESPONSE END ===');
       
       // Simple approach - just use whatever we get and display it
