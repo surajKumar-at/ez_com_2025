@@ -31,6 +31,7 @@ import {
   ArrowRightLeft,
   AlertTriangle,
   Building2,
+  BarChart3,
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
@@ -53,6 +54,13 @@ export function AdminSidebar() {
   const [openMenus, setOpenMenus] = useState<string[]>(['config']);
 
   const menuItems: MenuItem[] = [
+    {
+      title: t('admin.analytics'),
+      icon: BarChart3,
+      items: [
+        { title: t('admin.dashboard'), url: '/admin/analytics', icon: BarChart3 },
+      ],
+    },
     {
       title: t('admin.config'),
       icon: Settings,

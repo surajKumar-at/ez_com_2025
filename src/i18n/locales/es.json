@@ -22,6 +22,7 @@
   "admin": {
     "dashboard": "Panel de Administración",
     "adminPanel": "Panel Administrativo",
+    "analytics": "Analíticas",
     "welcomeTitle": "Bienvenido al Panel de Administración",
     "welcomeDescription": "Gestione la configuración del sistema, usuarios y procesos de negocio desde este panel de control central.",
     "profile": "Perfil",
@@ -206,5 +207,9 @@
     "fetchSystemAuthError": "Error al obtener autorizaciones del sistema",
     "saveSuccess": "Autorizaciones del sistema actualizadas exitosamente",
     "saveError": "Error al actualizar autorizaciones del sistema"
+  },
+  "analytics": {
+    "title": "Panel de Analíticas",
+    "description": "Analíticas de sesión en tiempo real e integración con Google Analytics"
   }
 }

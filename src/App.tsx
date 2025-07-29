@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Provider } from 'react-redux';
 import { store } from './store/store';
 import { useAuth } from './hooks/useAuth';
+import { usePageViewTracker } from './hooks/usePageViewTracker';
 import './i18n';
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -25,12 +26,14 @@ import MasterDefaults from "./pages/admin/config/MasterDefaults";
 import SapApi from "./pages/admin/SapApi";
 import SystemAuth from "./pages/admin/config/SystemAuth";
 import SiteDefaults from "./pages/admin/config/SiteDefaults";
+import Analytics from "./pages/admin/Analytics";
 import { AdminLayout } from "./components/admin/AdminLayout";
 
 const queryClient = new QueryClient();
 
 const AppContent = () => {
   useAuth(); // Initialize auth state
+  usePageViewTracker(); // Track page views with GA4
   
   return (
     <BrowserRouter>
@@ -80,6 +83,7 @@ const AppContent = () => {
             </AdminLayout>
           } />
           <Route path="/admin/site-defaults" element={<SiteDefaults />} />
+          <Route path="/admin/analytics" element={<Analytics />} />
             <Route path="/customer" element={<CustomerDashboard />} />
             <Route path="/licenses" element={<Licenses />} />
             <Route path="/getting-started" element={<GettingStarted />} />

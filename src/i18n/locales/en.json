@@ -22,6 +22,7 @@
   "admin": {
     "dashboard": "Admin Dashboard",
     "adminPanel": "Administrative Panel",
+    "analytics": "Analytics",
     "welcomeTitle": "Welcome to Admin Dashboard",
     "welcomeDescription": "Manage your system configuration, users, and business processes from this central control panel.",
     "profile": "Profile",
@@ -208,5 +209,9 @@
     "fetchSystemAuthError": "Error fetching system authorizations",
     "saveSuccess": "System authorizations updated successfully",
     "saveError": "Error updating system authorizations"
+  },
+  "analytics": {
+    "title": "Analytics Dashboard",
+    "description": "Real-time session analytics and Google Analytics integration"
   }
 }
