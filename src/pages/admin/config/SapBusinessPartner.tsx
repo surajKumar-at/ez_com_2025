@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { sapBusinessPartnerService } from '@/services/sapBusinessPartnerService';
-import { SapBusinessPartnerResponse, SapBusinessPartnerAddress } from '@/lib/dto/sapBusinessPartner.dto';
+import { SapBusinessPartnerApiResponse, SapBusinessPartnerAddress } from '@/lib/dto/sapBusinessPartner.dto';
 import { Loader2, Search } from 'lucide-react';
 
 const SapBusinessPartner: React.FC = () => {
@@ -20,7 +20,7 @@ const SapBusinessPartner: React.FC = () => {
     division: '',
     distributionChannel: '',
   });
-  const [businessPartnerData, setBusinessPartnerData] = useState<SapBusinessPartnerResponse | null>(null);
+  const [businessPartnerData, setBusinessPartnerData] = useState<SapBusinessPartnerApiResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,18 +49,20 @@ const SapBusinessPartner: React.FC = () => {
 
     try {
       const result = await sapBusinessPartnerService.getBusinessPartner(formData);
+      console.log('[SAP] Fetch response:', result);
       
-      if (result.success && result.data) {
-        setBusinessPartnerData(result.data);
+      if (result.success) {
+        setBusinessPartnerData(result);
         toast({
           title: t('success'),
           description: 'Business partner data retrieved successfully',
         });
       } else {
-        setError(result.error || 'Failed to retrieve business partner data');
+        const errorMessage = ('error' in result && result.error) || 'Failed to retrieve business partner data';
+        setError(errorMessage);
         toast({
           title: t('error'),
-          description: result.error || 'Failed to retrieve business partner data',
+          description: errorMessage,
           variant: 'destructive',
         });
       }
@@ -218,30 +220,56 @@ const SapBusinessPartner: React.FC = () => {
             <CardTitle>Business Partner Results</CardTitle>
           </CardHeader>
           <CardContent>
-            {businessPartnerData.d?.results && businessPartnerData.d.results.length > 0 ? (
+            {businessPartnerData.businessPartnerResults && businessPartnerData.businessPartnerResults.length > 0 ? (
               <div className="space-y-6">
-                {businessPartnerData.d.results.map((partner, index) => (
-                  <div key={index} className="space-y-4">
-                    {partner.BusinessPartnerFullName && (
-                      <div>
-                        <h3 className="text-lg font-semibold mb-2">
-                          Business Partner: {partner.BusinessPartnerFullName}
-                        </h3>
-                      </div>
-                    )}
-                    
-                    {partner.to_BusinessPartnerAddress?.results && (
-                      <div>
-                        <h4 className="text-md font-medium mb-3">Address Information</h4>
-                        {renderAddressTable(partner.to_BusinessPartnerAddress.results)}
-                      </div>
-                    )}
+                {businessPartnerData.businessPartnerResults.map((partnerResult, index) => (
+                  <div key={partnerResult.bpCustomerNumber} className="space-y-4">
+                    <div className="border-b pb-4">
+                      <h3 className="text-lg font-semibold mb-2">
+                        Business Partner: {partnerResult.bpCustomerNumber}
+                      </h3>
+                      
+                      {!partnerResult.success ? (
+                        <div className="text-destructive bg-destructive/10 p-3 rounded-md">
+                          <strong>Error:</strong> {partnerResult.error}
+                        </div>
+                      ) : partnerResult.data?.d?.results ? (
+                        <div className="space-y-4">
+                          {partnerResult.data.d.results.map((partner, partnerIndex) => (
+                            <div key={partnerIndex} className="space-y-3">
+                              {partner.BusinessPartnerFullName && (
+                                <div>
+                                  <h4 className="text-md font-medium">
+                                    {partner.BusinessPartnerFullName}
+                                  </h4>
+                                </div>
+                              )}
+                              
+                              {partner.to_BusinessPartnerAddress?.results && partner.to_BusinessPartnerAddress.results.length > 0 ? (
+                                <div>
+                                  <h5 className="text-sm font-medium mb-2">Address Information</h5>
+                                  {renderAddressTable(partner.to_BusinessPartnerAddress.results)}
+                                </div>
+                              ) : (
+                                <div className="text-muted-foreground text-sm">
+                                  No address information available
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-muted-foreground">
+                          No business partner data available
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="text-center py-8 text-muted-foreground">
-                No data found for the specified business partner
+                No business partner results found
               </div>
             )}
           </CardContent>

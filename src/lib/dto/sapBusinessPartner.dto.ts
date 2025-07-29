@@ -67,7 +67,32 @@ export const SapBusinessPartnerResponseSchema = z.object({
   })
 });
 
+export const SapBusinessPartnerApiResultSchema = z.object({
+  bpCustomerNumber: z.string(),
+  success: z.boolean(),
+  error: z.string().nullable(),
+  data: SapBusinessPartnerResponseSchema.nullable(),
+});
+
+export const SapBusinessPartnerApiResponseSchema = z.object({
+  success: z.boolean(),
+  businessPartnersData: z.object({
+    d: z.object({
+      results: z.array(z.object({
+        Customer: z.string(),
+        PartnerFunction: z.string(),
+        BPCustomerNumber: z.string(),
+      }))
+    })
+  }),
+  businessPartnerResults: z.array(SapBusinessPartnerApiResultSchema),
+  uniqueBPCustomerNumbers: z.array(z.string()),
+  requestData: SapBusinessPartnerRequestSchema,
+});
+
 export type SapBusinessPartnerRequest = z.infer<typeof SapBusinessPartnerRequestSchema>;
 export type SapBusinessPartnerAddress = z.infer<typeof SapBusinessPartnerAddressSchema>;
 export type SapBusinessPartnerResult = z.infer<typeof SapBusinessPartnerResultSchema>;
 export type SapBusinessPartnerResponse = z.infer<typeof SapBusinessPartnerResponseSchema>;
+export type SapBusinessPartnerApiResult = z.infer<typeof SapBusinessPartnerApiResultSchema>;
+export type SapBusinessPartnerApiResponse = z.infer<typeof SapBusinessPartnerApiResponseSchema>;
