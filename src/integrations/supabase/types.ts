@@ -8552,30 +8552,69 @@ export type Database = {
         }
         Relationships: []
       }
-      ezc_sap_credincials: {
+      ezc_sap_credentials: {
         Row: {
-          created_at: string | null
-          environment: string | null
-          id: number
-          password: string
-          updated_at: string | null
-          username: string
+          esc_additional_headers: Json | null
+          esc_authentication: string | null
+          esc_base_url: string
+          esc_client_id: string | null
+          esc_client_secret: string | null
+          esc_created_at: string | null
+          esc_ext1: string | null
+          esc_ext2: string | null
+          esc_ext3: string | null
+          esc_id: number
+          esc_is_active: boolean | null
+          esc_name: string
+          esc_password: string | null
+          esc_proxy_type: string | null
+          esc_system_type: string | null
+          esc_token_url: string | null
+          esc_updated_at: string | null
+          esc_url_id: string | null
+          esc_user_name: string | null
         }
         Insert: {
-          created_at?: string | null
-          environment?: string | null
-          id?: number
-          password: string
-          updated_at?: string | null
-          username: string
+          esc_additional_headers?: Json | null
+          esc_authentication?: string | null
+          esc_base_url: string
+          esc_client_id?: string | null
+          esc_client_secret?: string | null
+          esc_created_at?: string | null
+          esc_ext1?: string | null
+          esc_ext2?: string | null
+          esc_ext3?: string | null
+          esc_id: number
+          esc_is_active?: boolean | null
+          esc_name: string
+          esc_password?: string | null
+          esc_proxy_type?: string | null
+          esc_system_type?: string | null
+          esc_token_url?: string | null
+          esc_updated_at?: string | null
+          esc_url_id?: string | null
+          esc_user_name?: string | null
         }
         Update: {
-          created_at?: string | null
-          environment?: string | null
-          id?: number
-          password?: string
-          updated_at?: string | null
-          username?: string
+          esc_additional_headers?: Json | null
+          esc_authentication?: string | null
+          esc_base_url?: string
+          esc_client_id?: string | null
+          esc_client_secret?: string | null
+          esc_created_at?: string | null
+          esc_ext1?: string | null
+          esc_ext2?: string | null
+          esc_ext3?: string | null
+          esc_id?: number
+          esc_is_active?: boolean | null
+          esc_name?: string
+          esc_password?: string | null
+          esc_proxy_type?: string | null
+          esc_system_type?: string | null
+          esc_token_url?: string | null
+          esc_updated_at?: string | null
+          esc_url_id?: string | null
+          esc_user_name?: string | null
         }
         Relationships: []
       }

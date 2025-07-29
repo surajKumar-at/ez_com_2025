@@ -67,14 +67,20 @@ serve(async (req) => {
         .eq('key', 'BASE_URL')
         .single();
 
-      const { data: endpointData, error: endpointError } = await supabase
+      const { data: businessPartnersEndpointData, error: businessPartnersError } = await supabase
+        .from('ezc_sap_urls')
+        .select('value')
+        .eq('key', 'GET_BUSINESS_PARTNERS')
+        .single();
+
+      const { data: selectedSoldToEndpointData, error: selectedSoldToError } = await supabase
         .from('ezc_sap_urls')
         .select('value')
         .eq('key', 'GET_SELECTED_SOLDTO')
         .single();
 
-      if (baseUrlError || endpointError || !baseUrlData || !endpointData) {
-        console.error('Error fetching SAP URLs:', baseUrlError, endpointError);
+      if (baseUrlError || businessPartnersError || selectedSoldToError || !baseUrlData || !businessPartnersEndpointData || !selectedSoldToEndpointData) {
+        console.error('Error fetching SAP URLs:', baseUrlError, businessPartnersError, selectedSoldToError);
         return new Response(
           JSON.stringify({ 
             success: false, 
@@ -88,17 +94,22 @@ serve(async (req) => {
       }
 
       const baseUrl = baseUrlData.value;
-      const endpoint = endpointData.value.replace('{PARTNER}', soldTo);
       
-      const fullUrl = `${baseUrl}${endpoint}`;
-
-      console.log(`Calling SAP API: ${fullUrl}`);
+      // Step 1: Call GET_BUSINESS_PARTNERS to get BPCustomerNumber
+      const businessPartnersEndpoint = businessPartnersEndpointData.value
+        .replace('{CUSTOMER}', soldTo)
+        .replace('{SALES_ORG}', salesOrg || '')
+        .replace('{DIST_CHANNEL}', distributionChannel || '')
+        .replace('{DIVISION}', division || '');
+      
+      const businessPartnersUrl = `${baseUrl}${businessPartnersEndpoint}`;
+      console.log(`Step 1 - Calling GET_BUSINESS_PARTNERS: ${businessPartnersUrl}`);
 
       // Create basic auth header
       const authHeader = btoa(`${credentials.username}:${credentials.password}`);
 
-      // Call SAP API
-      const sapResponse = await fetch(fullUrl, {
+      // Call GET_BUSINESS_PARTNERS API
+      const businessPartnersResponse = await fetch(businessPartnersUrl, {
         method: 'GET',
         headers: {
           'Authorization': `Basic ${authHeader}`,
@@ -107,30 +118,98 @@ serve(async (req) => {
         },
       });
 
-      if (!sapResponse.ok) {
-        const errorText = await sapResponse.text();
-        console.error('SAP API Error:', errorText);
+      if (!businessPartnersResponse.ok) {
+        const errorText = await businessPartnersResponse.text();
+        console.error('GET_BUSINESS_PARTNERS API Error:', errorText);
         
         return new Response(
           JSON.stringify({ 
             success: false, 
-            error: `SAP API Error: ${sapResponse.status} - ${errorText}` 
+            error: `GET_BUSINESS_PARTNERS API Error: ${businessPartnersResponse.status} - ${errorText}` 
           }),
           { 
-            status: sapResponse.status, 
+            status: businessPartnersResponse.status, 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
           }
         );
       }
 
-      const sapData = await sapResponse.json();
+      const businessPartnersData = await businessPartnersResponse.json();
+      console.log('GET_BUSINESS_PARTNERS Response received:', JSON.stringify(businessPartnersData, null, 2));
+
+      // Extract BPCustomerNumber from the response
+      const partnerFunctions = businessPartnersData?.d?.results || [];
+      if (!partnerFunctions.length) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: 'No partner functions found for the given customer' 
+          }),
+          { 
+            status: 404, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+
+      // Use the first BPCustomerNumber found (you can modify this logic if needed)
+      const bpCustomerNumber = partnerFunctions[0].BPCustomerNumber;
+      if (!bpCustomerNumber) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: 'BPCustomerNumber not found in partner functions' 
+          }),
+          { 
+            status: 404, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+
+      console.log(`Extracted BPCustomerNumber: ${bpCustomerNumber}`);
+
+      // Step 2: Call GET_SELECTED_SOLDTO with the BPCustomerNumber
+      const selectedSoldToEndpoint = selectedSoldToEndpointData.value.replace('{PARTNER}', bpCustomerNumber);
+      const selectedSoldToUrl = `${baseUrl}${selectedSoldToEndpoint}`;
       
-      console.log('SAP API Response received');
+      console.log(`Step 2 - Calling GET_SELECTED_SOLDTO: ${selectedSoldToUrl}`);
+
+      // Call GET_SELECTED_SOLDTO API
+      const selectedSoldToResponse = await fetch(selectedSoldToUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Basic ${authHeader}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!selectedSoldToResponse.ok) {
+        const errorText = await selectedSoldToResponse.text();
+        console.error('GET_SELECTED_SOLDTO API Error:', errorText);
+        
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: `GET_SELECTED_SOLDTO API Error: ${selectedSoldToResponse.status} - ${errorText}` 
+          }),
+          { 
+            status: selectedSoldToResponse.status, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+
+      const selectedSoldToData = await selectedSoldToResponse.json();
+      console.log('GET_SELECTED_SOLDTO Response received');
 
       return new Response(
         JSON.stringify({ 
           success: true, 
-          data: sapData,
+          data: selectedSoldToData,
+          businessPartnersData: businessPartnersData,
+          bpCustomerNumber: bpCustomerNumber,
           requestData: {
             soldTo,
             salesOrg,
