@@ -164,26 +164,37 @@ const SapBusinessPartner: React.FC = () => {
     }
   };
 
-  const renderAddressTable = (addresses: SapBusinessPartnerAddress[]) => {
-    if (!addresses || addresses.length === 0) {
+  const renderDataTable = (data: any) => {
+    if (!data || (Array.isArray(data) && data.length === 0)) {
       return (
         <div className="text-center py-4 text-muted-foreground">
-          No address data available
+          No data available
         </div>
       );
     }
 
-    // Get all non-empty fields across all addresses to determine columns
+    // Handle single object or array of objects
+    const dataArray = Array.isArray(data) ? data : [data];
+    
+    // Get all fields across all objects to determine columns
     const allFields = new Set<string>();
-    addresses.forEach(address => {
-      Object.entries(address).forEach(([key, value]) => {
-        if (value !== null && value !== undefined && value !== '' && value !== false) {
+    dataArray.forEach(item => {
+      if (item && typeof item === 'object') {
+        Object.keys(item).forEach(key => {
           allFields.add(key);
-        }
-      });
+        });
+      }
     });
 
     const fieldArray = Array.from(allFields);
+
+    if (fieldArray.length === 0) {
+      return (
+        <div className="text-center py-4 text-muted-foreground">
+          No valid data structure found
+        </div>
+      );
+    }
 
     return (
       <div className="overflow-x-auto">
@@ -198,13 +209,17 @@ const SapBusinessPartner: React.FC = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {addresses.map((address, index) => (
+            {dataArray.map((item, index) => (
               <TableRow key={index}>
-                {fieldArray.map(field => (
-                  <TableCell key={field} className="whitespace-nowrap">
-                    {address[field as keyof SapBusinessPartnerAddress]?.toString() || '-'}
-                  </TableCell>
-                ))}
+                {fieldArray.map(field => {
+                  const value = item?.[field];
+                  const displayValue = value === null || value === undefined ? '' : String(value);
+                  return (
+                    <TableCell key={field} className="whitespace-nowrap">
+                      {displayValue}
+                    </TableCell>
+                  );
+                })}
               </TableRow>
             ))}
           </TableBody>
@@ -332,11 +347,12 @@ const SapBusinessPartner: React.FC = () => {
                               {partner.to_BusinessPartnerAddress?.results && partner.to_BusinessPartnerAddress.results.length > 0 ? (
                                 <div>
                                   <h5 className="text-sm font-medium mb-2">Address Information</h5>
-                                  {renderAddressTable(partner.to_BusinessPartnerAddress.results)}
+                                  {renderDataTable(partner.to_BusinessPartnerAddress.results)}
                                 </div>
                               ) : (
-                                <div className="text-muted-foreground text-sm">
-                                  No address information available
+                                <div>
+                                  <h5 className="text-sm font-medium mb-2">Business Partner Data</h5>
+                                  {renderDataTable(partner)}
                                 </div>
                               )}
                             </div>
