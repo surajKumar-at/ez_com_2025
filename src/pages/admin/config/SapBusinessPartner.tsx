@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { sapBusinessPartnerService } from '@/services/sapBusinessPartnerService';
-import { SapBusinessPartnerApiResponse, SapBusinessPartnerAddress } from '@/lib/dto/sapBusinessPartner.dto';
+import { SapBusinessPartnerApiResponse } from '@/lib/dto/sapBusinessPartner.dto';
 import { Loader2, Search } from 'lucide-react';
 
 const SapBusinessPartner: React.FC = () => {
@@ -22,6 +22,22 @@ const SapBusinessPartner: React.FC = () => {
   });
   const [businessPartnerData, setBusinessPartnerData] = useState<SapBusinessPartnerApiResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Convert SAP date format to readable format
+  const convertSapDate = (sapDate: string): string => {
+    if (!sapDate) return 'N/A';
+    try {
+      // Handle SAP OData date format like "/Date(1507161600000+0000)/"
+      const match = sapDate.match(/\/Date\((\d+)([+-]\d{4})?\)\//);
+      if (match) {
+        const timestamp = parseInt(match[1]);
+        return new Date(timestamp).toLocaleDateString();
+      }
+      return sapDate;
+    } catch {
+      return sapDate;
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -50,51 +66,8 @@ const SapBusinessPartner: React.FC = () => {
     try {
       const result = await sapBusinessPartnerService.getBusinessPartner(formData);
       
-      // RAW DATA LOGGING - Log everything for debugging
-      console.log('=== RAW API RESPONSE START ===');
-      console.log('Raw result type:', typeof result);
-      console.log('Raw result:', JSON.stringify(result, null, 2));
-      console.log('Raw result keys:', result ? Object.keys(result) : 'No keys');
-      console.log('Raw result.success:', (result as any)?.success);
-      console.log('Raw result.businessPartnersData:', (result as any)?.businessPartnersData);
-      console.log('Raw result.businessPartnerResults:', (result as any)?.businessPartnerResults);
-      console.log('Raw result.uniqueBPCustomerNumbers:', (result as any)?.uniqueBPCustomerNumbers);
+      console.log('🔍 SAP API Response:', result);
       
-      // LOG INDIVIDUAL BUSINESS PARTNER RESULTS
-      if ((result as any)?.businessPartnerResults) {
-        console.log('=== INDIVIDUAL BP RESULTS START ===');
-        (result as any).businessPartnerResults.forEach((bpResult: any, index: number) => {
-          console.log(`BP Result ${index + 1}:`, {
-            bpCustomerNumber: bpResult.bpCustomerNumber,
-            success: bpResult.success,
-            error: bpResult.error,
-            dataExists: !!bpResult.data,
-            dataStructure: bpResult.data ? Object.keys(bpResult.data) : 'No data',
-            fullData: bpResult.data
-          });
-          
-          if (bpResult.data?.d?.results) {
-            console.log(`BP ${bpResult.bpCustomerNumber} detailed results:`, bpResult.data.d.results);
-            
-            // Log address data specifically
-            bpResult.data.d.results.forEach((bpData: any, bpDataIndex: number) => {
-              console.log(`BP ${bpResult.bpCustomerNumber} - Entry ${bpDataIndex + 1}:`, {
-                BusinessPartnerFullName: bpData.BusinessPartnerFullName,
-                addressData: bpData.to_BusinessPartnerAddress
-              });
-              
-              if (bpData.to_BusinessPartnerAddress?.results) {
-                console.log(`BP ${bpResult.bpCustomerNumber} - Address Details:`, bpData.to_BusinessPartnerAddress.results);
-              }
-            });
-          }
-        });
-        console.log('=== INDIVIDUAL BP RESULTS END ===');
-      }
-      
-      console.log('=== RAW API RESPONSE END ===');
-      
-      // Simple approach - just use whatever we get and display it
       if (result && typeof result === 'object') {
         const resultAny = result as any;
         const processedData: SapBusinessPartnerApiResponse = {
@@ -113,60 +86,15 @@ const SapBusinessPartner: React.FC = () => {
           description: 'Data retrieved successfully',
         });
       } else {
-        // Still check if we have business partner results
-        const anyBusinessPartnerResults = (result as any)?.businessPartnerResults;
-        if (anyBusinessPartnerResults && anyBusinessPartnerResults.length > 0) {
-          const processedData: SapBusinessPartnerApiResponse = {
-            success: true,
-            businessPartnersData: (result as any).businessPartnersData || {},
-            businessPartnerResults: anyBusinessPartnerResults,
-            uniqueBPCustomerNumbers: (result as any).uniqueBPCustomerNumbers || [],
-            requestData: (result as any).requestData || formData
-          };
-          
-          setBusinessPartnerData(processedData);
-          setError(null);
-          
-          toast({
-            title: t('success'),
-            description: 'Customer data retrieved successfully',
-          });
-        } else {
-          setError('No business partner data found');
-          toast({
-            title: t('error'),
-            description: 'No business partner data found',
-            variant: 'destructive',
-          });
-        }
+        setError('No business partner data found');
+        toast({
+          title: t('error'),
+          description: 'No business partner data found',
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       console.error('Error fetching business partner:', error);
-      
-      // Try to extract any useful data from the error
-      try {
-        if (error && typeof error === 'object' && 'response' in error) {
-          const errorResponse = (error as any).response;
-          if (errorResponse?.data) {
-            setBusinessPartnerData({
-              success: false,
-              businessPartnersData: errorResponse.data,
-              businessPartnerResults: [],
-              uniqueBPCustomerNumbers: [],
-              requestData: formData
-            });
-            toast({
-              title: 'Partial Data',
-              description: 'Some data retrieved despite errors',
-              variant: 'default',
-            });
-            return;
-          }
-        }
-      } catch (fallbackError) {
-        console.warn('[SAP] Fallback processing failed:', fallbackError);
-      }
-      
       const errorMessage = error instanceof Error ? error.message : 'An error occurred while fetching business partner data';
       setError(errorMessage);
       toast({
@@ -179,167 +107,42 @@ const SapBusinessPartner: React.FC = () => {
     }
   };
 
-  const renderDataTable = (data: any) => {
-    if (!data || (Array.isArray(data) && data.length === 0)) {
-      return (
-        <div className="text-center py-4 text-muted-foreground">
-          No data available
-        </div>
-      );
-    }
+  const renderAddressFields = (address: any) => {
+    if (!address) return null;
 
-    // Handle single object or array of objects
-    const dataArray = Array.isArray(data) ? data : [data];
-    
-    // Get all fields across all objects to determine columns
-    const allFields = new Set<string>();
-    dataArray.forEach(item => {
-      if (item && typeof item === 'object') {
-        Object.keys(item).forEach(key => {
-          allFields.add(key);
-        });
-      }
-    });
+    console.log('📍 Address data being rendered:', address);
 
-    const fieldArray = Array.from(allFields);
-
-    if (fieldArray.length === 0) {
-      return (
-        <div className="text-center py-4 text-muted-foreground">
-          No valid data structure found
-        </div>
-      );
-    }
-
-    return (
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              {fieldArray.map(field => (
-                <TableHead key={field} className="whitespace-nowrap">
-                  {field.replace(/([A-Z])/g, ' $1').trim()}
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {dataArray.map((item, index) => (
-              <TableRow key={index}>
-                {fieldArray.map(field => {
-                  const value = item?.[field];
-                  const displayValue = value === null || value === undefined ? '' : String(value);
-                  return (
-                    <TableCell key={field} className="whitespace-nowrap">
-                      {displayValue}
-                    </TableCell>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    );
-  };
-
-  const renderAddressTable = (addresses: any[]) => {
-    if (!addresses || addresses.length === 0) {
-      return (
-        <div className="text-center py-4 text-muted-foreground">
-          No address data available
-        </div>
-      );
-    }
-
-    // Define the specific fields we want to display as mentioned by the user
     const addressFields = [
-      'BusinessPartner',
-      'AddressID',
-      'ValidityStartDate',
-      'ValidityEndDate',
-      'AuthorizationGroup',
-      'AddressUUID',
-      'AdditionalStreetPrefixName',
-      'AdditionalStreetSuffixName',
-      'AddressTimeZone',
-      'CareOfName',
-      'CityCode',
-      'CityName',
-      'CompanyPostalCode',
-      'Country',
-      'County',
-      'DeliveryServiceNumber',
-      'DeliveryServiceTypeCode',
-      'District',
-      'FormOfAddress',
-      'FullName',
-      'HomeCityName',
-      'HouseNumber',
-      'HouseNumberSupplementText',
-      'Language',
-      'POBox',
-      'POBoxDeviatingCityName',
-      'POBoxDeviatingCountry',
-      'POBoxDeviatingRegion',
-      'POBoxIsWithoutNumber',
-      'POBoxLobbyName',
-      'POBoxPostalCode',
-      'Person',
-      'PostalCode',
-      'PrfrdCommMediumType',
-      'Region',
-      'StreetName',
-      'StreetPrefixName',
-      'StreetSuffixName',
-      'TaxJurisdiction',
-      'TransportZone',
-      'AddressIDByExternalSystem',
-      'CountyCode',
-      'TownshipCode',
-      'TownshipName'
+      { label: 'Business Partner', value: address.BusinessPartner },
+      { label: 'Address ID', value: address.AddressID },
+      { label: 'Full Name', value: address.FullName },
+      { label: 'Street', value: `${address.HouseNumber || ''} ${address.StreetName || ''}`.trim() },
+      { label: 'City', value: address.CityName },
+      { label: 'Postal Code', value: address.PostalCode },
+      { label: 'Region', value: address.Region },
+      { label: 'Country', value: address.Country },
+      { label: 'Time Zone', value: address.AddressTimeZone },
+      { label: 'Language', value: address.Language },
+      { label: 'Tax Jurisdiction', value: address.TaxJurisdiction },
+      { label: 'Transport Zone', value: address.TransportZone },
+      { label: 'County', value: address.County },
+      { label: 'District', value: address.District },
+      { label: 'PO Box', value: address.POBox },
+      { label: 'Form of Address', value: address.FormOfAddress },
+      { label: 'Valid From', value: convertSapDate(address.ValidityStartDate) },
+      { label: 'Valid Until', value: convertSapDate(address.ValidityEndDate) },
     ];
 
-    // Log the address data to console
-    console.log('=== ADDRESS DATA FOR TABLE ===');
-    addresses.forEach((address, index) => {
-      console.log(`Address ${index + 1}:`, address);
-      addressFields.forEach(field => {
-        if (address[field] !== undefined && address[field] !== null && address[field] !== '') {
-          console.log(`  ${field}: ${address[field]}`);
-        }
-      });
-    });
-    console.log('=== END ADDRESS DATA ===');
-
     return (
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              {addressFields.map(field => (
-                <TableHead key={field} className="whitespace-nowrap text-xs">
-                  {field.replace(/([A-Z])/g, ' $1').trim()}
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {addresses.map((address, index) => (
-              <TableRow key={index}>
-                {addressFields.map(field => {
-                  const value = address?.[field];
-                  const displayValue = value === null || value === undefined || value === '' ? '-' : String(value);
-                  return (
-                    <TableCell key={field} className="whitespace-nowrap text-xs">
-                      {displayValue}
-                    </TableCell>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 text-sm">
+        {addressFields.map((field, index) => {
+          if (!field.value || field.value === 'N/A') return null;
+          return (
+            <div key={index} className="p-2 bg-gray-50 rounded">
+              <strong>{field.label}:</strong> {field.value}
+            </div>
+          );
+        })}
       </div>
     );
   };
@@ -436,32 +239,10 @@ const SapBusinessPartner: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {/* Debug: Show complete raw data */}
-              <div className="bg-muted p-4 rounded-md">
-                <h4 className="font-medium mb-2">Complete Raw Response:</h4>
-                <pre className="text-xs overflow-auto max-h-60">
-                  {JSON.stringify(businessPartnerData, null, 2)}
-                </pre>
-              </div>
-              
-              {/* Debug: Show uniqueBPCustomerNumbers */}
-              {businessPartnerData.uniqueBPCustomerNumbers && businessPartnerData.uniqueBPCustomerNumbers.length > 0 && (
-                <div className="bg-blue-50 p-4 rounded-md">
-                  <h4 className="font-medium mb-2">Unique BP Customer Numbers ({businessPartnerData.uniqueBPCustomerNumbers.length}):</h4>
-                  <div className="text-sm">
-                    {businessPartnerData.uniqueBPCustomerNumbers.map((num, index) => (
-                      <span key={index} className="inline-block bg-blue-100 px-2 py-1 rounded mr-2 mb-1">
-                        {num}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {/* Display detailed business partner results from GET_SELECTED_SOLDTO calls */}
+              {/* Display detailed business partner results */}
               {businessPartnerData.businessPartnerResults && businessPartnerData.businessPartnerResults.length > 0 ? (
                 <div className="space-y-4">
-                  <h4 className="font-medium text-lg">Detailed Business Partner Information (GET_SELECTED_SOLDTO Results):</h4>
+                  <h4 className="font-medium text-lg">Business Partner Information:</h4>
                   {businessPartnerData.businessPartnerResults.map((partnerResult, index) => (
                     <div key={partnerResult.bpCustomerNumber || index} className="border border-gray-200 p-4 rounded-md bg-white">
                       <h5 className="font-semibold text-md mb-3 text-blue-600">
@@ -494,74 +275,26 @@ const SapBusinessPartner: React.FC = () => {
                                   <div className="space-y-2">
                                     {bpData.to_BusinessPartnerAddress.results.map((address: any, addressIndex: number) => (
                                       <div key={addressIndex} className="bg-gray-50 p-3 rounded-md border">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                                          {address.AddressID && (
-                                            <div><strong>Address ID:</strong> {address.AddressID}</div>
-                                          )}
-                                          {address.Country && (
-                                            <div><strong>Country:</strong> {address.Country}</div>
-                                          )}
-                                          {address.Region && (
-                                            <div><strong>Region:</strong> {address.Region}</div>
-                                          )}
-                                          {address.CityName && (
-                                            <div><strong>City:</strong> {address.CityName}</div>
-                                          )}
-                                          {address.PostalCode && (
-                                            <div><strong>Postal Code:</strong> {address.PostalCode}</div>
-                                          )}
-                                          {address.StreetName && (
-                                            <div><strong>Street:</strong> {address.StreetName}</div>
-                                          )}
-                                          {address.HouseNumber && (
-                                            <div><strong>House Number:</strong> {address.HouseNumber}</div>
-                                          )}
-                                        </div>
-                                        
-                                        {/* Show all address fields in a table for complete data */}
-                                        <div className="mt-3">
-                                          <div className="font-medium text-xs text-gray-600">Complete Address Data:</div>
-                                          {renderAddressTable([address])}
-                                        </div>
+                                        {renderAddressFields(address)}
                                       </div>
                                     ))}
                                   </div>
                                 </div>
                               ) : (
-                                <div className="text-gray-500 italic bg-gray-50 p-3 rounded-md">
-                                  No address information available
-                                </div>
+                                <div className="text-gray-500 italic">No address information available</div>
                               )}
-                              
-                              {/* Show complete BP data */}
-                              <div className="bg-gray-50 p-3 rounded-md">
-                                <h6 className="font-medium mb-2 text-gray-700">Complete Business Partner Data:</h6>
-                                {renderDataTable([bpData])}
-                              </div>
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <div className="text-gray-500 italic">
-                          No detailed data available for this business partner
-                        </div>
+                        <div className="text-gray-500 italic">No detailed data available</div>
                       )}
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-md">
-                  <p className="text-yellow-800">No detailed business partner results found from GET_SELECTED_SOLDTO calls</p>
-                </div>
-              )}
-              
-              {/* Display initial business partners data from first API call */}
-              {businessPartnerData.businessPartnersData?.d?.results && (
-                <div className="space-y-4">
-                  <h4 className="font-medium text-lg">Initial Business Partners Data (First API Call):</h4>
-                  <div className="border border-gray-200 p-4 rounded-md bg-gray-50">
-                    {renderDataTable(businessPartnerData.businessPartnersData.d.results)}
-                  </div>
+                <div className="text-center py-4 text-muted-foreground">
+                  No business partner results found
                 </div>
               )}
             </div>
