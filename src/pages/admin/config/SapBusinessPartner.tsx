@@ -68,12 +68,27 @@ const SapBusinessPartner: React.FC = () => {
       
       console.log('🔍 SAP API Response:', result);
       
-      if (result && typeof result === 'object') {
+      // Check if we have a valid response with business partner results
+      if (result && (result as any).success && (result as any).businessPartnerResults) {
         const resultAny = result as any;
+        
+        console.log('✅ Processing valid response with business partner results');
+        console.log('Business Partner Results Count:', resultAny.businessPartnerResults.length);
+        
+        // Log each business partner result for debugging
+        resultAny.businessPartnerResults.forEach((bpResult: any, index: number) => {
+          console.log(`BP ${index + 1} (${bpResult.bpCustomerNumber}):`, {
+            success: bpResult.success,
+            hasData: !!bpResult.data,
+            hasResults: bpResult.data?.d?.results?.length > 0,
+            hasAddress: bpResult.data?.d?.results?.[0]?.to_BusinessPartnerAddress?.results?.length > 0
+          });
+        });
+        
         const processedData: SapBusinessPartnerApiResponse = {
           success: true,
-          businessPartnersData: resultAny.businessPartnersData || result,
-          businessPartnerResults: resultAny.businessPartnerResults || [],
+          businessPartnersData: resultAny.businessPartnersData || {},
+          businessPartnerResults: resultAny.businessPartnerResults,
           uniqueBPCustomerNumbers: resultAny.uniqueBPCustomerNumbers || [],
           requestData: resultAny.requestData || formData
         };
