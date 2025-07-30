@@ -1,4 +1,6 @@
-import axiosInstance from '@/config/api';
+import axiosInstance from 'axios';
+// import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
+
 import { LoginRequestDto, UserSessionDto } from '@/lib/dto/user.dto';
 import { API_CONFIG, getApiUrl } from '@/config/api';
 
