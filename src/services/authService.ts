@@ -100,7 +100,7 @@ export const authService = {
 
       if (response.data.success && response.data.user) {
         // Store the auth token for future requests
-        localStorage.setItem('auth_token', response.data.user.id);
+        localStorage.setItem('auth_token', response.data.session.access_token);
         localStorage.setItem('user_data', JSON.stringify(response.data.user));
         
         console.log('✅ Auth data stored successfully');
