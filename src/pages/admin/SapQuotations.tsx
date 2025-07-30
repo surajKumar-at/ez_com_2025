@@ -26,7 +26,7 @@ const SapQuotations: React.FC = () => {
   
   // Filters
   const [soldToParty, setSoldToParty] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
@@ -57,7 +57,7 @@ const SapQuotations: React.FC = () => {
         skip: (currentPage - 1) * pageSize,
         top: pageSize,
         countOnly: false,
-        ...(statusFilter && { statusFilter }),
+        ...(statusFilter && statusFilter !== 'all' && { statusFilter }),
         ...(startDate && endDate && {
           dateFilter: {
             startDate,
@@ -166,7 +166,7 @@ const SapQuotations: React.FC = () => {
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Statuses</SelectItem>
+                  <SelectItem value="all">All Statuses</SelectItem>
                   <SelectItem value="Open">Open</SelectItem>
                   <SelectItem value="In Process">In Process</SelectItem>
                   <SelectItem value="Completed">Completed</SelectItem>
