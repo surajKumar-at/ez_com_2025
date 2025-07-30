@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axiosInstance from '@/config/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -82,7 +82,7 @@ const SapApi: React.FC = () => {
       const url = getApiUrl(API_CONFIG.ENDPOINTS.CHECK_CUSTOMER_EXISTS);
       console.log('[SAP] Checking customer exists:', url, soldTo);
 
-      const response = await axios.post(url, { soldTo });
+      const response = await axiosInstance.post(url, { soldTo });
       console.log('[SAP] Check exists response:', response.data);
 
       return response.data;
@@ -97,7 +97,7 @@ const SapApi: React.FC = () => {
       const url = getApiUrl(API_CONFIG.ENDPOINTS.SAP_BUSINESS_PARTNER);
       console.log('[SAP] Fetching business partner:', url, form);
 
-      const response = await axios.post(url, form);
+      const response = await axiosInstance.post(url, form);
       console.log('[SAP] Fetch response:', response.data);
 
       return response.data;

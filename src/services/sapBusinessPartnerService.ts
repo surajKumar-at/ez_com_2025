@@ -1,6 +1,7 @@
-import axios from 'axios';
+import axiosInstance from '@/config/api';
 import { SapBusinessPartnerRequest, SapBusinessPartnerApiResponse } from '@/lib/dto/sapBusinessPartner.dto';
 import { API_CONFIG, getApiUrl } from '@/config/api';
+import { AxiosError } from 'axios';
 
 export const sapBusinessPartnerService = {
   async getBusinessPartner(request: SapBusinessPartnerRequest): Promise<SapBusinessPartnerApiResponse | {
@@ -8,12 +9,12 @@ export const sapBusinessPartnerService = {
     error: string;
   }> {
     try {
-      const response = await axios.post(getApiUrl(API_CONFIG.ENDPOINTS.SAP_BUSINESS_PARTNER), request);
+      const response = await axiosInstance.post(getApiUrl(API_CONFIG.ENDPOINTS.SAP_BUSINESS_PARTNER), request);
       return response.data;
     } catch (error) {
       console.error('SAP Business Partner Service Error:', error);
       
-      if (axios.isAxiosError(error)) {
+      if (error instanceof AxiosError) {
         return {
           success: false,
           error: error.response?.data?.error || error.message,

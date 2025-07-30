@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axiosInstance from '@/config/api';
 import { 
   SystemAuthDto, 
   AuthDescriptionDto, 
@@ -9,21 +9,11 @@ import {
 
 import { API_CONFIG, getApiUrl } from '@/config/api';
 
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('auth_token');
-  return {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
-  };
-};
-
 export const systemAuthService = {
   // Get all systems for dropdown
   async getSystems(): Promise<SystemAuthDto[]> {
     try {
-      const response = await axios.get(`${getApiUrl(API_CONFIG.ENDPOINTS.SYSTEM_AUTH)}/systems`, {
-        headers: getAuthHeaders()
-      });
+      const response = await axiosInstance.get(`${getApiUrl(API_CONFIG.ENDPOINTS.SYSTEM_AUTH)}/systems`);
       
       if (response.data.success) {
         return response.data.data;
@@ -39,9 +29,7 @@ export const systemAuthService = {
   // Get all authorization descriptions
   async getAuthDescriptions(): Promise<AuthDescriptionDto[]> {
     try {
-      const response = await axios.get(`${getApiUrl(API_CONFIG.ENDPOINTS.SYSTEM_AUTH)}/auth-descriptions`, {
-        headers: getAuthHeaders()
-      });
+      const response = await axiosInstance.get(`${getApiUrl(API_CONFIG.ENDPOINTS.SYSTEM_AUTH)}/auth-descriptions`);
       
       if (response.data.success) {
         return response.data.data;
@@ -57,9 +45,7 @@ export const systemAuthService = {
   // Get system's current authorizations
   async getSystemAuthorizations(systemId: number): Promise<SystemAuthAssignmentDto[]> {
     try {
-      const response = await axios.get(`${getApiUrl(API_CONFIG.ENDPOINTS.SYSTEM_AUTH)}/system-authorizations/${systemId}`, {
-        headers: getAuthHeaders()
-      });
+      const response = await axiosInstance.get(`${getApiUrl(API_CONFIG.ENDPOINTS.SYSTEM_AUTH)}/system-authorizations/${systemId}`);
       
       if (response.data.success) {
         return response.data.data;
@@ -75,9 +61,7 @@ export const systemAuthService = {
   // Update system authorizations
   async updateSystemAuthorizations(systemAuthRequest: SystemAuthRequest): Promise<void> {
     try {
-      const response = await axios.post(`${getApiUrl(API_CONFIG.ENDPOINTS.SYSTEM_AUTH)}/update`, systemAuthRequest, {
-        headers: getAuthHeaders()
-      });
+      const response = await axiosInstance.post(`${getApiUrl(API_CONFIG.ENDPOINTS.SYSTEM_AUTH)}/update`, systemAuthRequest);
       
       if (!response.data.success) {
         throw new Error(response.data.error || 'Failed to update system authorizations');

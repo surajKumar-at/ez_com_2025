@@ -1,24 +1,15 @@
 
-import axios from 'axios';
+import axiosInstance from '@/config/api';
 import { CreateAdverseEventDto, UpdateAdverseEventDto, AdverseEventDto, ApiResponse } from '@/lib/dto/adverseEvent.dto';
 import { API_CONFIG, getApiUrl } from '@/config/api';
-
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('auth_token');
-  return {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
-  };
-};
+import { AxiosError } from 'axios';
 
 export const adverseEventService = {
   // Get all adverse events
   getAllAdverseEvents: async (): Promise<AdverseEventDto[]> => {
     try {
       console.log('Fetching adverse events from:', getApiUrl(API_CONFIG.ENDPOINTS.ADVERSE_EVENTS));
-      const response = await axios.get<ApiResponse>(getApiUrl(API_CONFIG.ENDPOINTS.ADVERSE_EVENTS), {
-        headers: getAuthHeaders()
-      });
+      const response = await axiosInstance.get<ApiResponse>(getApiUrl(API_CONFIG.ENDPOINTS.ADVERSE_EVENTS));
       console.log('API Response:', response.data);
       
       if (response.data.success) {
@@ -27,7 +18,7 @@ export const adverseEventService = {
       throw new Error(response.data.error || 'Failed to fetch adverse events');
     } catch (error) {
       console.error('Error fetching adverse events:', error);
-      if (axios.isAxiosError(error)) {
+      if (error instanceof AxiosError) {
         console.error('Response data:', error.response?.data);
         console.error('Response status:', error.response?.status);
       }
@@ -38,9 +29,7 @@ export const adverseEventService = {
   // Create new adverse event
   createAdverseEvent: async (eventData: CreateAdverseEventDto): Promise<AdverseEventDto> => {
     try {
-      const response = await axios.post<ApiResponse>(getApiUrl(API_CONFIG.ENDPOINTS.ADVERSE_EVENTS), eventData, {
-        headers: getAuthHeaders()
-      });
+      const response = await axiosInstance.post<ApiResponse>(getApiUrl(API_CONFIG.ENDPOINTS.ADVERSE_EVENTS), eventData);
       if (response.data.success) {
         return response.data.data;
       }
@@ -54,12 +43,9 @@ export const adverseEventService = {
   // Update adverse event
   updateAdverseEvent: async (eventId: number, eventData: UpdateAdverseEventDto): Promise<void> => {
     try {
-      const response = await axios.put<ApiResponse>(
+      const response = await axiosInstance.put<ApiResponse>(
         `${getApiUrl(API_CONFIG.ENDPOINTS.ADVERSE_EVENTS)}?id=${eventId}`,
-        eventData,
-        {
-          headers: getAuthHeaders()
-        }
+        eventData
       );
       if (!response.data.success) {
         throw new Error(response.data.error || 'Failed to update adverse event');
@@ -73,11 +59,8 @@ export const adverseEventService = {
   // Delete adverse event
   deleteAdverseEvent: async (eventId: number): Promise<void> => {
     try {
-      const response = await axios.delete<ApiResponse>(
-        `${getApiUrl(API_CONFIG.ENDPOINTS.ADVERSE_EVENTS)}?id=${eventId}`,
-        {
-          headers: getAuthHeaders()
-        }
+      const response = await axiosInstance.delete<ApiResponse>(
+        `${getApiUrl(API_CONFIG.ENDPOINTS.ADVERSE_EVENTS)}?id=${eventId}`
       );
       if (!response.data.success) {
         throw new Error(response.data.error || 'Failed to delete adverse event');
@@ -91,11 +74,8 @@ export const adverseEventService = {
   // Delete multiple adverse events
   deleteMultipleAdverseEvents: async (eventIds: number[]): Promise<void> => {
     try {
-      const response = await axios.delete<ApiResponse>(
-        `${getApiUrl(API_CONFIG.ENDPOINTS.ADVERSE_EVENTS)}?ids=${eventIds.join(',')}`,
-        {
-          headers: getAuthHeaders()
-        }
+      const response = await axiosInstance.delete<ApiResponse>(
+        `${getApiUrl(API_CONFIG.ENDPOINTS.ADVERSE_EVENTS)}?ids=${eventIds.join(',')}`
       );
       if (!response.data.success) {
         throw new Error(response.data.error || 'Failed to delete adverse events');

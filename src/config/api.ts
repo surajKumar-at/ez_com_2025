@@ -1,3 +1,5 @@
+import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
+
 // API Configuration
 // This handles both local development (with Vite proxy) and production deployment
 
@@ -34,3 +36,42 @@ export const API_CONFIG = {
 export const getApiUrl = (endpoint: string): string => {
   return `${API_CONFIG.BASE_URL}${endpoint}`;
 };
+
+// Centralized Axios instance with interceptors
+const axiosInstance: AxiosInstance = axios.create({
+  timeout: 30000,
+  baseURL: API_CONFIG.BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Request interceptor to dynamically add auth token
+axiosInstance.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor for global error handling
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Handle 401 errors globally
+    if (error.response?.status === 401) {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user_data');
+      // Optionally redirect to login page
+    }
+    return Promise.reject(error);
+  }
+);
+
+export default axiosInstance;

@@ -1,19 +1,14 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import axios from 'axios';
+import axiosInstance from '@/config/api';
 
 export default function MigrationTrigger() {
   const triggerMigration = async () => {
     try {
       console.log('🚀 Triggering user migration...');
       
-      const response = await axios.post('https://ifonmbbhyreuewdcvfyt.supabase.co/functions/v1/users', {
+      const response = await axiosInstance.post('/users', {
         action: 'migrate-existing-users'
-      }, {
-        headers: {
-          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlmb25tYmJoeXJldWV3ZGN2Znl0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI1ODYwMzksImV4cCI6MjA2ODE2MjAzOX0.BFHVOVIU7Fb89Wys1Mwtc2mzwiRmpGKZyyrF1o55DX0`,
-          'Content-Type': 'application/json'
-        }
       });
       
       console.log('✅ Migration response:', response.data);

@@ -1,16 +1,6 @@
-import axios from 'axios';
+import axiosInstance from '@/config/api';
 import { LoginRequestDto, UserSessionDto } from '@/lib/dto/user.dto';
 import { API_CONFIG, getApiUrl } from '@/config/api';
-
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('auth_token');
-  return token ? {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
-  } : {
-    'Content-Type': 'application/json'
-  };
-};
 
 export interface LoginRequest {
   email: string;
@@ -102,7 +92,7 @@ export const authService = {
       
       console.log('📦 Request data:', requestData);
       
-      const response = await axios.post(loginUrl, requestData);
+      const response = await axiosInstance.post(loginUrl, requestData);
 
       console.log('✅ Login response:', response.data);
 
@@ -135,7 +125,7 @@ export const authService = {
     try {
       console.log('📝 Attempting signup for:', data.email);
       
-      const response = await axios.post(getApiUrl(API_CONFIG.ENDPOINTS.AUTH_SIGNUP), data);
+      const response = await axiosInstance.post(getApiUrl(API_CONFIG.ENDPOINTS.AUTH_SIGNUP), data);
       
       console.log('✅ Signup response:', response.data);
       
@@ -154,9 +144,7 @@ export const authService = {
     try {
       console.log('🔓 Attempting logout');
       
-      const response = await axios.post(getApiUrl(API_CONFIG.ENDPOINTS.AUTH_LOGOUT), {}, {
-        headers: getAuthHeaders()
-      });
+      const response = await axiosInstance.post(getApiUrl(API_CONFIG.ENDPOINTS.AUTH_LOGOUT), {});
       
       // Clear local storage
       localStorage.removeItem('auth_token');
@@ -175,9 +163,7 @@ export const authService = {
     try {
       console.log('🔍 Checking current session');
       
-      const response = await axios.get(getApiUrl(API_CONFIG.ENDPOINTS.AUTH_SESSION), {
-        headers: getAuthHeaders()
-      });
+      const response = await axiosInstance.get(getApiUrl(API_CONFIG.ENDPOINTS.AUTH_SESSION));
       
       console.log('✅ Session check response:', response.data);
       

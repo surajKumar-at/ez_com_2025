@@ -1,21 +1,11 @@
-import axios from 'axios';
+import axiosInstance from '@/config/api';
 import { CreateSalesAreaDto, SalesArea, SalesAreaResponse } from '@/lib/dto/salesArea.dto';
 import { API_CONFIG, getApiUrl } from '@/config/api';
-
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('auth_token');
-  return {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
-  };
-};
 
 export const salesAreaService = {
   getSalesAreas: async (): Promise<SalesArea[]> => {
     try {
-      const response = await axios.get<SalesAreaResponse>(getApiUrl(API_CONFIG.ENDPOINTS.SALES_AREAS), {
-        headers: getAuthHeaders()
-      });
+    const response = await axiosInstance.get<SalesAreaResponse>(getApiUrl(API_CONFIG.ENDPOINTS.SALES_AREAS));
       
       if (response.data.success && Array.isArray(response.data.data)) {
         return response.data.data;
@@ -29,9 +19,7 @@ export const salesAreaService = {
 
   createSalesArea: async (salesAreaData: CreateSalesAreaDto): Promise<SalesArea> => {
     try {
-      const response = await axios.post<SalesAreaResponse>(getApiUrl(API_CONFIG.ENDPOINTS.SALES_AREAS), salesAreaData, {
-        headers: getAuthHeaders()
-      });
+      const response = await axiosInstance.post<SalesAreaResponse>(getApiUrl(API_CONFIG.ENDPOINTS.SALES_AREAS), salesAreaData);
       
       if (response.data.success && response.data.data) {
         return response.data.data as SalesArea;
@@ -45,9 +33,7 @@ export const salesAreaService = {
 
   updateSalesArea: async (salesAreaData: CreateSalesAreaDto & { eskd_sys_no: number }): Promise<SalesArea> => {
     try {
-      const response = await axios.put<SalesAreaResponse>(getApiUrl(API_CONFIG.ENDPOINTS.SALES_AREAS), salesAreaData, {
-        headers: getAuthHeaders()
-      });
+      const response = await axiosInstance.put<SalesAreaResponse>(getApiUrl(API_CONFIG.ENDPOINTS.SALES_AREAS), salesAreaData);
       
       if (response.data.success && response.data.data) {
         return response.data.data as SalesArea;
