@@ -40,7 +40,7 @@ export const getApiUrl = (endpoint: string): string => {
 // Centralized Axios instance with interceptors
 const axiosInstance: AxiosInstance = axios.create({
   timeout: 30000,
-  baseURL: API_CONFIG.BASE_URL,
+  baseURL: "",
   headers: {
     'Content-Type': 'application/json',
   },
