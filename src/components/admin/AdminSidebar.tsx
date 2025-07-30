@@ -32,6 +32,7 @@ import {
   AlertTriangle,
   Building2,
   BarChart3,
+  FileText,
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
@@ -99,6 +100,14 @@ export function AdminSidebar() {
         { title: 'Add Customer', url: '/admin/sap-business-partner', icon: Database },
         { title: t('admin.create'), url: '/admin/users/create', icon: Plus },
         { title: t('admin.list'), url: '/admin/users/list', icon: List },
+      ],
+    },
+    {
+      title: t('navigation.sap'),
+      icon: Database,
+      items: [
+        { title: t('navigation.sapApi'), url: '/admin/sap-business-partner', icon: Globe },
+        { title: t('navigation.sapQuotations'), url: '/admin/sap-quotations', icon: FileText },
       ],
     },
   ];

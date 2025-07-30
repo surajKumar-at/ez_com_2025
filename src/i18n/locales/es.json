@@ -1,5 +1,22 @@
 
 {
+  "navigation": {
+    "dashboard": "Panel",
+    "config": "Configuración",
+    "userRoles": "Roles de Usuario",
+    "systems": "Sistemas",
+    "migrateUsers": "Migrar Usuarios",
+    "adverseEvents": "Eventos Adversos",
+    "salesAreas": "Áreas de Ventas",
+    "masterDefaults": "Valores Predeterminados",
+    "systemAuth": "Autenticación del Sistema",
+    "siteDefaults": "Configuración por Defecto",
+    "users": "Usuarios",
+    "sap": "SAP",
+    "sapApi": "API SAP",
+    "sapQuotations": "Cotizaciones SAP",
+    "analytics": "Analíticas"
+  },
   "auth": {
     "login": "Iniciar Sesión",
     "signup": "Registrarse",
@@ -211,5 +228,22 @@
   "analytics": {
     "title": "Panel de Analíticas",
     "description": "Analíticas de sesión en tiempo real e integración con Google Analytics"
+  },
+  "sapQuotations": {
+    "title": "Cotizaciones de Ventas SAP",
+    "configuration": "Configuración",
+    "edgeFunctionUrl": "URL de Edge Function",
+    "soldToParty": "Cliente Vendido",
+    "filters": "Filtros",
+    "status": "Estado",
+    "startDate": "Fecha de Inicio",
+    "endDate": "Fecha de Fin",
+    "search": "Buscar",
+    "results": "Resultados",
+    "salesQuotation": "Cotización de Ventas",
+    "creationDate": "Fecha de Creación",
+    "totalNetAmount": "Monto Neto Total",
+    "currency": "Moneda",
+    "salesOrganization": "Organización de Ventas"
   }
 }

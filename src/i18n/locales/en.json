@@ -1,5 +1,22 @@
 
 {
+  "navigation": {
+    "dashboard": "Dashboard",
+    "config": "Configuration",
+    "userRoles": "User Roles",
+    "systems": "Systems",
+    "migrateUsers": "Migrate Users",
+    "adverseEvents": "Adverse Events",
+    "salesAreas": "Sales Areas",
+    "masterDefaults": "Master Defaults",
+    "systemAuth": "System Auth",
+    "siteDefaults": "Site Defaults",
+    "users": "Users",
+    "sap": "SAP",
+    "sapApi": "SAP API",
+    "sapQuotations": "SAP Quotations",
+    "analytics": "Analytics"
+  },
   "auth": {
     "login": "Login",
     "signup": "Sign Up",
@@ -213,5 +230,22 @@
   "analytics": {
     "title": "Analytics Dashboard",
     "description": "Real-time session analytics and Google Analytics integration"
+  },
+  "sapQuotations": {
+    "title": "SAP Sales Quotations",
+    "configuration": "Configuration",
+    "edgeFunctionUrl": "Edge Function URL",
+    "soldToParty": "Sold To Party",
+    "filters": "Filters",
+    "status": "Status",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "search": "Search",
+    "results": "Results",
+    "salesQuotation": "Sales Quotation",
+    "creationDate": "Creation Date",
+    "totalNetAmount": "Total Net Amount",
+    "currency": "Currency", 
+    "salesOrganization": "Sales Organization"
   }
 }

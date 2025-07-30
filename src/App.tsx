@@ -24,6 +24,7 @@ import AdverseEvents from "./pages/admin/config/AdverseEvents";
 import SalesAreas from "./pages/admin/config/SalesAreas";
 import MasterDefaults from "./pages/admin/config/MasterDefaults";
 import SapApi from "./pages/admin/SapApi";
+import SapQuotations from "./pages/admin/SapQuotations";
 import SystemAuth from "./pages/admin/config/SystemAuth";
 import SiteDefaults from "./pages/admin/config/SiteDefaults";
 import Analytics from "./pages/admin/Analytics";
@@ -85,6 +86,11 @@ const AppContent = () => {
           <Route path="/admin/sap-business-partner" element={
             <AdminLayout>
               <SapApi />
+            </AdminLayout>
+          } />
+          <Route path="/admin/sap-quotations" element={
+            <AdminLayout>
+              <SapQuotations />
             </AdminLayout>
           } />
           <Route path="/admin/site-defaults" element={<SiteDefaults />} />
