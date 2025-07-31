@@ -1,6 +1,7 @@
-// index.ts (Supabase Edge Function, Deno)
+// index.ts (Supabase Edge Function, Deno) - Updated without upstash
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+// No upstash dependency - direct database calls only
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
