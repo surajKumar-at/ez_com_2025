@@ -26,6 +26,7 @@ export default function PartnerCreation() {
     ebpc_intranet_business_partner: false,
     ebpc_is_serves_partner: undefined,
   });
+  const [servesPartnerChoice, setServesPartnerChoice] = useState<'yes' | 'no' | ''>('');
 
   useEffect(() => {
     fetchCatalogOptions();
