@@ -1313,6 +1313,51 @@ export type Database = {
         }
         Relationships: []
       }
+      ezc_business_partner_creation: {
+        Row: {
+          ebpc_catalog_no: string | null
+          ebpc_company_name: string
+          ebpc_created_at: string | null
+          ebpc_created_by: string | null
+          ebpc_description: string | null
+          ebpc_id: number
+          ebpc_intranet_business_partner: boolean | null
+          ebpc_is_serves_partner: boolean | null
+          ebpc_number_of_users: number | null
+          ebpc_status: string | null
+          ebpc_unlimited_users: boolean | null
+          ebpc_updated_at: string | null
+        }
+        Insert: {
+          ebpc_catalog_no?: string | null
+          ebpc_company_name: string
+          ebpc_created_at?: string | null
+          ebpc_created_by?: string | null
+          ebpc_description?: string | null
+          ebpc_id?: number
+          ebpc_intranet_business_partner?: boolean | null
+          ebpc_is_serves_partner?: boolean | null
+          ebpc_number_of_users?: number | null
+          ebpc_status?: string | null
+          ebpc_unlimited_users?: boolean | null
+          ebpc_updated_at?: string | null
+        }
+        Update: {
+          ebpc_catalog_no?: string | null
+          ebpc_company_name?: string
+          ebpc_created_at?: string | null
+          ebpc_created_by?: string | null
+          ebpc_description?: string | null
+          ebpc_id?: number
+          ebpc_intranet_business_partner?: boolean | null
+          ebpc_is_serves_partner?: boolean | null
+          ebpc_number_of_users?: number | null
+          ebpc_status?: string | null
+          ebpc_unlimited_users?: boolean | null
+          ebpc_updated_at?: string | null
+        }
+        Relationships: []
+      }
       ezc_buss_partner_areas: {
         Row: {
           ebpa_area_flag: string | null
