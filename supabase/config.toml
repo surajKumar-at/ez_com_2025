@@ -25,3 +25,6 @@ verify_jwt = false
 [functions.master-defaults]
 verify_jwt = false
 
+[functions.partner-creation]
+verify_jwt = false
+
