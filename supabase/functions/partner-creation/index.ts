@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
       const path = url.pathname;
       
       // GET /partner-creation/catalogs - Get catalog options
-      if (path.endsWith('/catalogs')) {
+      if (path.includes('/catalogs') || url.searchParams.get('action') === 'catalogs') {
         console.log('Fetching catalog options');
         
         const { data, error } = await supabase
