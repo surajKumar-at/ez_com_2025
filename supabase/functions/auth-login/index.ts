@@ -2,7 +2,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 // Import your upstash utility
-import { cache_store } from '../../shared/upstash.ts';
+import { cache_store } from '../_shared/upstash.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
