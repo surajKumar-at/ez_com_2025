@@ -11908,6 +11908,57 @@ export type Database = {
         }
         Relationships: []
       }
+      sap_credentials: {
+        Row: {
+          api_path: string
+          created_at: string
+          distribution_channel: string | null
+          division: string | null
+          ecc_client: string | null
+          ecc_language: string | null
+          ecc_server: string | null
+          ecc_system_id: string | null
+          id: string
+          sales_organization: string | null
+          sap_password: string
+          sap_system_type: string | null
+          sap_user: string
+          server: string
+        }
+        Insert: {
+          api_path?: string
+          created_at?: string
+          distribution_channel?: string | null
+          division?: string | null
+          ecc_client?: string | null
+          ecc_language?: string | null
+          ecc_server?: string | null
+          ecc_system_id?: string | null
+          id?: string
+          sales_organization?: string | null
+          sap_password: string
+          sap_system_type?: string | null
+          sap_user: string
+          server?: string
+        }
+        Update: {
+          api_path?: string
+          created_at?: string
+          distribution_channel?: string | null
+          division?: string | null
+          ecc_client?: string | null
+          ecc_language?: string | null
+          ecc_server?: string | null
+          ecc_system_id?: string | null
+          id?: string
+          sales_organization?: string | null
+          sap_password?: string
+          sap_system_type?: string | null
+          sap_user?: string
+          server?: string
+        }
+        Relationships: []
+      }
       web_mat_details: {
         Row: {
           emd_desc: string | null
