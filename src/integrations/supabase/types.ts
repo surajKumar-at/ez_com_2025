@@ -1313,6 +1313,51 @@ export type Database = {
         }
         Relationships: []
       }
+      ezc_business_partner_creation: {
+        Row: {
+          ebpc_catalog_no: string | null
+          ebpc_company_name: string
+          ebpc_created_at: string | null
+          ebpc_created_by: string | null
+          ebpc_description: string | null
+          ebpc_id: number
+          ebpc_intranet_business_partner: boolean | null
+          ebpc_is_serves_partner: boolean | null
+          ebpc_number_of_users: number | null
+          ebpc_status: string | null
+          ebpc_unlimited_users: boolean | null
+          ebpc_updated_at: string | null
+        }
+        Insert: {
+          ebpc_catalog_no?: string | null
+          ebpc_company_name: string
+          ebpc_created_at?: string | null
+          ebpc_created_by?: string | null
+          ebpc_description?: string | null
+          ebpc_id?: number
+          ebpc_intranet_business_partner?: boolean | null
+          ebpc_is_serves_partner?: boolean | null
+          ebpc_number_of_users?: number | null
+          ebpc_status?: string | null
+          ebpc_unlimited_users?: boolean | null
+          ebpc_updated_at?: string | null
+        }
+        Update: {
+          ebpc_catalog_no?: string | null
+          ebpc_company_name?: string
+          ebpc_created_at?: string | null
+          ebpc_created_by?: string | null
+          ebpc_description?: string | null
+          ebpc_id?: number
+          ebpc_intranet_business_partner?: boolean | null
+          ebpc_is_serves_partner?: boolean | null
+          ebpc_number_of_users?: number | null
+          ebpc_status?: string | null
+          ebpc_unlimited_users?: boolean | null
+          ebpc_updated_at?: string | null
+        }
+        Relationships: []
+      }
       ezc_buss_partner_areas: {
         Row: {
           ebpa_area_flag: string | null
@@ -11905,6 +11950,57 @@ export type Database = {
           trigger_name?: string | null
           trigger_state?: string | null
           trigger_type?: string | null
+        }
+        Relationships: []
+      }
+      sap_credentials: {
+        Row: {
+          api_path: string
+          created_at: string
+          distribution_channel: string | null
+          division: string | null
+          ecc_client: string | null
+          ecc_language: string | null
+          ecc_server: string | null
+          ecc_system_id: string | null
+          id: string
+          sales_organization: string | null
+          sap_password: string
+          sap_system_type: string | null
+          sap_user: string
+          server: string
+        }
+        Insert: {
+          api_path?: string
+          created_at?: string
+          distribution_channel?: string | null
+          division?: string | null
+          ecc_client?: string | null
+          ecc_language?: string | null
+          ecc_server?: string | null
+          ecc_system_id?: string | null
+          id?: string
+          sales_organization?: string | null
+          sap_password: string
+          sap_system_type?: string | null
+          sap_user: string
+          server?: string
+        }
+        Update: {
+          api_path?: string
+          created_at?: string
+          distribution_channel?: string | null
+          division?: string | null
+          ecc_client?: string | null
+          ecc_language?: string | null
+          ecc_server?: string | null
+          ecc_system_id?: string | null
+          id?: string
+          sales_organization?: string | null
+          sap_password?: string
+          sap_system_type?: string | null
+          sap_user?: string
+          server?: string
         }
         Relationships: []
       }

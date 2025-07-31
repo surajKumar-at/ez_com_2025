@@ -98,6 +98,7 @@ export function AdminSidebar() {
       items: [
         { title: t('admin.users'), url: '/admin/config/users', icon: Users },
         { title: 'Add Customer', url: '/admin/sap-business-partner', icon: Database },
+        { title: 'Partner Creation', url: '/admin/config/partner-creation', icon: Building2 },
         { title: t('admin.create'), url: '/admin/users/create', icon: Plus },
         { title: t('admin.list'), url: '/admin/users/list', icon: List },
       ],
