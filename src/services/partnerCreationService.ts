@@ -5,7 +5,7 @@ import { API_CONFIG, getApiUrl } from '@/config/api';
 export const partnerCreationService = {
   getAll: async (): Promise<ApiResponse<PartnerCreation[]>> => {
     try {
-      const response = await axiosInstance.get<ApiResponse<PartnerCreation[]>>(getApiUrl('/functions/v1/partner-creation'));
+      const response = await axiosInstance.get<ApiResponse<PartnerCreation[]>>(getApiUrl('/partner-creation'));
       return response.data;
     } catch (error) {
       console.error('Error fetching partner creations:', error);
@@ -16,7 +16,7 @@ export const partnerCreationService = {
   getCatalogOptions: async (): Promise<ApiResponse<CatalogOption[]>> => {
     try {
       console.log('🔄 Fetching catalog options...');
-      const url = getApiUrl('/functions/v1/partner-creation/catalogs');
+      const url = getApiUrl('/partner-creation/catalogs');
       console.log('📡 Request URL:', url);
       
       const response = await axiosInstance.get<ApiResponse<CatalogOption[]>>(url);
@@ -34,7 +34,7 @@ export const partnerCreationService = {
 
   create: async (partnerCreation: PartnerCreationCreate): Promise<ApiResponse<PartnerCreation>> => {
     try {
-      const response = await axiosInstance.post<ApiResponse<PartnerCreation>>(getApiUrl('/functions/v1/partner-creation'), partnerCreation);
+      const response = await axiosInstance.post<ApiResponse<PartnerCreation>>(getApiUrl('/partner-creation'), partnerCreation);
       return response.data;
     } catch (error) {
       console.error('Error creating partner creation:', error);
@@ -44,7 +44,7 @@ export const partnerCreationService = {
 
   update: async (id: number, partnerCreation: PartnerCreationUpdate): Promise<ApiResponse<PartnerCreation>> => {
     try {
-      const response = await axiosInstance.put<ApiResponse<PartnerCreation>>(getApiUrl('/functions/v1/partner-creation'), { ...partnerCreation, ebpc_id: id });
+      const response = await axiosInstance.put<ApiResponse<PartnerCreation>>(getApiUrl('/partner-creation'), { ...partnerCreation, ebpc_id: id });
       return response.data;
     } catch (error) {
       console.error('Error updating partner creation:', error);
@@ -54,7 +54,7 @@ export const partnerCreationService = {
 
   delete: async (id: number): Promise<ApiResponse<void>> => {
     try {
-      const response = await axiosInstance.delete<ApiResponse<void>>(getApiUrl('/functions/v1/partner-creation'), {
+      const response = await axiosInstance.delete<ApiResponse<void>>(getApiUrl('/partner-creation'), {
         data: { ebpc_id: id }
       });
       return response.data;
