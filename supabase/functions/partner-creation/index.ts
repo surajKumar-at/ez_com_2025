@@ -54,10 +54,12 @@ Deno.serve(async (req) => {
 
     if (req.method === 'GET') {
       const path = url.pathname;
+      console.log('🔍 GET request path:', path);
+      console.log('🔍 Full URL:', url.toString());
       
       // GET /partner-creation/catalogs - Get catalog options
       if (path.includes('/catalogs') || url.searchParams.get('action') === 'catalogs') {
-        console.log('Fetching catalog options');
+        console.log('📋 Fetching catalog options from ezc_catalog_group');
         
         const { data, error } = await supabase
           .from('ezc_catalog_group')
@@ -66,13 +68,14 @@ Deno.serve(async (req) => {
           .order('ecg_catalog_no');
 
         if (error) {
-          console.error('Database error:', error);
+          console.error('❌ Database error:', error);
           return new Response(JSON.stringify({ success: false, error: error.message }), {
             status: 500,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           });
         }
 
+        console.log('✅ Found catalog records:', data?.length || 0);
         return new Response(JSON.stringify({ success: true, data }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });

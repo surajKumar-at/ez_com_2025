@@ -15,10 +15,19 @@ export const partnerCreationService = {
 
   getCatalogOptions: async (): Promise<ApiResponse<CatalogOption[]>> => {
     try {
-      const response = await axiosInstance.get<ApiResponse<CatalogOption[]>>(getApiUrl('/functions/v1/partner-creation/catalogs'));
+      console.log('🔄 Fetching catalog options...');
+      const url = getApiUrl('/functions/v1/partner-creation/catalogs');
+      console.log('📡 Request URL:', url);
+      
+      const response = await axiosInstance.get<ApiResponse<CatalogOption[]>>(url);
+      console.log('✅ Catalog options response:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Error fetching catalog options:', error);
+      console.error('❌ Error fetching catalog options:', error);
+      if (error.response) {
+        console.error('❌ Response status:', error.response.status);
+        console.error('❌ Response data:', error.response.data);
+      }
       throw error;
     }
   },
