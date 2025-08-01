@@ -1,6 +1,6 @@
 // index.ts (Supabase Edge Function, Deno)
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { supabaseAdmin } from '../_shared/supabase-client.ts';
 // Import your upstash utility
 import { cache_store } from '../_shared/cache_store.ts';
 
@@ -17,8 +17,8 @@ serve(async (req)=>{
   }
   try {
     const { email, password, loginType } = await req.json();
-    // Create Supabase client
-    const supabase = createClient(Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '');
+    // Use shared Supabase client
+    const supabase = supabaseAdmin;
     // Authenticate with Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email,

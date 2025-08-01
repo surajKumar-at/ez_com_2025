@@ -1,5 +1,5 @@
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { supabaseAdmin } from '../../_shared/supabase-client.ts';
 import { corsHeaders } from '../../_shared/cors.ts';
 
 export const verifyAuth = async (authHeader: string | null) => {
@@ -14,25 +14,8 @@ export const verifyAuth = async (authHeader: string | null) => {
     };
   }
 
-  // Create Supabase client
-  const supabaseUrl = Deno.env.get('SUPABASE_URL');
-  const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-  
-  console.log('Supabase URL available:', supabaseUrl ? 'Yes' : 'No');
-  console.log('Supabase Key available:', supabaseKey ? 'Yes' : 'No');
-  
-  if (!supabaseUrl || !supabaseKey) {
-    console.error('Missing Supabase credentials in environment');
-    return {
-      error: {
-        message: 'Server configuration error',
-        status: 500
-      },
-      user: null
-    };
-  }
-  
-  const supabaseClient = createClient(supabaseUrl, supabaseKey);
+  // Use shared Supabase client
+  const supabaseClient = supabaseAdmin;
 
   // Verify the user's JWT
   const { data: userData, error: authError } = await supabaseClient.auth.getUser(

@@ -1,5 +1,5 @@
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
+import { createAuthenticatedClient } from "../_shared/supabase-client.ts";
 
 export function validateAuthHeader(authHeader: string | null): string | null {
   if (!authHeader) {
@@ -10,15 +10,7 @@ export function validateAuthHeader(authHeader: string | null): string | null {
 }
 
 export function createSupabaseClient(authHeader: string) {
-  return createClient(
-    Deno.env.get('SUPABASE_URL') ?? '',
-    Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-    {
-      global: {
-        headers: { Authorization: authHeader },
-      },
-    }
-  );
+  return createAuthenticatedClient(authHeader);
 }
 
 export async function fetchSapCredentials(supabaseClient: any) {

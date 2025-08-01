@@ -1,12 +1,12 @@
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
+import { createAuthenticatedClient } from "../../_shared/supabase-client.ts";
 
 /**
  * Verifies the authentication header and creates an authenticated Supabase client
  * @param authHeader The Authorization header from the request
  * @returns Authenticated Supabase client or null if authentication fails
  */
-export const createAuthenticatedClient = (authHeader: string | null) => {
+export const createAuthenticatedClientWithLogging = (authHeader: string | null) => {
   if (!authHeader) {
     console.error("No Authorization header found");
     return null;
@@ -14,17 +14,11 @@ export const createAuthenticatedClient = (authHeader: string | null) => {
 
   console.log("Authorization header found:", authHeader ? "Yes" : "No");
   
-  // Create an authenticated Supabase client
-  return createClient(
-    Deno.env.get('SUPABASE_URL') ?? '',
-    Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-    {
-      global: {
-        headers: { Authorization: authHeader },
-      },
-    }
-  );
+  return createAuthenticatedClient(authHeader);
 };
+
+// Export for backwards compatibility
+export { createAuthenticatedClient };
 
 /**
  * Retrieves the SAP sold-to ID associated with the given sold-to ID
