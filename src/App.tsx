@@ -25,8 +25,7 @@ import SalesAreas from "./pages/admin/config/SalesAreas";
 import MasterDefaults from "./pages/admin/config/MasterDefaults";
 import PartnerCreation from "./pages/admin/config/PartnerCreation";
 import SapApi from "./pages/admin/SapApi";
-import SapQuotations from "./pages/customer/SapQuotations";
-import SapDeliveries from "./pages/customer/SapDeliveries";
+import SapQuotations from "./pages/admin/SapQuotations";
 import SystemAuth from "./pages/admin/config/SystemAuth";
 import SiteDefaults from "./pages/admin/config/SiteDefaults";
 import Analytics from "./pages/admin/Analytics";
@@ -95,11 +94,14 @@ const AppContent = () => {
               <SapApi />
             </AdminLayout>
           } />
+          <Route path="/admin/sap-quotations" element={
+            <AdminLayout>
+              <SapQuotations />
+            </AdminLayout>
+          } />
           <Route path="/admin/site-defaults" element={<SiteDefaults />} />
           <Route path="/admin/analytics" element={<Analytics />} />
             <Route path="/customer" element={<CustomerDashboard />} />
-            <Route path="/customer/sap-quotations" element={<SapQuotations />} />
-            <Route path="/customer/sap-deliveries" element={<SapDeliveries />} />
             <Route path="/licenses" element={<Licenses />} />
             <Route path="/getting-started" element={<GettingStarted />} />
             <Route path="/frontend" element={<Frontend />} />
