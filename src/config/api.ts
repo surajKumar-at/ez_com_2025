@@ -4,7 +4,7 @@ import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 // This handles both local development (with Vite proxy) and production deployment
 
 const isDevelopment = import.meta.env.DEV;
-const SUPABASE_PROJECT_ID = 'ifonmbbhyreuewdcvfyt';
+const SUPABASE_PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID;
 
 export const API_CONFIG = {
   // Use proxy in development, direct Supabase URL in production
