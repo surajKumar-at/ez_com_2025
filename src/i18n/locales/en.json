@@ -232,62 +232,21 @@
     "title": "Analytics Dashboard",
     "description": "Real-time session analytics and Google Analytics integration"
   },
-  "sap": {
-    "quotations": {
-      "title": "SAP Sales Quotations",
-      "configuration": "Configuration",
-      "edgeFunctionUrl": "Edge Function URL",
-      "soldToParty": "Sold To Party",
-      "filters": "Filters",
-      "status": "Status",
-      "startDate": "Start Date",
-      "endDate": "End Date",
-      "search": "Search",
-      "results": "Results",
-      "salesQuotation": "Sales Quotation",
-      "creationDate": "Creation Date",
-      "totalNetAmount": "Total Net Amount",
-      "currency": "Currency", 
-      "salesOrganization": "Sales Organization"
-    },
-    "deliveries": {
-      "title": "SAP Deliveries",
-      "search": {
-        "title": "Search Deliveries",
-        "description": "Enter a Sold To Party ID to fetch delivery information"
-      },
-      "soldToId": "Sold To Party ID",
-      "results": {
-        "title": "Delivery Results",
-        "count": "Found {{count}} deliveries"
-      },
-      "table": {
-        "document": "Delivery Document",
-        "date": "Delivery Date",
-        "soldTo": "Sold To",
-        "shipTo": "Ship To",
-        "type": "Type",
-        "billingStatus": "Billing Status",
-        "goodsMovement": "Goods Movement",
-        "picking": "Picking Status",
-        "weight": "Weight",
-        "route": "Route"
-      }
-    }
-  },
-  "validation": {
-    "required": "This field is required",
-    "email": "Please enter a valid email",
-    "password": "Password must be at least 6 characters"
-  },
-  "error": {
-    "title": "Error",
-    "generic": "An error occurred"
-  },
-  "info": {
-    "title": "Information"
-  },
-  "success": {
-    "title": "Success"
+  "sapQuotations": {
+    "title": "SAP Sales Quotations",
+    "configuration": "Configuration",
+    "edgeFunctionUrl": "Edge Function URL",
+    "soldToParty": "Sold To Party",
+    "filters": "Filters",
+    "status": "Status",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "search": "Search",
+    "results": "Results",
+    "salesQuotation": "Sales Quotation",
+    "creationDate": "Creation Date",
+    "totalNetAmount": "Total Net Amount",
+    "currency": "Currency", 
+    "salesOrganization": "Sales Organization"
   }
 }
