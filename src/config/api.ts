@@ -8,10 +8,10 @@ const SUPABASE_PROJECT_ID = 'ifonmbbhyreuewdcvfyt';
 
 export const API_CONFIG = {
   // Use proxy in development, direct Supabase URL in production
-  //BASE_URL: '/api',
-   BASE_URL: isDevelopment 
-     ? '/api' 
-     : `https://${SUPABASE_PROJECT_ID}.supabase.co/functions/v1`,
+  BASE_URL: '/api',
+  // BASE_URL: isDevelopment 
+  //   ? '/api' 
+  //   : `https://${SUPABASE_PROJECT_ID}.supabase.co/functions/v1`,
   
   // Individual endpoint helpers
   ENDPOINTS: {
