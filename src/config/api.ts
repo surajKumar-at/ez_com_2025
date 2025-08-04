@@ -4,14 +4,14 @@ import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 // This handles both local development (with Vite proxy) and production deployment
 
 const isDevelopment = import.meta.env.DEV;
-const SUPABASE_PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+const SUPABASE_PROJECT_ID = 'ifonmbbhyreuewdcvfyt';
 
 export const API_CONFIG = {
   // Use proxy in development, direct Supabase URL in production
   //BASE_URL: '/api',
    BASE_URL: isDevelopment 
      ? '/api' 
-     : `https://ezc-vercel.vercel.app/api`,
+     : `https://${SUPABASE_PROJECT_ID}.supabase.co/functions/v1`,
   
   // Individual endpoint helpers
   ENDPOINTS: {

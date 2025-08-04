@@ -1,6 +1,6 @@
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.21.0'
-import { corsHeaders } from './utils/cors.ts'
+import { corsHeaders } from '../_shared/cors.ts'
+import { supabaseAdmin } from '../_shared/supabase-client.ts'
 
 // Base function for handling requests
 Deno.serve(async (req) => {
@@ -20,14 +20,8 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Get database credentials from environment
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
-
     // Get SAP credentials from database
-    const { data: sapCredentials, error: credentialsError } = await supabaseClient
+    const { data: sapCredentials, error: credentialsError } = await supabaseAdmin
       .from('sap_credentials')
       .select('*')
       .limit(1)

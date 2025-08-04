@@ -230,21 +230,62 @@
     "title": "Panel de Analíticas",
     "description": "Analíticas de sesión en tiempo real e integración con Google Analytics"
   },
-  "sapQuotations": {
-    "title": "Cotizaciones de Ventas SAP",
-    "configuration": "Configuración",
-    "edgeFunctionUrl": "URL de Edge Function",
-    "soldToParty": "Cliente Vendido",
-    "filters": "Filtros",
-    "status": "Estado",
-    "startDate": "Fecha de Inicio",
-    "endDate": "Fecha de Fin",
-    "search": "Buscar",
-    "results": "Resultados",
-    "salesQuotation": "Cotización de Ventas",
-    "creationDate": "Fecha de Creación",
-    "totalNetAmount": "Monto Neto Total",
-    "currency": "Moneda",
-    "salesOrganization": "Organización de Ventas"
+  "sap": {
+    "quotations": {
+      "title": "Cotizaciones de Ventas SAP",
+      "configuration": "Configuración",
+      "edgeFunctionUrl": "URL de Edge Function",
+      "soldToParty": "Cliente Vendido",
+      "filters": "Filtros",
+      "status": "Estado",
+      "startDate": "Fecha de Inicio",
+      "endDate": "Fecha de Fin",
+      "search": "Buscar",
+      "results": "Resultados",
+      "salesQuotation": "Cotización de Ventas",
+      "creationDate": "Fecha de Creación",
+      "totalNetAmount": "Monto Neto Total",
+      "currency": "Moneda",
+      "salesOrganization": "Organización de Ventas"
+    },
+    "deliveries": {
+      "title": "Entregas SAP",
+      "search": {
+        "title": "Buscar Entregas",
+        "description": "Ingrese un ID de Cliente para obtener información de entregas"
+      },
+      "soldToId": "ID de Cliente",
+      "results": {
+        "title": "Resultados de Entregas",
+        "count": "Se encontraron {{count}} entregas"
+      },
+      "table": {
+        "document": "Documento de Entrega",
+        "date": "Fecha de Entrega",
+        "soldTo": "Cliente",
+        "shipTo": "Enviar A",
+        "type": "Tipo",
+        "billingStatus": "Estado de Facturación",
+        "goodsMovement": "Movimiento de Mercancías",
+        "picking": "Estado de Picking",
+        "weight": "Peso",
+        "route": "Ruta"
+      }
+    }
+  },
+  "validation": {
+    "required": "Este campo es obligatorio",
+    "email": "Por favor ingrese un correo válido",
+    "password": "La contraseña debe tener al menos 6 caracteres"
+  },
+  "error": {
+    "title": "Error",
+    "generic": "Ocurrió un error"
+  },
+  "info": {
+    "title": "Información"
+  },
+  "success": {
+    "title": "Éxito"
   }
 }
