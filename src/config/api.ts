@@ -11,7 +11,7 @@ export const API_CONFIG = {
   //BASE_URL: '/api',
    BASE_URL: isDevelopment 
      ? '/api' 
-     : `https://${SUPABASE_PROJECT_ID}.supabase.co/functions/v1`,
+     : `https://ezc-vercel.vercel.app/api`,
   
   // Individual endpoint helpers
   ENDPOINTS: {
